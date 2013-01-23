@@ -96,6 +96,60 @@ sub connect
   return $condvar;
 }
 
+sub login
+{
+  my($self, $user, $pass) = @_;
+  
+  my $condvar = AnyEvent->condvar;
+  
+  $self->_send(USER => $user)->cb(sub {
+    my $res = shift->recv;
+    if($res->code == 331)
+    {
+      $self->_send(PASS => $pass)->cb(sub {
+        my $res = shift->recv;
+        if($res->code == 230)
+        { $condvar->send($res) }
+        else
+        { $condvar->croak($res) }
+      });
+    }
+    else
+    { $condvar->croak($res) }
+  });
+  
+  return $condvar;
+}
+
+sub cwd { shift->_send(CWD => @_) }
+sub pwd { shift->_send('PWD') }
+
+sub quit
+{
+  my($self) = @_;
+  my $condvar = AnyEvent->condvar;
+  
+  my $res;
+  
+  $self->_send('QUIT')->cb(sub {
+    $res = shift->recv;
+  });
+  
+  my $save = $self->{on_close};
+  $self->{on_close} = sub {
+    if(defined $res && $res->code == 221)
+    { $condvar->send($res) }
+    elsif(defined $res)
+    { $condvar->croak($res) }
+    else
+    { $condvar->croak("did not receive QUIT response from server") }
+    $save->();
+    $self->{on_close} = $save;
+  };
+  
+  return $condvar;
+}
+
 sub _send
 {
   my($self, $cmd, $args) = @_;

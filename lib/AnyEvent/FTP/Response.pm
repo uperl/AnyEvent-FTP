@@ -3,6 +3,7 @@ package AnyEvent::FTP::Response;
 use strict;
 use warnings;
 use v5.10;
+use overload '""' => sub { shift->as_string };
 
 # ABSTRACT: Response class for asynchronous ftp client
 # VERSION
@@ -20,6 +21,27 @@ sub get_address_and_port
   {
     return;
   }
+}
+
+sub get_dir
+{
+  if(shift->{message}->[0] =~ /^"(.*)" is/)
+  {
+    my $dir = $1;
+    $dir =~ s/""/"/;
+    return $dir;
+  }
+  else
+  {
+    return;
+  }
+}
+
+sub as_string
+{
+  my($self) = @_;
+  
+  sprintf "[%d] %s%s", $self->{code}, $self->{message}->[0], @{ $self->{message} } > 1 ? '...' : '';
 }
 
 1;
