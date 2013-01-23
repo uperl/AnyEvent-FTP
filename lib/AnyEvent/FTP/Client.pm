@@ -122,8 +122,20 @@ sub login
 }
 
 sub cwd { shift->_send(CWD => @_) }
-sub pwd { shift->_send('PWD') }
 sub cdup { shift->_send('CDUP') }
+
+sub pwd
+{
+  my($self) = @_;
+  my $cv = AnyEvent->condvar;
+  $self->_send('PWD')->cb(sub {
+    my $res = shift->recv;
+    my $dir = $res->get_dir;
+    if($dir) { $cv->send($dir) } 
+    else { $cv->croak($res) }
+  });
+  $cv;
+}
 
 sub quit
 {

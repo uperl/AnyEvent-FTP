@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 9;
+use Test::More tests => 8;
 use AnyEvent::FTP::Client;
 use FindBin ();
 require "$FindBin::Bin/lib.pl";
@@ -30,20 +30,19 @@ do {
 
 do {
   my $res = eval { $client->pwd->recv };
-  isa_ok $res, 'AnyEvent::FTP::Response';
-  is $res->get_dir, $config->{dir}, "dir = " . $config->{dir};
+  is $res, $config->{dir}, "dir = " . $config->{dir};
 };
 
 do {
 
   $client->cwd('t')->recv;
-  isnt $client->pwd->recv->get_dir, $config->{dir}, "in t dir";
+  isnt $client->pwd->recv, $config->{dir}, "in t dir";
   
   my $res = eval { $client->cdup->recv };
   diag $@ if $@;
   isa_ok $res, 'AnyEvent::FTP::Response';
   is $res->code, 250, 'code = 250';
-  is $client->pwd->recv->get_dir, $config->{dir}, "dir = " . $config->{dir};
+  is $client->pwd->recv, $config->{dir}, "dir = " . $config->{dir};
 
 };
 
