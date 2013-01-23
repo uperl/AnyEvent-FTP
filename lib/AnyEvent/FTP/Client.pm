@@ -121,10 +121,25 @@ sub login
   return $condvar;
 }
 
-sub cwd  { shift->_send(CWD => @_) }
-sub cdup { shift->_send('CDUP') }
-sub noop { shift->_send('NOOP') }
-sub syst { shift->_send('SYST') }
+sub _send_simple
+{
+  my $self = shift;
+  my $cv = AnyEvent->condvar;
+  $self->_send(@_)->cb(sub {
+    my $res = shift->recv;
+    if($res->code =~ /^[45]/)
+    { $cv->croak($res) }
+    else
+    { $cv->send($res) }
+  });
+  return $cv;
+}
+
+sub cwd  { shift->_send_simple(CWD => @_) }
+sub cdup { shift->_send_simple('CDUP') }
+sub noop { shift->_send_simple('NOOP') }
+sub syst { shift->_send_simple('SYST') }
+sub type { shift->_send_simple(TYPE => @_) }
 
 sub pwd
 {
