@@ -124,6 +124,7 @@ sub login
 sub cwd  { shift->_send(CWD => @_) }
 sub cdup { shift->_send('CDUP') }
 sub noop { shift->_send('NOOP') }
+sub syst { shift->_send('SYST') }
 
 sub pwd
 {
