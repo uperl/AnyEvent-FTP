@@ -121,8 +121,9 @@ sub login
   return $condvar;
 }
 
-sub cwd { shift->_send(CWD => @_) }
+sub cwd  { shift->_send(CWD => @_) }
 sub cdup { shift->_send('CDUP') }
+sub noop { shift->_send('NOOP') }
 
 sub pwd
 {
