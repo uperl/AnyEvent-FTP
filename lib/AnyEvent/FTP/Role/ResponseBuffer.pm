@@ -9,7 +9,7 @@ use AnyEvent::FTP::Response;
 # ABSTRACT: Response buffer role for asynchronous ftp client
 # VERSION
 
-sub on_once_response
+sub on_next_response
 {
   my($self, $cb) = @_;
   push @{ $self->{response_buffer}->{once} }, $cb;
@@ -36,10 +36,10 @@ sub process_message_line
         message => $self->{response_buffer}->{message},
       }, 'AnyEvent::FTP::Response';
       delete $self->{response_buffer}->{$_} for qw( code message );
+      my $once = delete $self->{response_buffer}->{once};
       $_->($response) 
-        for @{ $self->{response_buffer}->{once} },
+        for @{ $once },
             @{ $self->{response_buffer}->{each} };
-      $self->{response_buffer}->{once} = [];
     }
   }
   elsif(@{ $self->{response_buffer}->{message} } > 0)

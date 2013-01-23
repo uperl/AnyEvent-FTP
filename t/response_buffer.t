@@ -24,7 +24,7 @@ $client->on_each_response(sub {
 });
 
 my $count2 = 0;
-$client->on_once_response(sub {
+$client->on_next_response(sub {
   $count2++;
   my $res = shift;
   is $res->code, 220, 'code = 220';
@@ -35,7 +35,7 @@ $client->process_message_line('220 ProFTPD 1.3.3a Server (Debian) [::ffff:10.10.
 
 my $count3 = 0;
 
-$client->on_once_response(sub {
+$client->on_next_response(sub {
   $count3++;
   my $res = shift;
   is $res->code, 214, 'code = 214';
@@ -48,7 +48,7 @@ $client->process_message_line('214 Direct comments to root@web01.sydney.wdlabs.c
 
 my $count4 = 0;
 
-$client->on_once_response(sub {
+$client->on_next_response(sub {
   $count4++;
   my $res = shift;
   is $res->code, 214, 'code = 214';
