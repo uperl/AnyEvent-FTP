@@ -123,6 +123,7 @@ sub login
 
 sub cwd { shift->_send(CWD => @_) }
 sub pwd { shift->_send('PWD') }
+sub cdup { shift->_send('CDUP') }
 
 sub quit
 {
