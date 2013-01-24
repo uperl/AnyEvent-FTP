@@ -39,6 +39,26 @@ sub connect
 {
   my($self, $host, $port) = @_;
   
+  if($host =~ /^ftp:/)
+  {
+    eval q{ require URI };
+    croak "passing in a string URI to connect requires URI to be installed" if $@;
+    $host = URI->new($host);
+  }
+  
+  my $uri;
+  
+  if(ref($host) && eval { $host->isa('URI') })
+  {
+    $uri = $host;
+    $host = $uri->host;
+    $port = $uri->port;
+  }
+  else
+  {
+    $port //= 21;
+  }
+  
   croak "Tried to reconnect while connected" if $self->{connected};
   
   my $condvar = AnyEvent->condvar;
@@ -79,7 +99,26 @@ sub connect
     );
     
     $self->on_next_response(sub {
-      $condvar->send(shift);
+      if(defined $uri)
+      {
+        $self->_send(USER => $uri->user)->cb(sub {
+          my $res = shift->recv;
+          return $condvar->croak($res) unless $res->is_success;
+          $self->_send(PASS => $uri->password)->cb(sub {
+            my $res = shift->recv;
+            return $condvar->croak($res) unless $res->is_success;
+            $self->_send(CWD => $uri->path)->cb(sub {
+              my $res = shift->recv;
+              return $condvar->croak($res) unless $res->is_success;
+              $condvar->send($res);
+            });
+          });
+        });
+      }
+      else
+      {
+        $condvar->send(shift);
+      }
     });
     
     $self->{handle}->on_read(sub {
@@ -127,10 +166,10 @@ sub _send_simple
   my $cv = AnyEvent->condvar;
   $self->_send(@_)->cb(sub {
     my $res = shift->recv;
-    if($res->code =~ /^[45]/)
-    { $cv->croak($res) }
-    else
+    if($res->is_success)
     { $cv->send($res) }
+    else
+    { $cv->croak($res) }
   });
   return $cv;
 }

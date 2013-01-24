@@ -44,4 +44,6 @@ sub as_string
   sprintf "[%d] %s%s", $self->{code}, $self->{message}->[0], @{ $self->{message} } > 1 ? '...' : '';
 }
 
+sub is_success { shift->{code} !~ /^[45]/ }
+
 1;
