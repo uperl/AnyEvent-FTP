@@ -47,6 +47,10 @@ L<RFC 3659 Extensions to FTP|http://tools.ietf.org/html/rfc3659>
 
 L<RFC 5797 FTP Command and Extension Registry|http://tools.ietf.org/html/rfc5797>
 
+=item *
+
+L<http://cr.yp.to/ftp.html>
+
 =cut
 
 1;
