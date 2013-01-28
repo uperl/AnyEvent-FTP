@@ -41,8 +41,7 @@ sub connect
   
   if($host =~ /^ftp:/)
   {
-    eval q{ require URI };
-    croak "passing in a string URI to connect requires URI to be installed" if $@;
+    require URI;
     $host = URI->new($host);
   }
   

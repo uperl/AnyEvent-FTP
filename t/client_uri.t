@@ -1,19 +1,11 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More;
+use Test::More tests => 12;
 use AnyEvent::FTP::Client;
 use FindBin ();
+use URI;
 require "$FindBin::Bin/lib.pl";
-
-if(eval q{ use URI; 1 })
-{
-  plan tests => 12;
-}
-else
-{
-  plan skip_all => 'test requires URI';
-}
 
 my $w = AnyEvent->timer( after => 5, cb => sub { say STDERR "TIMEOUT"; exit } );
 
