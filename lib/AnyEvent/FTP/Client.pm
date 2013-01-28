@@ -183,6 +183,50 @@ sub login
 sub retr
 {
   my($self, $filename, $destination) = @_;
+  $self->_pasv_fetch([RETR => $filename], $destination);
+}
+
+sub nlst
+{
+  my($self, $location) = @_;
+  my @lines;
+  my $cb = sub {
+    my($handle, $line) = @_;
+    $line =~ s/\015?\012//g;
+    push @lines, $line;
+  };
+  my $cv = AnyEvent->condvar;
+  my $inner_cv = $self->_pasv_fetch([NLST => $location], [line => $cb]);
+  $inner_cv->cb(sub {
+    my $res = eval { shift->recv };
+    $cv->croak($@) if $@;
+    $cv->send(\@lines);
+  });
+  $cv;
+}
+
+sub list
+{
+  my($self, $location) = @_;
+  my @lines;
+  my $cb = sub {
+    my($handle, $line) = @_;
+    $line =~ s/\015?\012//g;
+    push @lines, $line;
+  };
+  my $cv = AnyEvent->condvar;
+  my $inner_cv = $self->_pasv_fetch([LIST => $location], [line => $cb]);
+  $inner_cv->cb(sub {
+    my $res = eval { shift->recv };
+    $cv->croak($@) if $@;
+    $cv->send(\@lines);
+  });
+  $cv;
+}
+
+sub _pasv_fetch
+{
+  my($self, $cmd_pair, $destination) = @_;
   
   if(ref($destination) eq 'SCALAR')
   {
@@ -220,21 +264,29 @@ sub retr
           on_error => sub {
             my($hdl, $fatal, $msg) = @_;
             $_[0]->destroy;
-            #$cv->croak("error on data port: $msg");
           },
           on_eof => sub {
             $handle->destroy;
           },
         );
         
-        $handle->on_read(sub {
-          $handle->push_read(sub {
-            $destination->($_[0]{rbuf});
-            $_[0]{rbuf} = '';
+        if(ref($destination) eq 'ARRAY')
+        {
+          $handle->on_read(sub {
+            $handle->push_read(@$destination);
           });
-        });
+        }
+        else
+        {
+          $handle->on_read(sub {
+            $handle->push_read(sub {
+              $destination->($_[0]{rbuf});
+              $_[0]{rbuf} = '';
+            });
+          });
+        }
         
-        $self->_send(RETR => $filename)->cb(sub {
+        $self->_send(@$cmd_pair)->cb(sub {
           my $res = shift->recv;
           if($res->is_success)
           {
