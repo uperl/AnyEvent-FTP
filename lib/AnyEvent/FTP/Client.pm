@@ -189,25 +189,18 @@ sub retr
 sub nlst
 {
   my($self, $location) = @_;
-  my @lines;
-  my $cb = sub {
-    my($handle, $line) = @_;
-    $line =~ s/\015?\012//g;
-    push @lines, $line;
-  };
-  my $cv = AnyEvent->condvar;
-  my $inner_cv = $self->_pasv_fetch([NLST => $location], [line => $cb]);
-  $inner_cv->cb(sub {
-    my $res = eval { shift->recv };
-    $cv->croak($@) if $@;
-    $cv->send(\@lines);
-  });
-  $cv;
+  $self->_list(NLST => $location);
 }
 
 sub list
 {
   my($self, $location) = @_;
+  $self->_list(LIST => $location);
+}
+
+sub _list
+{
+  my($self, $verb, $location) = @_;
   my @lines;
   my $cb = sub {
     my($handle, $line) = @_;
@@ -215,7 +208,7 @@ sub list
     push @lines, $line;
   };
   my $cv = AnyEvent->condvar;
-  my $inner_cv = $self->_pasv_fetch([LIST => $location], [line => $cb]);
+  my $inner_cv = $self->_pasv_fetch([$verb => $location], [line => $cb]);
   $inner_cv->cb(sub {
     my $res = eval { shift->recv };
     $cv->croak($@) if $@;
