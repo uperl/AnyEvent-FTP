@@ -7,18 +7,13 @@ use FindBin ();
 use URI;
 require "$FindBin::Bin/lib.pl";
 
-my $w = AnyEvent->timer( after => 5, cb => sub { say STDERR "TIMEOUT"; exit } );
-
-my $client = eval { AnyEvent::FTP::Client->new( on_send => sub { } ) };
+my $client = eval { AnyEvent::FTP::Client->new };
 diag $@ if $@;
 isa_ok $client, 'AnyEvent::FTP::Client';
 
 our $config;
 
-$client->on_each_response(sub {
-  #my $res = shift;
-  #diag sprintf "[ %d ] %s\n", $res->code, $_ for @{ $res->message };
-});
+prep_client( $client );
 
 my $uri = URI->new('ftp:');
 $uri->host($config->{host});

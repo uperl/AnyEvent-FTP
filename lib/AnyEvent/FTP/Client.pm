@@ -35,6 +35,27 @@ sub new
   $self;
 }
 
+sub on_error
+{
+  my($self,$new_value) = @_;
+  $self->{on_error} = $new_value // sub {};
+  $self;
+}
+
+sub on_close
+{
+  my($self,$new_value) = @_;
+  $self->{on_close} = $new_value // sub {};
+  $self;
+}
+
+sub on_send
+{
+  my($self,$new_value) = @_;
+  $self->{on_send} = $new_value // sub {};
+  $self;
+}
+
 sub connect
 {
   my($self, $host, $port) = @_;
@@ -60,14 +81,14 @@ sub connect
   
   croak "Tried to reconnect while connected" if $self->{connected};
   
-  my $condvar = AnyEvent->condvar;
+  my $cv = AnyEvent->condvar;
   $self->{connected} = 1;
   
   tcp_connect $host, $port, sub {
     my($fh) = @_;
     unless($fh)
     {
-      $condvar->croak("unable to connect: $!");
+      $cv->croak("unable to connect: $!");
       $self->{connected} = 0;
       $self->{ready} = 0;
       $self->{buffer} = [];
@@ -102,21 +123,21 @@ sub connect
       {
         $self->_send(USER => $uri->user)->cb(sub {
           my $res = shift->recv;
-          return $condvar->croak($res) unless $res->is_success;
+          return $cv->croak($res) unless $res->is_success;
           $self->_send(PASS => $uri->password)->cb(sub {
             my $res = shift->recv;
-            return $condvar->croak($res) unless $res->is_success;
+            return $cv->croak($res) unless $res->is_success;
             $self->_send(CWD => $uri->path)->cb(sub {
               my $res = shift->recv;
-              return $condvar->croak($res) unless $res->is_success;
-              $condvar->send($res);
+              return $cv->croak($res) unless $res->is_success;
+              $cv->send($res);
             });
           });
         });
       }
       else
       {
-        $condvar->send(shift);
+        $cv->send(shift);
       }
     });
     
@@ -131,14 +152,14 @@ sub connect
   # FIXME parameterize timeout
   }, sub { $self->{timeout} };
   
-  return $condvar;
+  return $cv;
 }
 
 sub login
 {
   my($self, $user, $pass) = @_;
   
-  my $condvar = AnyEvent->condvar;
+  my $cv = AnyEvent->condvar;
   
   $self->_send(USER => $user)->cb(sub {
     my $res = shift->recv;
@@ -147,16 +168,94 @@ sub login
       $self->_send(PASS => $pass)->cb(sub {
         my $res = shift->recv;
         if($res->code == 230)
-        { $condvar->send($res) }
+        { $cv->send($res) }
         else
-        { $condvar->croak($res) }
+        { $cv->croak($res) }
       });
     }
     else
-    { $condvar->croak($res) }
+    { $cv->croak($res) }
   });
   
-  return $condvar;
+  return $cv;
+}
+
+sub retr
+{
+  my($self, $filename, $destination) = @_;
+  
+  if(ref($destination) eq 'SCALAR')
+  {
+    my $buffer = $destination;
+    $destination = sub {
+      $$buffer .= shift;
+    };
+  }
+  elsif(ref($destination) eq 'GLOB')
+  {
+    my $fh = $destination;
+    $destination = sub {
+      print $fh shift;
+    };
+  }
+  
+  my $cv = AnyEvent->condvar;
+  
+  $self->_send('PASV')->cb(sub {
+    my $res = shift->recv;
+    my($ip, $port) = $res->get_address_and_port;
+    if(defined $ip && defined $port)
+    {
+      tcp_connect $ip, $port, sub {
+        my($fh) = @_;
+        unless($fh)
+        {
+          $cv->croak("unable to connect to data port: $!");
+          return
+        }
+        
+        my $handle;
+        $handle = AnyEvent::Handle->new(
+          fh => $fh,
+          on_error => sub {
+            my($hdl, $fatal, $msg) = @_;
+            $_[0]->destroy;
+            #$cv->croak("error on data port: $msg");
+          },
+          on_eof => sub {
+            $handle->destroy;
+          },
+        );
+        
+        $handle->on_read(sub {
+          $handle->push_read(sub {
+            $destination->($_[0]{rbuf});
+            $_[0]{rbuf} = '';
+          });
+        });
+        
+        $self->_send(RETR => $filename)->cb(sub {
+          my $res = shift->recv;
+          if($res->is_success)
+          {
+            $self->_wait->cb(sub {
+              my $res = shift->recv;
+              if($res->is_success)
+              { $cv->send($res) }
+              else
+              { $cv->croak($res) }
+            });
+          }
+          else
+          { $cv->croak($res) }
+        });
+      };
+    }
+    else
+    { $cv->croak($res) }
+  });
+  
+  return $cv;
 }
 
 sub _send_simple
@@ -195,7 +294,7 @@ sub pwd
 sub quit
 {
   my($self) = @_;
-  my $condvar = AnyEvent->condvar;
+  my $cv = AnyEvent->condvar;
   
   my $res;
   
@@ -206,29 +305,36 @@ sub quit
   my $save = $self->{on_close};
   $self->{on_close} = sub {
     if(defined $res && $res->code == 221)
-    { $condvar->send($res) }
+    { $cv->send($res) }
     elsif(defined $res)
-    { $condvar->croak($res) }
+    { $cv->croak($res) }
     else
-    { $condvar->croak("did not receive QUIT response from server") }
+    { $cv->croak("did not receive QUIT response from server") }
     $save->();
     $self->{on_close} = $save;
   };
   
-  return $condvar;
+  return $cv;
 }
 
 sub _send
 {
   my($self, $cmd, $args) = @_;
-  my $line = defined $args ? join(' ', $cmd, $args) : $cmd;
   
-  my $condvar = AnyEvent->condvar;
-  push @{ $self->{buffer} }, [ "$line\015\012", $condvar ];
+  $self->_process if $self->{ready};
+  
+  my $cv = AnyEvent->condvar;
+  push @{ $self->{buffer} }, [ $cmd, $args, $cv ];
   
   $self->_process if $self->{ready};
 
-  return $condvar;
+  return $cv;
+}
+
+sub _wait
+{
+  my($self) = @_;
+  $self->_send(undef, undef);
 }
 
 sub _process
@@ -236,10 +342,14 @@ sub _process
   my($self) = @_;
   if(@{ $self->{buffer} } > 0)
   {
-    my($line, $cv) = @{ shift @{ $self->{buffer} } };
+    my($cmd, $args, $cv) = @{ shift @{ $self->{buffer} } };
     $self->on_next_response(sub { $cv->send(shift) });
-    $self->{on_send}->($line);
-    $self->{handle}->push_write($line);
+    if(defined $cmd)
+    {
+      my $line = defined $args ? join(' ', $cmd, $args) : $cmd;
+      $self->{on_send}->($cmd, $args);
+      $self->{handle}->push_write("$line\015\012");
+    }
     $self->{ready} = 0;
   }
   else

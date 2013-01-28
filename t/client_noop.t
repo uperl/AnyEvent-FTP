@@ -6,12 +6,11 @@ use AnyEvent::FTP::Client;
 use FindBin ();
 require "$FindBin::Bin/lib.pl";
 
-my $w = AnyEvent->timer( after => 5, cb => sub { say STDERR "TIMEOUT"; exit } );
-
 my $client = eval { AnyEvent::FTP::Client->new };
 diag $@ if $@;
 isa_ok $client, 'AnyEvent::FTP::Client';
 
+prep_client( $client );
 our $config;
 
 $client->on_each_response(sub {
