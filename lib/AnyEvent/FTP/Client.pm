@@ -116,18 +116,17 @@ sub connect
     $self->on_next_response(sub {
       if(defined $uri)
       {
-        $self->_send(USER => $uri->user)->cb(sub {
-          my $res = shift->recv;
-          return $cv->croak($res) unless $res->is_success;
-          $self->_send(PASS => $uri->password)->cb(sub {
-            my $res = shift->recv;
-            return $cv->croak($res) unless $res->is_success;
+        $self->login($uri->user, $uri->password)->cb(sub {
+          if(eval { shift->recv; 1 })
+          {
             $self->_send(CWD => $uri->path)->cb(sub {
               my $res = shift->recv;
               return $cv->croak($res) unless $res->is_success;
               $cv->send($res);
             });
-          });
+          }
+          else
+          { $cv->croak($@) }
         });
       }
       else
