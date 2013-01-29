@@ -23,9 +23,9 @@ sub new
     ready     => 0, 
     connected => 0, 
     timeout   => 30,
-    on_error  => $args->{on_error} // sub { warn shift },
-    on_close  => $args->{on_close} // sub {},
-    on_send   => $args->{on_send}  // sub {},
+    on_error  => sub { warn shift },
+    on_close  => sub {},
+    on_send   => sub {},
     passive   => $args->{passive}  // 1,
     buffer    => [],
   }, $class;

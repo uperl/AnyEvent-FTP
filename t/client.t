@@ -8,9 +8,11 @@ require "$FindBin::Bin/lib.pl";
 
 my $done = AnyEvent->condvar;
 
-my $client = eval { AnyEvent::FTP::Client->new( on_close => sub { $done->send } ) };
+my $client = eval { AnyEvent::FTP::Client->new };
 diag $@ if $@;
 isa_ok $client, 'AnyEvent::FTP::Client';
+
+$client->on_close(sub { $done->send });
 
 our $config;
 
