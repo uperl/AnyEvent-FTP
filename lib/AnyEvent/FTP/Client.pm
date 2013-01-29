@@ -29,6 +29,11 @@ sub new
     passive   => $args->{passive}  // 1,
     buffer    => [],
   }, $class;
+
+  if($self->{passive})
+  { require AnyEvent::FTP::Client::passive }
+  else
+  { require AnyEvent::FTP::Client::active }
   
   $self->on_error(sub { warn shift });
   
@@ -147,6 +152,9 @@ sub connect
   return $cv;
 }
 
+# FIXME: implement STOR, APPE, STOU, ALLO, MKD, RMD, DEL, rename (RNFR, RNTO)
+
+# TODO: implement ACCT
 sub login
 {
   my($self, $user, $pass) = @_;
@@ -172,6 +180,7 @@ sub login
   return $cv;
 }
 
+# FIXME: implement REST (with test)
 sub retr
 {
   my($self, $filename, $destination) = @_;
@@ -286,73 +295,6 @@ sub _slurp_cmd
   });
 }
 
-sub _fetch_active
-{
-  my($self, $cmd_pair, $destination) = @_;
-  my $cv = AnyEvent->condvar;
-  
-  my $count = 0;
-  my $guard;
-  $guard = tcp_server $self->{my_ip}, undef, sub {
-    my($fh, $host, $port) = @_;
-    # TODO double check the host/port combo here.
-    
-    return close $fh if ++$count > 1;
-    
-    undef $guard; # close to additional connections.
-
-    $self->_slurp_data($fh,$destination);
-  }, sub {
-  
-    my($fh, $host, $port) = @_;
-    my $args = join(',', split(/\./, $self->{my_ip}), $port >> 8, $port & 0xff);
-
-    $self->_send(PORT => $args)->cb(sub {
-      my $res = shift->recv;
-      if($res->is_success)
-      {
-        $self->_slurp_cmd($cmd_pair, $cv);
-      }
-      else
-      { $cv->croak($res) }
-    });
-  };
-  
-  $cv;
-}
-
-sub _fetch_passive
-{
-  my($self, $cmd_pair, $destination) = @_;
-  
-  my $cv = AnyEvent->condvar;
-  
-  $self->_send('PASV')->cb(sub {
-    my $res = shift->recv;
-    my($ip, $port) = $res->get_address_and_port;
-    if(defined $ip && defined $port)
-    {
-      tcp_connect $ip, $port, sub {
-        my($fh) = @_;
-        unless($fh)
-        {
-          $cv->croak("unable to connect to data port: $!");
-          return
-        }
-        
-        $DB::single = 1;
-        
-        $self->_slurp_data($fh,$destination);
-        $self->_slurp_cmd($cmd_pair, $cv);
-      };
-    }
-    else
-    { $cv->croak($res) }
-  });
-  
-  return $cv;
-}
-
 sub _send_simple
 {
   my $self = shift;
@@ -367,11 +309,16 @@ sub _send_simple
   return $cv;
 }
 
+# FIXME: implement STAT and HELP
+# FIXME: implement SITE CHMOD
+# FIXME: implement ABOR
 sub cwd  { shift->_send_simple(CWD => @_) }
 sub cdup { shift->_send_simple('CDUP') }
 sub noop { shift->_send_simple('NOOP') }
 sub syst { shift->_send_simple('SYST') }
 sub type { shift->_send_simple(TYPE => @_) }
+sub stru { shift->_send_simple('STRU') }
+sub mode { shift->_send_simple('MODE') }
 
 sub pwd
 {
