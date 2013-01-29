@@ -8,6 +8,7 @@ use AnyEvent::Socket qw( tcp_connect );
 use AnyEvent::Handle;
 use Role::Tiny::With;
 use Carp qw( croak );
+use Socket qw( unpack_sockaddr_in inet_ntoa );
 
 # ABSTRACT: Simple asynchronous ftp client
 # VERSION
@@ -25,6 +26,7 @@ sub new
     on_error  => $args->{on_error} // sub { warn shift },
     on_close  => $args->{on_close} // sub {},
     on_send   => $args->{on_send}  // sub {},
+    passive   => $args->{passive}  // 1,
     buffer    => [],
   }, $class;
   
@@ -95,6 +97,13 @@ sub connect
       return;
     }
     
+    # Get the IP address we are sending from for when
+    # we use the PORT command (passive=0).
+    $self->{my_ip} = do {
+      my($port, $addr) = unpack_sockaddr_in getsockname $fh;
+      inet_ntoa $addr;
+    };
+    
     $self->{handle} = AnyEvent::Handle->new(
       fh       => $fh,
       on_error => sub {
@@ -150,7 +159,9 @@ sub connect
     });
     
   # FIXME parameterize timeout
-  }, sub { $self->{timeout} };
+  }, sub { 
+    $self->{timeout}
+  };
   
   return $cv;
 }
@@ -183,7 +194,7 @@ sub login
 sub retr
 {
   my($self, $filename, $destination) = @_;
-  $self->_pasv_fetch([RETR => $filename], $destination);
+  $self->_fetch([RETR => $filename], $destination);
 }
 
 sub nlst
@@ -208,7 +219,7 @@ sub _list
     push @lines, $line;
   };
   my $cv = AnyEvent->condvar;
-  my $inner_cv = $self->_pasv_fetch([$verb => $location], [line => $cb]);
+  my $inner_cv = $self->_fetch([$verb => $location], [line => $cb]);
   $inner_cv->cb(sub {
     my $res = eval { shift->recv };
     $cv->croak($@) if $@;
@@ -217,7 +228,21 @@ sub _list
   $cv;
 }
 
-sub _pasv_fetch
+sub _fetch
+{
+  my $self = shift;
+  $self->{passive} 
+  ? $self->_fetch_passive(@_)
+  : $self->_fetch_active(@_);
+}
+
+sub _fetch_active
+{
+  my($self, $cmd_pair, $destination) = @_;
+  die 'unimplemented';
+}
+
+sub _fetch_passive
 {
   my($self, $cmd_pair, $destination) = @_;
   
