@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use v5.10;
 use AnyEvent;
-use AnyEvent::Socket qw( tcp_connect );
+use AnyEvent::Socket qw( tcp_connect tcp_server );
 use AnyEvent::Handle;
 use Role::Tiny::With;
 use Carp qw( croak );
@@ -230,20 +230,6 @@ sub _list
 
 sub _fetch
 {
-  my $self = shift;
-  $self->{passive} 
-  ? $self->_fetch_passive(@_)
-  : $self->_fetch_active(@_);
-}
-
-sub _fetch_active
-{
-  my($self, $cmd_pair, $destination) = @_;
-  die 'unimplemented';
-}
-
-sub _fetch_passive
-{
   my($self, $cmd_pair, $destination) = @_;
   
   if(ref($destination) eq 'SCALAR')
@@ -261,6 +247,103 @@ sub _fetch_passive
     };
   }
   
+  $self->{passive} 
+  ? $self->_fetch_passive($cmd_pair, $destination)
+  : $self->_fetch_active($cmd_pair, $destination);
+}
+
+sub _slurp_data
+{
+  my($self, $fh, $destination) = @_;
+
+  my $handle;
+  $handle = AnyEvent::Handle->new(
+    fh => $fh,
+    on_error => sub {
+      my($hdl, $fatal, $msg) = @_;
+      $_[0]->destroy;
+    },
+    on_eof => sub {
+      $handle->destroy;
+    },
+  );
+        
+  if(ref($destination) eq 'ARRAY')
+  {
+    $handle->on_read(sub {
+      $handle->push_read(@$destination);
+    });
+  }
+  else
+  {
+    $handle->on_read(sub {
+      $handle->push_read(sub {
+        $destination->($_[0]{rbuf});
+        $_[0]{rbuf} = '';
+      });
+    });
+  }
+}
+
+sub _slurp_cmd
+{
+  my($self, $cmd_pair, $cv) = @_;
+  $self->_send(@$cmd_pair)->cb(sub {
+    my $res = shift->recv;
+    if($res->is_success)
+    {
+      $self->_wait->cb(sub {
+        my $res = shift->recv;
+        if($res->is_success)
+        { $cv->send($res) }
+        else
+        { $cv->croak($res) }
+      });
+    }
+    else
+    { $cv->croak($res) }
+  });
+}
+
+sub _fetch_active
+{
+  my($self, $cmd_pair, $destination) = @_;
+  my $cv = AnyEvent->condvar;
+  
+  my $count = 0;
+  my $guard;
+  $guard = tcp_server $self->{my_ip}, undef, sub {
+    my($fh, $host, $port) = @_;
+    # TODO double check the host/port combo here.
+    
+    return close $fh if ++$count > 1;
+    
+    undef $guard; # close to additional connections.
+
+    $self->_slurp_data($fh,$destination);
+  }, sub {
+  
+    my($fh, $host, $port) = @_;
+    my $args = join(',', split(/\./, $self->{my_ip}), $port >> 8, $port & 0xff);
+
+    $self->_send(PORT => $args)->cb(sub {
+      my $res = shift->recv;
+      if($res->is_success)
+      {
+        $self->_slurp_cmd($cmd_pair, $cv);
+      }
+      else
+      { $cv->croak($res) }
+    });
+  };
+  
+  $cv;
+}
+
+sub _fetch_passive
+{
+  my($self, $cmd_pair, $destination) = @_;
+  
   my $cv = AnyEvent->condvar;
   
   $self->_send('PASV')->cb(sub {
@@ -276,49 +359,10 @@ sub _fetch_passive
           return
         }
         
-        my $handle;
-        $handle = AnyEvent::Handle->new(
-          fh => $fh,
-          on_error => sub {
-            my($hdl, $fatal, $msg) = @_;
-            $_[0]->destroy;
-          },
-          on_eof => sub {
-            $handle->destroy;
-          },
-        );
+        $DB::single = 1;
         
-        if(ref($destination) eq 'ARRAY')
-        {
-          $handle->on_read(sub {
-            $handle->push_read(@$destination);
-          });
-        }
-        else
-        {
-          $handle->on_read(sub {
-            $handle->push_read(sub {
-              $destination->($_[0]{rbuf});
-              $_[0]{rbuf} = '';
-            });
-          });
-        }
-        
-        $self->_send(@$cmd_pair)->cb(sub {
-          my $res = shift->recv;
-          if($res->is_success)
-          {
-            $self->_wait->cb(sub {
-              my $res = shift->recv;
-              if($res->is_success)
-              { $cv->send($res) }
-              else
-              { $cv->croak($res) }
-            });
-          }
-          else
-          { $cv->croak($res) }
-        });
+        $self->_slurp_data($fh,$destination);
+        $self->_slurp_cmd($cmd_pair, $cv);
       };
     }
     else
