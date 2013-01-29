@@ -13,7 +13,10 @@ use Socket qw( unpack_sockaddr_in inet_ntoa );
 # ABSTRACT: Simple asynchronous ftp client
 # VERSION
 
+with 'AnyEvent::FTP::Role::Event';
 with 'AnyEvent::FTP::Role::ResponseBuffer';
+
+__PACKAGE__->define_events(qw( error close send ));
 
 sub new
 {
@@ -23,38 +26,16 @@ sub new
     ready     => 0, 
     connected => 0, 
     timeout   => 30,
-    on_error  => sub { warn shift },
-    on_close  => sub {},
-    on_send   => sub {},
     passive   => $args->{passive}  // 1,
     buffer    => [],
   }, $class;
+  
+  $self->on_error(sub { warn shift });
   
   $self->on_each_response(sub {
     $self->_process;
   });
   
-  $self;
-}
-
-sub on_error
-{
-  my($self,$new_value) = @_;
-  $self->{on_error} = $new_value // sub {};
-  $self;
-}
-
-sub on_close
-{
-  my($self,$new_value) = @_;
-  $self->{on_close} = $new_value // sub {};
-  $self;
-}
-
-sub on_send
-{
-  my($self,$new_value) = @_;
-  $self->{on_send} = $new_value // sub {};
   $self;
 }
 
@@ -113,8 +94,8 @@ sub connect
         delete $self->{handle};
         $self->{connected} = 0;
         $self->{ready} = 0;
-        $self->{on_error}->($msg);
-        $self->{on_close}->();
+        $self->emit('error', $msg);
+        $self->emit('close');
         $self->{buffer} = [];
       },
       on_eof   => sub {
@@ -122,7 +103,7 @@ sub connect
         delete $self->{handle};
         $self->{connected} = 0;
         $self->{ready} = 0;
-        $self->{on_close}->();
+        $self->emit('close');
         $self->{buffer} = [];
       },
     );
@@ -416,17 +397,17 @@ sub quit
     $res = shift->recv;
   });
   
-  my $save = $self->{on_close};
-  $self->{on_close} = sub {
+  my $save = $self->{event}->{close};
+  $self->{event}->{close} = [ sub {
     if(defined $res && $res->code == 221)
     { $cv->send($res) }
     elsif(defined $res)
     { $cv->croak($res) }
     else
     { $cv->croak("did not receive QUIT response from server") }
-    $save->();
-    $self->{on_close} = $save;
-  };
+    $_->() for @$save;
+    $self->{event}->{close} = $save;
+  } ];
   
   return $cv;
 }
@@ -461,7 +442,7 @@ sub _process
     if(defined $cmd)
     {
       my $line = defined $args ? join(' ', $cmd, $args) : $cmd;
-      $self->{on_send}->($cmd, $args);
+      $self->emit('send', $cmd, $args);
       $self->{handle}->push_write("$line\015\012");
     }
     $self->{ready} = 0;
