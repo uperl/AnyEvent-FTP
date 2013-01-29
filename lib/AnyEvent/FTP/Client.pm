@@ -185,11 +185,31 @@ sub login
   return $cv;
 }
 
-# FIXME: implement REST (with test)
 sub retr
 {
   my($self, $filename, $destination) = @_;
   $self->_fetch([RETR => $filename], $destination);
+}
+
+sub resume_retr
+{
+  my($self, $filename, $destination) = @_;
+  croak "resume_retr only works with a SCALAR ref destination" unless ref($destination) eq 'SCALAR';
+  my $cv = AnyEvent->condvar;
+  $self->_send(REST => do { use bytes; length $$destination })->cb(sub {
+    my $res = shift->recv;
+    if($res->is_success)
+    {
+      $self->_fetch([RETR => $filename], $destination)->cb(sub {
+        my $res = eval { shift->recv };
+        if($@) { $cv->croak($@) }
+        else { $cv->send($res) }
+      });
+    }
+    else
+    { $cv->croak($res) }
+  });
+  $cv;
 }
 
 sub nlst
@@ -324,6 +344,7 @@ sub syst { shift->_send_simple('SYST') }
 sub type { shift->_send_simple(TYPE => @_) }
 sub stru { shift->_send_simple('STRU') }
 sub mode { shift->_send_simple('MODE') }
+sub rest { shift->_send_simple(REST => @_) }
 
 sub pwd
 {
