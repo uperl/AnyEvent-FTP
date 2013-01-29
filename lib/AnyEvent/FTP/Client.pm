@@ -117,13 +117,19 @@ sub connect
       if(defined $uri)
       {
         $self->login($uri->user, $uri->password)->cb(sub {
-          if(eval { shift->recv; 1 })
+          my $res = eval { shift->recv };
+          if(defined $res)
           {
-            $self->_send(CWD => $uri->path)->cb(sub {
-              my $res = shift->recv;
-              return $cv->croak($res) unless $res->is_success;
-              $cv->send($res);
-            });
+            if($uri->path ne '')
+            {
+              $self->_send(CWD => $uri->path)->cb(sub {
+                my $res = shift->recv;
+                return $cv->croak($res) unless $res->is_success;
+                $cv->send($res);
+              });
+            }
+            else 
+            { $cv->send($res) }
           }
           else
           { $cv->croak($@) }
