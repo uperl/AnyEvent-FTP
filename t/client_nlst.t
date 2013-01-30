@@ -42,20 +42,20 @@ foreach my $passive (0,1)
   $client->cwd($config->{dir})->recv;
 
   do {
-    my $list = eval { $client->list->recv };
+    my $list = eval { $client->nlst->recv };
     diag $@ if $@;
     isa_ok $list, 'ARRAY';
     $list //= [];
-    is scalar(@$list), 4, 'list length 4';
+    is_deeply [ sort @$list ], [ sort qw( foo.txt bar.txt baz.txt dir2 ) ], 'nlst 1';
     #note "list: $_" for @$list;
   };
 
   do {
-    my $list = eval { $client->list('dir2')->recv };
+    my $list = eval { $client->nlst('dir2')->recv };
     diag $@ if $@;
     isa_ok $list, 'ARRAY';
     $list //= [];
-    is scalar(@$list), 3, 'list length 3';
+    is_deeply [ sort @$list ], [ sort map { "dir2/$_.txt" } qw( dr.pepper coke pepsi ) ], 'nlst 1';
     #note "list: $_" for @$list;
   };
 
