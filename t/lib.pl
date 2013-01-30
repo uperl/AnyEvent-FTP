@@ -10,6 +10,7 @@ do {
   $config->{dir} = $save_dir if defined $save_dir;
 };
 
+# FIXME this stoped working for some reason ?
 our $anyevent_test_timeout = AnyEvent->timer( after => 5, cb => sub { say STDERR "TIMEOUT"; exit } );
 
 sub prep_client

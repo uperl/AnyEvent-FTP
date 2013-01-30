@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use v5.10;
 use AnyEvent;
-use AnyEvent::Socket qw( tcp_connect tcp_server );
+use AnyEvent::Socket qw( tcp_connect );
 use AnyEvent::Handle;
 use Role::Tiny::With;
 use Carp qw( croak );
@@ -212,6 +212,29 @@ sub resume_retr
   $cv;
 }
 
+sub stor
+{
+  my($self, $filename, $destination) = @_;
+  $self->_store([STOR => $filename], $destination);
+}
+
+# TODO: the server gives the name in the 1xx response
+# immediately after sending STOU (not the 2xx response
+# when it is done), so at the moment we are loosing
+# the filename.  parse it out so we get it.
+sub stou
+{
+  my($self, $filename, $destination) = @_;
+  $self->_store([STOU => $filename], $destination);
+}
+
+# for this to work under ProFTPd: AllowStoreRestart off
+sub appe
+{
+  my($self, $filename, $destination) = @_;
+  $self->_store([APPE => $filename], $destination);
+}
+
 sub nlst
 {
   my($self, $location) = @_;
@@ -267,6 +290,39 @@ sub _fetch
   : $self->_fetch_active($cmd_pair, $destination);
 }
 
+sub _store
+{
+  my($self, $cmd_pair, $destination) = @_;
+  
+  if(ref($destination) eq '')
+  {
+    my $buffer = $destination;
+    $destination = sub {
+      my $tmp = $buffer;
+      undef $buffer;
+      $tmp;
+    };
+  }
+  elsif(ref($destination) eq 'SCALAR')
+  {
+    my $buffer = $$destination;
+    $destination = sub {
+      my $tmp = $buffer;
+      undef $buffer;
+      $tmp;
+    };
+  }
+  else
+  {
+    # FIXME implement GLOB and CODE
+    die 'IMPLEMENT';
+  }
+  
+  $self->{passive}
+  ? $self->_store_passive($cmd_pair, $destination)
+  : $self->_store_active($cmd_pair, $destination);
+}
+
 sub _slurp_data
 {
   my($self, $fh, $destination) = @_;
@@ -298,6 +354,35 @@ sub _slurp_data
       });
     });
   }
+}
+
+sub _spew_data
+{
+  my($self, $fh, $destination) = @_;
+  
+  my $handle;
+  $handle = AnyEvent::Handle->new(
+    fh => $fh,
+    on_error => sub {
+      my($hdl, $fatal, $msg) = @_;
+      $_[0]->destroy;
+    },
+    on_eof => sub {
+      $handle->destroy;
+    },
+  );
+  
+  $handle->on_drain(sub {
+    my $data = $destination->();
+    if(defined $data)
+    {
+      $handle->push_write($data);
+    }
+    else
+    {
+      $handle->push_shutdown;
+    }
+  });
 }
 
 sub _slurp_cmd
@@ -340,6 +425,7 @@ sub _send_simple
 sub cwd  { shift->_send_simple(CWD => @_) }
 sub cdup { shift->_send_simple('CDUP') }
 sub noop { shift->_send_simple('NOOP') }
+sub allo { shift->_send_simple(ALLO => @_) }
 sub syst { shift->_send_simple('SYST') }
 sub type { shift->_send_simple(TYPE => @_) }
 sub stru { shift->_send_simple('STRU') }
