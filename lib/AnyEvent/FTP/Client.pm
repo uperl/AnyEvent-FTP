@@ -157,7 +157,7 @@ sub connect
   return $cv;
 }
 
-# FIXME: implement STOR, APPE, STOU, ALLO, DEL, rename (RNFR, RNTO)
+# FIXME: implement DEL, rename (RNFR, RNTO)
 
 # TODO: implement ACCT
 sub login
@@ -419,7 +419,6 @@ sub _send_simple
   return $cv;
 }
 
-# FIXME: implement STAT and HELP
 # FIXME: implement SITE CHMOD
 # FIXME: implement ABOR
 sub cwd  { shift->_send_simple(CWD => @_) }
@@ -433,6 +432,8 @@ sub mode { shift->_send_simple('MODE') }
 sub rest { shift->_send_simple(REST => @_) }
 sub mkd  { shift->_send_simple(MKD => @_) }
 sub rmd  { shift->_send_simple(RMD => @_) }
+sub stat { shift->_send_simple(STAT => @_) }
+sub help { shift->_send_simple(HELP => @_) }
 
 sub pwd
 {
