@@ -157,7 +157,7 @@ sub connect
   return $cv;
 }
 
-# FIXME: implement STOR, APPE, STOU, ALLO, MKD, RMD, DEL, rename (RNFR, RNTO)
+# FIXME: implement STOR, APPE, STOU, ALLO, DEL, rename (RNFR, RNTO)
 
 # TODO: implement ACCT
 sub login
@@ -431,6 +431,8 @@ sub type { shift->_send_simple(TYPE => @_) }
 sub stru { shift->_send_simple('STRU') }
 sub mode { shift->_send_simple('MODE') }
 sub rest { shift->_send_simple(REST => @_) }
+sub mkd  { shift->_send_simple(MKD => @_) }
+sub rmd  { shift->_send_simple(RMD => @_) }
 
 sub pwd
 {
