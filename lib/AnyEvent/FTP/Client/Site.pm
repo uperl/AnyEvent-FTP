@@ -19,6 +19,7 @@ sub AUTOLOAD
   my $self = shift;
   my $name = $AUTOLOAD;
   $name =~ s/^.*://;
+  $name =~ s/_(.)/uc $1/eg;
   my $class = join('::', qw( AnyEvent FTP Client Site ), ucfirst($name) );
   eval qq{ use $class () };
   die $@ if $@;
