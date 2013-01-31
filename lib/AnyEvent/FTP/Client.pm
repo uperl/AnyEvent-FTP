@@ -184,7 +184,11 @@ sub resume_retr
 sub stor
 {
   my($self, $filename, $destination) = @_;
-  $self->_store([STOR => $filename], $destination);
+  $self->{store}->new(
+    command     => [STOR => $filename],
+    destination => $destination,
+    client      => $self,
+  );
 }
 
 # TODO: the server gives the name in the 1xx response
@@ -194,14 +198,22 @@ sub stor
 sub stou
 {
   my($self, $filename, $destination) = @_;
-  $self->_store([STOU => $filename], $destination);
+  $self->{store}->new(
+    command     => [STOU => $filename],
+    destination => $destination,
+    client      => $self,
+  );
 }
 
 # for this to work under ProFTPd: AllowStoreRestart off
 sub appe
 {
   my($self, $filename, $destination) = @_;
-  $self->_store([APPE => $filename], $destination);
+  $self->{store}->new(
+    command     => [APPE => $filename],
+    destination => $destination,
+    client      => $self,
+  );
 }
 
 sub nlst
@@ -231,20 +243,6 @@ sub _list
     $cv->send(\@lines);
   });
   $cv;
-}
-
-sub _store
-{
-  my $self = shift;
-  my $cmd_pair = shift;
-  my $destination = shift;
-  
-  $self->{store}->new(
-    command     => $cmd_pair,
-    destination => $destination,
-    prefix      => \@_,
-    client      => $self,
-  );
 }
 
 sub rename
