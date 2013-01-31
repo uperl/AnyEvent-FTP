@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 3;
+use Test::More tests => 6;
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
@@ -21,16 +21,28 @@ $client->type('I')->recv;
 $client->cwd($config->{dir})->recv;
 
 do {
-  my $ret = eval { $client->mkd('foo')->recv; };
+  my $fn = File::Spec->catfile($config->{dir}, 'foo.txt');
+  do { open my $fh, '>', $fn; close $fh; };
+  
+  ok -e $fn, "created file";
+  
+  my $ret = eval { $client->dele('foo.txt')->recv; };
   diag $@ if $@;
   isa_ok $ret, 'AnyEvent::FTP::Response';
-    
-  my $dir_name = File::Spec->catdir($config->{dir}, 'foo');
-  ok -d $dir_name, "dir created: $dir_name";
-    
-  rmdir $dir_name;
-    
-  ok !-d $dir_name, "dir deleted";
+  
+  ok !-e $fn, "deleted file";
+};
+  
+do {
+  my $fn = File::Spec->catfile($config->{dir}, 'bar.txt');
+
+  ok !-e $fn, "created file";
+  
+  eval { $client->dele('foo.txt')->recv; };
+  my $res = $@;
+  isa_ok $res, 'AnyEvent::FTP::Response';
+  
+  ok !-e $fn, "deleted file";
 };
   
 $client->quit->recv;

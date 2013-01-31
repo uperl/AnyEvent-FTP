@@ -157,7 +157,7 @@ sub connect
   return $cv;
 }
 
-# FIXME: implement DEL, rename (RNFR, RNTO)
+# FIXME: implement rename (RNFR, RNTO)
 
 # TODO: implement ACCT
 sub login
@@ -434,6 +434,7 @@ sub mkd  { shift->_send_simple(MKD => @_) }
 sub rmd  { shift->_send_simple(RMD => @_) }
 sub stat { shift->_send_simple(STAT => @_) }
 sub help { shift->_send_simple(HELP => @_) }
+sub dele { shift->_send_simple(DELE => @_) }
 
 sub pwd
 {

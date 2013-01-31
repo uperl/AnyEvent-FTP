@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 4;
+use Test::More tests => 2;
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
@@ -11,7 +11,7 @@ require "$FindBin::Bin/lib.pl";
 our $config;
 $config->{dir} = tempdir( CLEANUP => 1 );
 
-my $client = AnyEvent::FTP::Client->new( passive => $passive );
+my $client = AnyEvent::FTP::Client->new;
 
 prep_client( $client );
 
