@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use v5.10;
 
-# ABSTRACT: Dispatcher for site specific ftp commands
+# ABSTRACT: Site specific commands for Proftpd
 # VERSION
 
 sub new
