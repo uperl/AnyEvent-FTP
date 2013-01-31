@@ -15,6 +15,7 @@ use Socket qw( unpack_sockaddr_in inet_ntoa );
 
 with 'AnyEvent::FTP::Role::Event';
 with 'AnyEvent::FTP::Role::ResponseBuffer';
+with 'AnyEvent::FTP::Role::RequestBuffer';
 
 __PACKAGE__->define_events(qw( error close send ));
 
@@ -23,11 +24,9 @@ sub new
   my($class) = shift;
   my $args   = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
   my $self = bless {
-    ready     => 0, 
     connected => 0, 
     timeout   => 30,
     passive   => $args->{passive}  // 1,
-    buffer    => [],
   }, $class;
 
   if($self->{passive})
@@ -36,9 +35,10 @@ sub new
   { require AnyEvent::FTP::Client::active }
   
   $self->on_error(sub { warn shift });
-  
-  $self->on_each_response(sub {
-    $self->_process;
+  $self->on_close(sub {
+    $self->clear_command;
+    $self->{connected} = 0;
+    delete $self->{handle};
   });
   
   $self;
@@ -78,8 +78,7 @@ sub connect
     {
       $cv->croak("unable to connect: $!");
       $self->{connected} = 0;
-      $self->{ready} = 0;
-      $self->{buffer} = [];
+      $self->clear_command;
       return;
     }
     
@@ -96,48 +95,31 @@ sub connect
         # FIXME handle errors
         my ($hdl, $fatal, $msg) = @_;
         $_[0]->destroy;
-        delete $self->{handle};
-        $self->{connected} = 0;
-        $self->{ready} = 0;
         $self->emit('error', $msg);
         $self->emit('close');
-        $self->{buffer} = [];
       },
       on_eof   => sub {
         $self->{handle}->destroy;
-        delete $self->{handle};
-        $self->{connected} = 0;
-        $self->{ready} = 0;
         $self->emit('close');
-        $self->{buffer} = [];
       },
     );
     
     $self->on_next_response(sub {
+      my $res = shift;
+      return $cv->croak($res) unless $res->is_success;
       if(defined $uri)
       {
-        $self->login($uri->user, $uri->password)->cb(sub {
-          my $res = eval { shift->recv };
-          if(defined $res)
-          {
-            if($uri->path ne '')
-            {
-              $self->_send(CWD => $uri->path)->cb(sub {
-                my $res = shift->recv;
-                return $cv->croak($res) unless $res->is_success;
-                $cv->send($res);
-              });
-            }
-            else 
-            { $cv->send($res) }
-          }
-          else
-          { $cv->croak($@) }
-        });
+        my @start_commands = (
+          [USER => $uri->user],
+          [PASS => $uri->password],
+        );
+        push @start_commands, [CWD => $uri->path] if $uri->path ne '';
+        $self->unshift_command(@start_commands, $cv);
       }
       else
       {
-        $cv->send(shift);
+        $cv->send($res);
+        $self->pop_command;
       }
     });
     
@@ -161,26 +143,10 @@ sub connect
 sub login
 {
   my($self, $user, $pass) = @_;
-  
-  my $cv = AnyEvent->condvar;
-  
-  $self->_send(USER => $user)->cb(sub {
-    my $res = shift->recv;
-    if($res->code == 331)
-    {
-      $self->_send(PASS => $pass)->cb(sub {
-        my $res = shift->recv;
-        if($res->code == 230)
-        { $cv->send($res) }
-        else
-        { $cv->croak($res) }
-      });
-    }
-    else
-    { $cv->croak($res) }
-  });
-  
-  return $cv;
+  $self->push_command(
+    [ USER => $user ],
+    [ PASS => $pass ]
+  );
 }
 
 sub retr
@@ -193,21 +159,11 @@ sub resume_retr
 {
   my($self, $filename, $destination) = @_;
   croak "resume_retr only works with a SCALAR ref destination" unless ref($destination) eq 'SCALAR';
-  my $cv = AnyEvent->condvar;
-  $self->_send(REST => do { use bytes; length $$destination })->cb(sub {
-    my $res = shift->recv;
-    if($res->is_success)
-    {
-      $self->_fetch([RETR => $filename], $destination)->cb(sub {
-        my $res = eval { shift->recv };
-        if($@) { $cv->croak($@) }
-        else { $cv->send($res) }
-      });
-    }
-    else
-    { $cv->croak($res) }
-  });
-  $cv;
+  $self->_fetch(
+    [RETR => $filename], 
+    $destination, 
+    [REST => do { use bytes; length $$destination }],
+  );
 }
 
 sub stor
@@ -266,7 +222,9 @@ sub _list
 
 sub _fetch
 {
-  my($self, $cmd_pair, $destination) = @_;
+  my $self = shift;
+  my $cmd_pair = shift;
+  my $destination = shift;
   
   if(ref($destination) eq 'SCALAR')
   {
@@ -284,13 +242,15 @@ sub _fetch
   }
   
   $self->{passive} 
-  ? $self->_fetch_passive($cmd_pair, $destination)
-  : $self->_fetch_active($cmd_pair, $destination);
+  ? $self->_fetch_passive($cmd_pair, $destination, @_)
+  : $self->_fetch_active($cmd_pair, $destination, @_);
 }
 
 sub _store
 {
-  my($self, $cmd_pair, $destination) = @_;
+  my $self = shift;
+  my $cmd_pair = shift;
+  my $destination = shift;
   
   if(ref($destination) eq '')
   {
@@ -317,8 +277,8 @@ sub _store
   }
   
   $self->{passive}
-  ? $self->_store_passive($cmd_pair, $destination)
-  : $self->_store_active($cmd_pair, $destination);
+  ? $self->_store_passive($cmd_pair, $destination, @_)
+  : $self->_store_active($cmd_pair, $destination, @_);
 }
 
 sub _slurp_data
@@ -383,89 +343,40 @@ sub _spew_data
   });
 }
 
-sub _slurp_cmd
-{
-  my($self, $cmd_pair, $cv) = @_;
-  $self->_send(@$cmd_pair)->cb(sub {
-    my $res = shift->recv;
-    if($res->is_success)
-    {
-      $self->_wait->cb(sub {
-        my $res = shift->recv;
-        if($res->is_success)
-        { $cv->send($res) }
-        else
-        { $cv->croak($res) }
-      });
-    }
-    else
-    { $cv->croak($res) }
-  });
-}
-
 sub rename
 {
   my($self, $from, $to) = @_;
-  my $cv = AnyEvent->condvar;
-  
-  $self->_send(RNFR => $from)->cb(sub {
-    my $res = shift->recv;
-    if($res->is_success)
-    {
-      $self->_send(RNTO => $to)->cb(sub {
-        my $res = shift->recv;
-        if($res->is_success)
-        { $cv->send($res) }
-        else
-        { $cv->croak($res) }
-      });
-    }
-    else
-    { $cv->croak($res) }
-  });
-  
-  $cv;
-}
-
-sub _send_simple
-{
-  my $self = shift;
-  my $cv = AnyEvent->condvar;
-  $self->_send(@_)->cb(sub {
-    my $res = shift->recv;
-    if($res->is_success)
-    { $cv->send($res) }
-    else
-    { $cv->croak($res) }
-  });
-  return $cv;
+  $self->push_command(
+    [ RNFR => $from ],
+    [ RNTO => $to   ],
+  );
 }
 
 # FIXME: implement SITE CHMOD
 # FIXME: implement ABOR
-sub cwd  { shift->_send_simple(CWD => @_) }
-sub cdup { shift->_send_simple('CDUP') }
-sub noop { shift->_send_simple('NOOP') }
-sub allo { shift->_send_simple(ALLO => @_) }
-sub syst { shift->_send_simple('SYST') }
-sub type { shift->_send_simple(TYPE => @_) }
-sub stru { shift->_send_simple('STRU') }
-sub mode { shift->_send_simple('MODE') }
-sub rest { shift->_send_simple(REST => @_) }
-sub mkd  { shift->_send_simple(MKD => @_) }
-sub rmd  { shift->_send_simple(RMD => @_) }
-sub stat { shift->_send_simple(STAT => @_) }
-sub help { shift->_send_simple(HELP => @_) }
-sub dele { shift->_send_simple(DELE => @_) }
-sub rnfr { shift->_send_simple(RNFR => @_) }
-sub rnto { shift->_send_simple(RNTO => @_) }
+sub cwd  { shift->push_command([ CWD => @_  ] ) }
+sub cdup { shift->push_command([ 'CDUP'     ] ) }
+sub noop { shift->push_command([ 'NOOP'     ] ) }
+sub allo { shift->push_command([ ALLO => @_ ] ) }
+sub syst { shift->push_command([ 'SYST'     ] ) }
+sub type { shift->push_command([ TYPE => @_ ] ) }
+sub stru { shift->push_command([ 'STRU'     ] ) }
+sub mode { shift->push_command([ 'MODE'     ] ) }
+sub rest { shift->push_command([ REST => @_ ] ) }
+sub mkd  { shift->push_command([ MKD => @_  ] ) }
+sub rmd  { shift->push_command([ RMD => @_  ] ) }
+sub stat { shift->push_command([ STAT => @_ ] ) }
+sub help { shift->push_command([ HELP => @_ ] ) }
+sub dele { shift->push_command([ DELE => @_ ] ) }
+sub rnfr { shift->push_command([ RNFR => @_ ] ) }
+sub rnto { shift->push_command([ RNTO => @_ ] ) }
 
 sub pwd
 {
   my($self) = @_;
   my $cv = AnyEvent->condvar;
-  $self->_send('PWD')->cb(sub {
-    my $res = shift->recv;
+  $self->push_command(['PWD'])->cb(sub {
+    my $res = eval { shift->recv } // $@;
     my $dir = $res->get_dir;
     if($dir) { $cv->send($dir) } 
     else { $cv->croak($res) }
@@ -480,13 +391,13 @@ sub quit
   
   my $res;
   
-  $self->_send('QUIT')->cb(sub {
-    $res = shift->recv;
+  $self->push_command(['QUIT'])->cb(sub {
+    $res = eval { shift->recv } // $@;
   });
   
   my $save = $self->{event}->{close};
   $self->{event}->{close} = [ sub {
-    if(defined $res && $res->code == 221)
+    if(defined $res && $res->is_success)
     { $cv->send($res) }
     elsif(defined $res)
     { $cv->croak($res) }
@@ -497,47 +408,6 @@ sub quit
   } ];
   
   return $cv;
-}
-
-sub _send
-{
-  my($self, $cmd, $args) = @_;
-  
-  $self->_process if $self->{ready};
-  
-  my $cv = AnyEvent->condvar;
-  push @{ $self->{buffer} }, [ $cmd, $args, $cv ];
-  
-  $self->_process if $self->{ready};
-
-  return $cv;
-}
-
-sub _wait
-{
-  my($self) = @_;
-  $self->_send(undef, undef);
-}
-
-sub _process
-{
-  my($self) = @_;
-  if(@{ $self->{buffer} } > 0)
-  {
-    my($cmd, $args, $cv) = @{ shift @{ $self->{buffer} } };
-    $self->on_next_response(sub { $cv->send(shift) });
-    if(defined $cmd)
-    {
-      my $line = defined $args ? join(' ', $cmd, $args) : $cmd;
-      $self->emit('send', $cmd, $args);
-      $self->{handle}->push_write("$line\015\012");
-    }
-    $self->{ready} = 0;
-  }
-  else
-  {
-    $self->{ready} = 1;
-  }
 }
 
 1;

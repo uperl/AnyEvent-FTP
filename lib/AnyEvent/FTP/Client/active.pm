@@ -12,7 +12,7 @@ use AnyEvent::Socket qw( tcp_server );
 
 sub _fetch_active
 {
-  my($self, $cmd_pair, $destination) = @_;
+  my($self, $cmd_pair, $destination, @prefix) = @_;
   my $cv = AnyEvent->condvar;
   
   my $count = 0;
@@ -31,15 +31,12 @@ sub _fetch_active
     my($fh, $host, $port) = @_;
     my $args = join(',', split(/\./, $self->{my_ip}), $port >> 8, $port & 0xff);
 
-    $self->_send(PORT => $args)->cb(sub {
-      my $res = shift->recv;
-      if($res->is_success)
-      {
-        $self->_slurp_cmd($cmd_pair, $cv);
-      }
-      else
-      { $cv->croak($res) }
-    });
+    $self->push_command(
+      @prefix,
+      [ PORT => $args ],
+      $cmd_pair,
+      $cv,
+    );
   };
   
   $cv;
@@ -47,7 +44,7 @@ sub _fetch_active
 
 sub _store_active
 {
-  my($self, $cmd_pair, $destination) = @_;
+  my($self, $cmd_pair, $destination, @prefix) = @_;
   my $cv = AnyEvent->condvar;
   
   my $count = 0;
@@ -66,15 +63,12 @@ sub _store_active
     my($fh, $host, $port) = @_;
     my $args = join(',', split(/\./, $self->{my_ip}), $port >> 8, $port & 0xff);
 
-    $self->_send(PORT => $args)->cb(sub {
-      my $res = shift->recv;
-      if($res->is_success)
-      {
-        $self->_slurp_cmd($cmd_pair, $cv);
-      }
-      else
-      { $cv->croak($res) }
-    });
+    $self->push_command(
+      @prefix,
+      [ PORT => $args ],
+      $cmd_pair,
+      $cv,
+    );
   };
   
   $cv;

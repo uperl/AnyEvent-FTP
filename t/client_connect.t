@@ -29,11 +29,11 @@ do {
   is $res->code, 220, 'code = 220';
 };
 
-is eval { $client->_send(USER => $config->{user})->recv->code }, 331, 'code = 331';
+is eval { $client->push_command([USER => $config->{user}])->recv->code }, 331, 'code = 331';
 diag $@ if $@;
-is eval { $client->_send(PASS => $config->{pass})->recv->code }, 230, 'code = 230';
+is eval { $client->push_command([PASS => $config->{pass}])->recv->code }, 230, 'code = 230';
 diag $@ if $@;
-is eval { $client->_send('QUIT')                 ->recv->code }, 221, 'code = 221';
+is eval { $client->push_command(['QUIT'])                 ->recv->code }, 221, 'code = 221';
 diag $@ if $@;
 
 $done->recv;
@@ -42,21 +42,22 @@ $done = AnyEvent->condvar;
 is eval { $client->connect($config->{host}, $config->{port})->recv->code }, 220, 'code = 220';
 diag $@ if $@;
 
-my $cv = $client->_send('HELP');
+my $cv = $client->push_command(['HELP']);
 
-is eval { $client->_send(USER => 'bogus')->recv->code }, 331, 'code = 331';
+is eval { $client->push_command([USER => 'bogus'])->recv->code }, 331, 'code = 331';
 diag $@ if $@;
-is eval { $client->_send(PASS => 'bogus')->recv->code }, 530, 'code = 530';
-is eval { $client->_send('QUIT')                 ->recv->code }, 221, 'code = 221';
+eval { $client->push_command([PASS => 'bogus'])->recv };
+is $@->code, 530, 'code = 530';
+is eval { $client->push_command(['QUIT'])                 ->recv->code }, 221, 'code = 221';
 diag $@ if $@;
 
 is $cv->recv->code, 214, 'code = 214';
 $done->recv;
 $done = AnyEvent->condvar;
 
-my $cv1 = $client->_send(USER => $config->{user});
-my $cv2 = $client->_send(PASS => $config->{pass});
-my $cv3 = $client->_send('QUIT');
+my $cv1 = $client->push_command([USER => $config->{user}]);
+my $cv2 = $client->push_command([PASS => $config->{pass}]);
+my $cv3 = $client->push_command(['QUIT']);
 
 is eval { $client->connect($config->{host}, $config->{port})->recv->code }, 220, 'code = 220';
 diag $@ if $@;
