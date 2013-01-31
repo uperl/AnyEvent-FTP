@@ -13,11 +13,19 @@ sub new
   bless { client => $client }, $class;
 }
 
-# TODO: use AUTOLOAD for this
-sub proftpd
+sub AUTOLOAD
 {
-  require AnyEvent::FTP::Client::Site::Proftpd;
-  AnyEvent::FTP::Client::Site::Proftpd->new(shift->{client});
+  our $AUTOLOAD;
+  my $self = shift;
+  my $name = $AUTOLOAD;
+  $name =~ s/^.*://;
+  my $class = join('::', qw( AnyEvent FTP Client Site ), ucfirst($name) );
+  eval qq{ use $class () };
+  die $@ if $@;
+  $class->new($self->{client});
 }
+
+# don't autoload DESTROY
+sub DESTROY { }
 
 1;
