@@ -13,11 +13,6 @@ isa_ok $client, 'AnyEvent::FTP::Client';
 prep_client( $client );
 our $config;
 
-$client->on_each_response(sub {
-  #my $res = shift;
-  #diag sprintf "[ %d ] %s\n", $res->code, $_ for @{ $res->message };
-});
-
 $client->connect($config->{host}, $config->{port})->recv;
 $client->login($config->{user}, $config->{pass})->recv;
 

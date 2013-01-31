@@ -38,8 +38,7 @@ sub process_message_line
       delete $self->{response_buffer}->{$_} for qw( code message );
       my $once = delete $self->{response_buffer}->{once};
       $_->($response) 
-        for @{ $once },
-            @{ $self->{response_buffer}->{each} };
+        for @{ $self->{response_buffer}->{each} }, @{ $once };
     }
   }
   elsif(@{ $self->{response_buffer}->{message} } > 0)

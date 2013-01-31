@@ -58,7 +58,6 @@ sub pop_command
   return unless $self->{ready};
 
   my($cmd, $args, $cb) =  @{ shift @{ $self->{request_buffer}->[0]->{cmd} } };
-  $self->emit('send', $cmd, $args);
   my $line = defined $args ? join(' ', $cmd, $args) : $cmd;
   
   my $handler;
@@ -106,6 +105,7 @@ sub pop_command
   $self->on_next_response($handler);
   
   $self->{ready} = 0;
+  $self->emit('send', $cmd, $args);
   $self->{handle}->push_write("$line\015\012");
   
   $self;
