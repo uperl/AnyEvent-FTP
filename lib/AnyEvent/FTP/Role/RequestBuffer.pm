@@ -56,7 +56,7 @@ sub pop_command
   }
   
   return unless $self->{ready};
-  
+
   my($cmd, $args, $cb) =  @{ shift @{ $self->{request_buffer}->[0]->{cmd} } };
   $self->emit('send', $cmd, $args);
   my $line = defined $args ? join(' ', $cmd, $args) : $cmd;

@@ -30,9 +30,17 @@ sub new
   }, $class;
 
   if($self->{passive})
-  { require AnyEvent::FTP::Client::passive }
+  { 
+    require AnyEvent::FTP::Transfer::Passive;
+    $self->{store} = 'AnyEvent::FTP::Transfer::Passive::Store';
+    $self->{fetch} = 'AnyEvent::FTP::Transfer::Passive::Fetch';
+  }
   else
-  { require AnyEvent::FTP::Client::active }
+  {
+    require AnyEvent::FTP::Transfer::Active;
+    $self->{store} = 'AnyEvent::FTP::Transfer::Active::Store';
+    $self->{fetch} = 'AnyEvent::FTP::Transfer::Active::Fetch';
+  }
   
   $self->on_error(sub { warn shift });
   $self->on_close(sub {
@@ -241,9 +249,12 @@ sub _fetch
     };
   }
   
-  $self->{passive} 
-  ? $self->_fetch_passive($cmd_pair, $destination, @_)
-  : $self->_fetch_active($cmd_pair, $destination, @_);
+  $self->{fetch}->new(
+    command     => $cmd_pair,
+    destination => $destination,
+    prefix      => \@_,
+    client      => $self,
+  );
 }
 
 sub _store
@@ -276,71 +287,12 @@ sub _store
     die 'IMPLEMENT';
   }
   
-  $self->{passive}
-  ? $self->_store_passive($cmd_pair, $destination, @_)
-  : $self->_store_active($cmd_pair, $destination, @_);
-}
-
-sub _slurp_data
-{
-  my($self, $fh, $destination) = @_;
-
-  my $handle;
-  $handle = AnyEvent::Handle->new(
-    fh => $fh,
-    on_error => sub {
-      my($hdl, $fatal, $msg) = @_;
-      $_[0]->destroy;
-    },
-    on_eof => sub {
-      $handle->destroy;
-    },
+  $self->{store}->new(
+    command     => $cmd_pair,
+    destination => $destination,
+    prefix      => \@_,
+    client      => $self,
   );
-        
-  if(ref($destination) eq 'ARRAY')
-  {
-    $handle->on_read(sub {
-      $handle->push_read(@$destination);
-    });
-  }
-  else
-  {
-    $handle->on_read(sub {
-      $handle->push_read(sub {
-        $destination->($_[0]{rbuf});
-        $_[0]{rbuf} = '';
-      });
-    });
-  }
-}
-
-sub _spew_data
-{
-  my($self, $fh, $destination) = @_;
-  
-  my $handle;
-  $handle = AnyEvent::Handle->new(
-    fh => $fh,
-    on_error => sub {
-      my($hdl, $fatal, $msg) = @_;
-      $_[0]->destroy;
-    },
-    on_eof => sub {
-      $handle->destroy;
-    },
-  );
-  
-  $handle->on_drain(sub {
-    my $data = $destination->();
-    if(defined $data)
-    {
-      $handle->push_write($data);
-    }
-    else
-    {
-      $handle->push_shutdown;
-    }
-  });
 }
 
 sub rename
