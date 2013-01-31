@@ -1,9 +1,11 @@
 use strict;
 use warnings;
-use Test::More tests => 12;
+use Test::More tests => 14;
 
 use_ok 'AnyEvent::FTP';
 use_ok 'AnyEvent::FTP::Client';
+use_ok 'AnyEvent::FTP::Client::Site';
+use_ok 'AnyEvent::FTP::Client::Site::Proftpd';
 use_ok 'AnyEvent::FTP::Role::RequestBuffer';
 use_ok 'AnyEvent::FTP::Role::ResponseBuffer';
 use_ok 'AnyEvent::FTP::Role::Event';

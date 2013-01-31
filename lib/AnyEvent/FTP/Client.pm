@@ -17,7 +17,7 @@ with 'AnyEvent::FTP::Role::Event';
 with 'AnyEvent::FTP::Role::ResponseBuffer';
 with 'AnyEvent::FTP::Role::RequestBuffer';
 
-__PACKAGE__->define_events(qw( error close send ));
+__PACKAGE__->define_events(qw( error close send greeting ));
 
 sub new
 {
@@ -116,6 +116,7 @@ sub connect
     $self->on_next_response(sub {
       my $res = shift;
       return $cv->croak($res) unless $res->is_success;
+      $self->emit(greeting => $res);
       if(defined $uri)
       {
         my @start_commands = (
@@ -253,7 +254,7 @@ sub rename
   );
 }
 
-# FIXME: implement SITE CHMOD
+# FIXME: implement $client->site->proftpd->chgrp
 (eval sprintf('sub %s { shift->push_command([ %s => @_])};1', lc $_, $_)) // die $@ 
   for qw( CWD CDUP NOOP ALLO SYST TYPE STRU MODE REST MKD RMD STAT HELP DELE RNFR RNTO USER PASS ACCT );
 
@@ -294,6 +295,12 @@ sub quit
   } ];
   
   return $cv;
+}
+
+sub site
+{
+  require AnyEvent::FTP::Client::Site;
+  AnyEvent::FTP::Client::Site->new(shift);
 }
 
 1;
