@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 8;
+use Test::More tests => 12;
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
@@ -25,7 +25,10 @@ foreach my $passive (0,1)
 
   do {
     my $data = 'some data';
-    my $ret = eval { $client->stou(undef, \$data)->recv; };
+    my $xfer = eval { $client->stou(undef, \$data) };
+    diag $@ if $@;
+    isa_ok $xfer, 'AnyEvent::FTP::Transfer';
+    my $ret = eval { $xfer->recv; };
     diag $@ if $@;
     isa_ok $ret, 'AnyEvent::FTP::Response';
     
@@ -36,6 +39,7 @@ foreach my $passive (0,1)
     
     is scalar(@list), 1, 'exactly one file';
     my $fn = File::Spec->catfile($config->{dir}, $list[0]);
+    is $xfer->remote_name, $list[0], "remote_name = $list[0]";
 
     my $remote = do {
       open my $fh, '<', $fn;

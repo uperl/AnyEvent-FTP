@@ -15,8 +15,9 @@ sub new
   my($class) = shift;
   my $args   = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
   bless {
-    cv     => $args->{cv} // AnyEvent->condvar,
-    client => $args->{client},
+    cv          => $args->{cv} // AnyEvent->condvar,
+    client      => $args->{client},
+    remote_name => $args->{command}->[1],
   }, $class;
 }
 
@@ -40,5 +41,7 @@ sub handle
     },
   );
 }
+
+sub remote_name { shift->{remote_name} }
 
 1;

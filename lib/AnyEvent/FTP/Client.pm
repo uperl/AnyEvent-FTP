@@ -198,8 +198,14 @@ sub stor
 sub stou
 {
   my($self, $filename, $destination) = @_;
-  $self->{store}->new(
-    command     => [STOU => $filename],
+  my $xfer;
+  my $cb = sub {
+    my $name = shift->get_file;
+    $xfer->{remote_name} = $name if defined $name;
+    return;
+  };
+  $xfer = $self->{store}->new(
+    command     => [STOU => $filename, $cb],
     destination => $destination,
     client      => $self,
   );

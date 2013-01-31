@@ -25,16 +25,18 @@ sub get_address_and_port
 
 sub get_dir
 {
-  if(shift->{message}->[0] =~ /^"(.*)" is/)
+  if(shift->{message}->[0] =~ /^"(.*)"/)
   {
     my $dir = $1;
     $dir =~ s/""/"/;
     return $dir;
   }
-  else
-  {
-    return;
-  }
+  return;
+}
+
+sub get_file
+{
+  return shift->{message}->[0] =~ /^FILE: (.*)/i ? $1 : ();
 }
 
 sub as_string

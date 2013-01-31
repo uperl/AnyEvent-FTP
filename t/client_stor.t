@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 16;
+use Test::More tests => 20;
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
@@ -27,7 +27,10 @@ foreach my $passive (0,1)
 
   do {
     my $data = 'some data';
-    my $ret = eval { $client->stor('foo.txt', \$data)->recv; };
+    my $xfer = eval { $client->stor('foo.txt', \$data) };
+    diag $@ if $@;
+    isa_ok $xfer, 'AnyEvent::FTP::Transfer';
+    my $ret = eval { $xfer->recv; };
     diag $@ if $@;
     isa_ok $ret, 'AnyEvent::FTP::Response';
     ok -e $fn, 'remote file created';
@@ -37,6 +40,7 @@ foreach my $passive (0,1)
       <$fh>;
     };
     is $remote, $data, 'remote matches';
+    is $xfer->remote_name, 'foo.txt', 'remote_name = foo.txt';
   };
   
   unlink $fn;
