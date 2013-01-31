@@ -52,6 +52,10 @@ L<RFC 5797 FTP Command and Extension Registry|http://tools.ietf.org/html/rfc5797
 
 L<http://cr.yp.to/ftp.html>
 
+=item *
+
+L<http://en.wikipedia.org/wiki/List_of_FTP_server_return_codes>
+
 =back
 
 =head1 AUTHOR
