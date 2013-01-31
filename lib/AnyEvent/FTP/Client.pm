@@ -403,7 +403,6 @@ sub _slurp_cmd
   });
 }
 
-# FIXME: implement rename (RNFR, RNTO)
 sub rename
 {
   my($self, $from, $to) = @_;
