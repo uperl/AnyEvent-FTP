@@ -9,8 +9,6 @@ use AnyEvent::Socket qw( tcp_server );
 # ABSTRACT: Active transfer class for asynchronous ftp client
 # VERSION
 
-# my($self, $cmd_pair, $destination, @prefix) = @_;
-
 # args:
 #  - command
 #  - destination

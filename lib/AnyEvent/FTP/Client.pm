@@ -102,7 +102,6 @@ sub connect
     $self->{handle} = AnyEvent::Handle->new(
       fh       => $fh,
       on_error => sub {
-        # FIXME handle errors
         my ($hdl, $fatal, $msg) = @_;
         $_[0]->destroy;
         $self->emit('error', $msg);
@@ -141,7 +140,6 @@ sub connect
       });
     });
     
-  # FIXME parameterize timeout
   }, sub { 
     $self->{timeout}
   };
@@ -149,7 +147,6 @@ sub connect
   return $cv;
 }
 
-# TODO: implement ACCT
 sub login
 {
   my($self, $user, $pass) = @_;
@@ -191,10 +188,6 @@ sub stor
   );
 }
 
-# TODO: the server gives the name in the 1xx response
-# immediately after sending STOU (not the 2xx response
-# when it is done), so at the moment we are loosing
-# the filename.  parse it out so we get it.
 sub stou
 {
   my($self, $filename, $destination) = @_;
@@ -261,7 +254,8 @@ sub rename
 }
 
 # FIXME: implement SITE CHMOD
-(eval sprintf('sub %s { shift->push_command([ %s => @_])};1', lc $_, $_)) // die $@ for qw( CWD CDUP NOOP ALLO SYST TYPE STRU MODE REST MKD RMD STAT HELP DELE RNFR RNTO );
+(eval sprintf('sub %s { shift->push_command([ %s => @_])};1', lc $_, $_)) // die $@ 
+  for qw( CWD CDUP NOOP ALLO SYST TYPE STRU MODE REST MKD RMD STAT HELP DELE RNFR RNTO USER PASS ACCT );
 
 sub pwd
 {
