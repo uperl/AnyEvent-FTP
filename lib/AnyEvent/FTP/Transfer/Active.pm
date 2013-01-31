@@ -21,6 +21,8 @@ sub new
   my $args   = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
   my $self = $class->SUPER::new($args);
   
+  my $destination = $self->convert_destination($args->{destination});
+  
   my $count = 0;
   my $guard;
   $guard = tcp_server $self->{client}->{my_ip}, undef, sub {
@@ -31,7 +33,7 @@ sub new
     
     undef $guard; # close to additional connections.
 
-    $self->xfer($fh,$args->{destination});
+    $self->xfer($fh,$destination);
   }, sub {
   
     my($fh, $host, $port) = @_;

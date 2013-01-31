@@ -19,6 +19,8 @@ sub new
   my $args   = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
   my $self = $class->SUPER::new($args);
   
+  my $destination = $self->convert_destination($args->{destination});
+  
   my $data_connection = sub {
     my $res = shift;
     return if $res->is_preliminary;
@@ -32,7 +34,7 @@ sub new
           return "unable to connect to data port: $!";
         }
         
-        $self->xfer($fh,$args->{destination});
+        $self->xfer($fh,$destination);
       };
       return;
     }

@@ -234,21 +234,6 @@ sub _fetch
   my $cmd_pair = shift;
   my $destination = shift;
   
-  if(ref($destination) eq 'SCALAR')
-  {
-    my $buffer = $destination;
-    $destination = sub {
-      $$buffer .= shift;
-    };
-  }
-  elsif(ref($destination) eq 'GLOB')
-  {
-    my $fh = $destination;
-    $destination = sub {
-      print $fh shift;
-    };
-  }
-  
   $self->{fetch}->new(
     command     => $cmd_pair,
     destination => $destination,
@@ -262,30 +247,6 @@ sub _store
   my $self = shift;
   my $cmd_pair = shift;
   my $destination = shift;
-  
-  if(ref($destination) eq '')
-  {
-    my $buffer = $destination;
-    $destination = sub {
-      my $tmp = $buffer;
-      undef $buffer;
-      $tmp;
-    };
-  }
-  elsif(ref($destination) eq 'SCALAR')
-  {
-    my $buffer = $$destination;
-    $destination = sub {
-      my $tmp = $buffer;
-      undef $buffer;
-      $tmp;
-    };
-  }
-  else
-  {
-    # FIXME implement GLOB and CODE
-    die 'IMPLEMENT';
-  }
   
   $self->{store}->new(
     command     => $cmd_pair,

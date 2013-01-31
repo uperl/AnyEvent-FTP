@@ -37,4 +37,32 @@ sub xfer
   });
 }
 
+sub convert_destination
+{
+  my($self, $destination) = @_;
+  
+  if(ref($destination) eq '')
+  {
+    return sub {
+      my $tmp = $destination;
+      undef $destination;
+      $tmp;
+    };
+  }
+  elsif(ref($destination) eq 'SCALAR')
+  {
+    my $buffer = $$destination;
+    return sub {
+      my $tmp = $buffer;
+      undef $buffer;
+      $tmp;
+    };
+  }
+  else
+  {
+    # FIXME implement GLOB and CODE
+    die 'IMPLEMENT';
+  }
+}
+
 1;

@@ -41,4 +41,26 @@ sub xfer
   }
 }
 
+sub convert_destination
+{
+  my($self, $destination) = @_;
+  
+  if(ref($destination) eq 'SCALAR')
+  {
+    return sub {
+      $$destination .= shift;
+    };
+  }
+  elsif(ref($destination) eq 'GLOB')
+  {
+    return sub {
+      print $destination shift;
+    };
+  }
+  else
+  {
+    return $destination;
+  }
+}
+
 1;
