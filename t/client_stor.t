@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 20;
+use Test::More tests => 36;
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
@@ -63,5 +63,59 @@ foreach my $passive (0,1)
   unlink $fn;
   ok !-e $fn, 'remote file deleted';
 
+  do {
+    my $data = 'some data';
+    my $cb = do {
+      my $buffer = $data;
+      sub {
+        my $tmp = $buffer;
+        undef $buffer;
+        $tmp;
+      };
+    };
+    my $ret = eval { $client->stor('foo.txt', $cb)->recv; };
+    diag $@ if $@;
+    isa_ok $ret, 'AnyEvent::FTP::Response';
+    ok -e $fn, 'remote file created';
+    my $remote = do {
+      open my $fh, '<', $fn;
+      local $/;
+      <$fh>;
+    };
+    is $remote, $data, 'remote matches';
+  };
+  
+  unlink $fn;
+  ok !-e $fn, 'remote file deleted';
+
+  do {
+    my $data = 'some data';
+    my $glob = do {
+      my $dir = tempdir( CLEANUP => 1);
+      my $fn = File::Spec->catfile($dir, 'flub.txt');
+      open my $out, '>', $fn;
+      binmode $out;
+      print $out $data;
+      close $out;
+      open my $in, '<', $fn;
+      binmode $in;
+      $in;
+    };
+    my $ret = eval { $client->stor('foo.txt', $glob)->recv; };
+    diag $@ if $@;
+    isa_ok $ret, 'AnyEvent::FTP::Response';
+    ok -e $fn, 'remote file created';
+    my $remote = do {
+      open my $fh, '<', $fn;
+      local $/;
+      <$fh>;
+    };
+    is $remote, $data, 'remote matches';
+  };
+  
+  unlink $fn;
+  ok !-e $fn, 'remote file deleted';
+
   $client->quit->recv;
 }
+

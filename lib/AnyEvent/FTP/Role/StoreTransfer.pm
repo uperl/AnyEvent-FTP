@@ -31,6 +31,8 @@ sub convert_destination
 {
   my($self, $destination) = @_;
   
+  return $destination if ref($destination) eq 'CODE';
+  
   if(ref($destination) eq '')
   {
     return sub {
@@ -48,10 +50,18 @@ sub convert_destination
       $tmp;
     };
   }
+  elsif(ref($destination) eq 'GLOB')
+  {
+    sub {
+      # TODO: for big files, maybe
+      # break this up into batches
+      local $/;
+      <$destination>;
+    };
+  }
   else
   {
-    # FIXME implement GLOB and CODE
-    die 'IMPLEMENT';
+    die 'bad destination type';
   }
 }
 

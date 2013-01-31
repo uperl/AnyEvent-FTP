@@ -254,7 +254,6 @@ sub rename
   );
 }
 
-# FIXME: implement $client->site->proftpd->chgrp
 (eval sprintf('sub %s { shift->push_command([ %s => @_])};1', lc $_, $_)) // die $@ 
   for qw( CWD CDUP NOOP ALLO SYST TYPE STRU MODE REST MKD RMD STAT HELP DELE RNFR RNTO USER PASS ACCT );
 
