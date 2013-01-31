@@ -12,33 +12,14 @@ sub xfer
 {
   my($self, $fh, $destination) = @_;
   
-  my $handle;
-  $handle = AnyEvent::Handle->new(
-    fh => $fh,
-    on_error => sub {
-      my($hdl, $fatal, $msg) = @_;
-      $_[0]->destroy;
-    },
-    on_eof => sub {
-      $handle->destroy;
-    },
-  );
-        
-  if(ref($destination) eq 'ARRAY')
-  {
-    $handle->on_read(sub {
-      $handle->push_read(@$destination);
+  my $handle = $self->handle($fh);
+  
+  $handle->on_read(sub {
+    $handle->push_read(sub {
+      $destination->($_[0]{rbuf});
+      $_[0]{rbuf} = '';
     });
-  }
-  else
-  {
-    $handle->on_read(sub {
-      $handle->push_read(sub {
-        $destination->($_[0]{rbuf});
-        $_[0]{rbuf} = '';
-      });
-    });
-  }
+  });
 }
 
 sub convert_destination

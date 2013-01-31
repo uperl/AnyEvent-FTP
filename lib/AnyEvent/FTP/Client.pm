@@ -34,12 +34,14 @@ sub new
     require AnyEvent::FTP::Transfer::Passive;
     $self->{store} = 'AnyEvent::FTP::Transfer::Passive::Store';
     $self->{fetch} = 'AnyEvent::FTP::Transfer::Passive::Fetch';
+    $self->{list}  = 'AnyEvent::FTP::Transfer::Passive::List';
   }
   else
   {
     require AnyEvent::FTP::Transfer::Active;
     $self->{store} = 'AnyEvent::FTP::Transfer::Active::Store';
     $self->{fetch} = 'AnyEvent::FTP::Transfer::Active::Fetch';
+    $self->{list}  = 'AnyEvent::FTP::Transfer::Active::List';
   }
   
   $self->on_error(sub { warn shift });
@@ -160,18 +162,23 @@ sub login
 sub retr
 {
   my($self, $filename, $destination) = @_;
-  $self->_fetch([RETR => $filename], $destination);
+  $self->{fetch}->new({
+    command     => [ RETR => $filename ],
+    destination => $destination,
+    client      => $self,
+  });
 }
 
 sub resume_retr
 {
   my($self, $filename, $destination) = @_;
   croak "resume_retr only works with a SCALAR ref destination" unless ref($destination) eq 'SCALAR';
-  $self->_fetch(
-    [RETR => $filename], 
-    $destination, 
-    [REST => do { use bytes; length $$destination }],
-  );
+  $self->{fetch}->new({
+    command     => [ RETR => $filename ],
+    destination => $destination,
+    prefix      => [[REST => do { use bytes; length $$destination }]],
+    client      => $self,
+  });
 }
 
 sub stor
@@ -213,33 +220,17 @@ sub _list
 {
   my($self, $verb, $location) = @_;
   my @lines;
-  my $cb = sub {
-    my($handle, $line) = @_;
-    $line =~ s/\015?\012//g;
-    push @lines, $line;
-  };
   my $cv = AnyEvent->condvar;
-  my $inner_cv = $self->_fetch([$verb => $location], [line => $cb]);
-  $inner_cv->cb(sub {
+  $self->{list}->new(
+    command     => [ $verb => $location ],
+    destination => \@lines,
+    client      => $self,
+  )->cb(sub {
     my $res = eval { shift->recv };
     $cv->croak($@) if $@;
     $cv->send(\@lines);
   });
   $cv;
-}
-
-sub _fetch
-{
-  my $self = shift;
-  my $cmd_pair = shift;
-  my $destination = shift;
-  
-  $self->{fetch}->new(
-    command     => $cmd_pair,
-    destination => $destination,
-    prefix      => \@_,
-    client      => $self,
-  );
 }
 
 sub _store

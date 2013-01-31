@@ -68,4 +68,11 @@ use Role::Tiny::With;
 
 with 'AnyEvent::FTP::Role::StoreTransfer';
 
+package AnyEvent::FTP::Transfer::Passive::List;
+
+use base qw( AnyEvent::FTP::Transfer::Passive );
+use Role::Tiny::With;
+
+with 'AnyEvent::FTP::Role::ListTransfer';
+
 1;

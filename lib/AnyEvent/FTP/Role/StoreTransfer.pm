@@ -12,17 +12,7 @@ sub xfer
 {
   my($self, $fh, $destination) = @_;
   
-  my $handle;
-  $handle = AnyEvent::Handle->new(
-    fh => $fh,
-    on_error => sub {
-      my($hdl, $fatal, $msg) = @_;
-      $_[0]->destroy;
-    },
-    on_eof => sub {
-      $handle->destroy;
-    },
-  );
+  my $handle = $self->handle($fh);
   
   $handle->on_drain(sub {
     my $data = $destination->();
