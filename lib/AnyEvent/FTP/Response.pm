@@ -13,14 +13,8 @@ sub message { shift->{message} }
 
 sub get_address_and_port
 {
-  if(shift->{message}->[0] =~ /\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)/)
-  {
-    return ("$1.$2.$3.$4", $5*256+$6);
-  }
-  else
-  {
-    return;
-  }
+  return ("$1.$2.$3.$4", $5*256+$6) if shift->{message}->[0] =~ /\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)/;
+  return;
 }
 
 sub get_dir
@@ -42,7 +36,6 @@ sub get_file
 sub as_string
 {
   my($self) = @_;
-  
   sprintf "[%d] %s%s", $self->{code}, $self->{message}->[0], @{ $self->{message} } > 1 ? '...' : '';
 }
 
