@@ -157,8 +157,6 @@ sub connect
   return $cv;
 }
 
-# FIXME: implement rename (RNFR, RNTO)
-
 # TODO: implement ACCT
 sub login
 {
@@ -405,6 +403,31 @@ sub _slurp_cmd
   });
 }
 
+# FIXME: implement rename (RNFR, RNTO)
+sub rename
+{
+  my($self, $from, $to) = @_;
+  my $cv = AnyEvent->condvar;
+  
+  $self->_send(RNFR => $from)->cb(sub {
+    my $res = shift->recv;
+    if($res->is_success)
+    {
+      $self->_send(RNTO => $to)->cb(sub {
+        my $res = shift->recv;
+        if($res->is_success)
+        { $cv->send($res) }
+        else
+        { $cv->croak($res) }
+      });
+    }
+    else
+    { $cv->croak($res) }
+  });
+  
+  $cv;
+}
+
 sub _send_simple
 {
   my $self = shift;
@@ -435,6 +458,8 @@ sub rmd  { shift->_send_simple(RMD => @_) }
 sub stat { shift->_send_simple(STAT => @_) }
 sub help { shift->_send_simple(HELP => @_) }
 sub dele { shift->_send_simple(DELE => @_) }
+sub rnfr { shift->_send_simple(RNFR => @_) }
+sub rnto { shift->_send_simple(RNTO => @_) }
 
 sub pwd
 {
