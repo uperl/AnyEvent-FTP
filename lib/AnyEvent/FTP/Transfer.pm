@@ -8,6 +8,8 @@ use AnyEvent;
 # ABSTRACT: Transfer class for asynchronous ftp client
 # VERSION
 
+# FIXME: implement ABOR
+
 sub new
 {
   my($class) = shift;

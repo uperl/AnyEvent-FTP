@@ -255,23 +255,7 @@ sub rename
 }
 
 # FIXME: implement SITE CHMOD
-# FIXME: implement ABOR
-sub cwd  { shift->push_command([ CWD => @_  ] ) }
-sub cdup { shift->push_command([ 'CDUP'     ] ) }
-sub noop { shift->push_command([ 'NOOP'     ] ) }
-sub allo { shift->push_command([ ALLO => @_ ] ) }
-sub syst { shift->push_command([ 'SYST'     ] ) }
-sub type { shift->push_command([ TYPE => @_ ] ) }
-sub stru { shift->push_command([ 'STRU'     ] ) }
-sub mode { shift->push_command([ 'MODE'     ] ) }
-sub rest { shift->push_command([ REST => @_ ] ) }
-sub mkd  { shift->push_command([ MKD => @_  ] ) }
-sub rmd  { shift->push_command([ RMD => @_  ] ) }
-sub stat { shift->push_command([ STAT => @_ ] ) }
-sub help { shift->push_command([ HELP => @_ ] ) }
-sub dele { shift->push_command([ DELE => @_ ] ) }
-sub rnfr { shift->push_command([ RNFR => @_ ] ) }
-sub rnto { shift->push_command([ RNTO => @_ ] ) }
+(eval sprintf('sub %s { shift->push_command([ %s => @_])};1', lc $_, $_)) // die $@ for qw( CWD CDUP NOOP ALLO SYST TYPE STRU MODE REST MKD RMD STAT HELP DELE RNFR RNTO );
 
 sub pwd
 {
