@@ -39,6 +39,10 @@ sub handle
     on_eof => sub {
       $handle->destroy;
     },
+    # this avoids deep recursion exception error (usually
+    # a warning) in example fput.pl when the buffer is 
+    # small (1024 on my debian VM)
+    autocork  => 1,
   );
 }
 

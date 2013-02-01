@@ -14,10 +14,12 @@ use Path::Class qw( file );
 
 my $debug = 0;
 my $progress = 0;
+my $active = 0;
 
 GetOptions(
   'd' => \$debug,
   'p' => \$progress,
+  'a' => \$active,
 );
 
 my $local = shift;
@@ -30,6 +32,7 @@ unless(defined $local && defined $remote)
   say STDERR "  and remote is a URL for a FTP server";
   say STDERR "  -d (optional) prints FTP commands and responses";
   say STDERR "  -p (optional) displays a progress bar as the file uploads";
+  say STDERR "  -a (optional) use an active transfer instead of passive";
   exit 2;
 }
 
@@ -57,7 +60,7 @@ do {
   say "DST: ", $to;
 };
 
-my $ftp = AnyEvent::FTP::Client->new;
+my $ftp = AnyEvent::FTP::Client->new( passive => $active ? 0 : 1 );
 
 $ftp->on_send(sub {
   my($cmd, $arguments) = @_;
@@ -96,7 +99,7 @@ $pb = Term::ProgressBar->new({ count => -s $fh })
 
 $ftp->stor($local->basename, sub {
   $pb->update(tell $fh) if $pb;
-  my $ret = read $fh, $buffer, 1024*512;
+  my $ret = read $fh, $buffer, 1024 * 512;
   return unless $ret;
   $buffer;
 })->recv;
