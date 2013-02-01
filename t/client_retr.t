@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 26;
+use Test::More tests => 32;
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
@@ -30,6 +30,21 @@ foreach my $passive (0,1)
   $client->login($config->{user}, $config->{pass})->recv;
   $client->type('I')->recv;
   $client->cwd($config->{dir})->recv;
+
+  do {
+    my $dest_fn = File::Spec->catdir(tempdir( CLEANUP => 1 ), 'foo.txt');
+
+    my $ret = eval { $client->retr('foo.txt', $dest_fn)->recv; };
+    diag $@ if $@;
+    isa_ok $ret, 'AnyEvent::FTP::Response';
+    my @data = split /\015?\012/, do {
+      open my $fh, '<', $dest_fn;
+      local $/;
+      <$fh>;
+    };
+    is $data[0], 'line 1';
+    is $data[1], 'line 2';
+  };
 
   do {
     my $data = '';

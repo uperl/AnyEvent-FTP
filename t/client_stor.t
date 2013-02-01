@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 40;
+use Test::More tests => 46;
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
@@ -24,6 +24,28 @@ foreach my $passive (0,1)
   $client->cwd($config->{dir})->recv;
 
   my $fn = File::Spec->catfile($config->{dir}, 'foo.txt');
+
+  do {
+    my $data = 'some data';
+    my $src_fn = do {
+      my $fn = File::Spec->catfile(tempdir(CLEANUP => 1), 'foo.txt');
+      open my $fh, '>', $fn;
+      print $fh $data;
+      close $fh;
+      $fn;
+    };
+
+    my $ret = eval { $client->stor('foo.txt', $src_fn)->recv; };
+    diag $@ if $@;
+    isa_ok $ret, 'AnyEvent::FTP::Response';
+    ok -e $fn, 'remote file created';
+    my $remote = do {
+      open my $fh, '<', $fn;
+      local $/;
+      <$fh>;
+    };
+    is $remote, $data, 'remote matches';
+  };
 
   do {
     my $data = 'some data';

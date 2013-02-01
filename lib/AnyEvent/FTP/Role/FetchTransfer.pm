@@ -28,6 +28,9 @@ sub convert_destination
 {
   my($self, $destination) = @_;
   
+  return unless defined $destination;
+  return $destination if ref($destination) eq 'CODE';
+  
   if(ref($destination) eq 'SCALAR')
   {
     return sub {
@@ -40,9 +43,19 @@ sub convert_destination
       print $destination shift;
     };
   }
+  elsif(ref($destination) eq '')
+  {
+    open my $fh, '>', $destination;
+    # better would be to have an on_close event
+    # and close $fh there
+    $fh->autoflush(1);
+    return sub {
+      print $fh shift;
+    };
+  }
   else
   {
-    return $destination;
+    die 'unimplemented: ' . ref $destination;
   }
 }
 

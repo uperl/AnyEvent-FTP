@@ -38,10 +38,10 @@ sub convert_destination
   
   if(ref($destination) eq '')
   {
+    open my $fh, '<', $destination;
     return sub {
-      my $tmp = $destination;
-      undef $destination;
-      $tmp;
+      local $/;
+      <$fh>;
     };
   }
   elsif(ref($destination) eq 'SCALAR')
