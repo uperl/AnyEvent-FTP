@@ -4,11 +4,17 @@ use strict;
 use warnings;
 use v5.10;
 use AnyEvent;
+use AnyEvent::Handle;
+use Role::Tiny::With;
 
 # ABSTRACT: Transfer class for asynchronous ftp client
 # VERSION
 
 # FIXME: implement ABOR
+
+with 'AnyEvent::FTP::Role::Event';
+
+__PACKAGE__->define_events(qw( open ));
 
 sub new
 {
@@ -44,6 +50,10 @@ sub handle
     # small (1024 on my debian VM)
     autocork  => 1,
   );
+  
+  $self->emit(open => $handle);
+  
+  $handle;
 }
 
 sub remote_name { shift->{remote_name} }

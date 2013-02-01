@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 18;
+use Test::More tests => 26;
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
@@ -31,6 +31,27 @@ foreach my $passive (0,1)
   $client->type('I')->recv;
   $client->cwd($config->{dir})->recv;
 
+  do {
+    my $data = '';
+    my $xfer = eval { $client->retr('foo.txt') };
+    isa_ok $xfer, 'AnyEvent::FTP::Transfer';
+    $xfer->on_open(sub {
+      my $handle = shift;
+      $handle->on_read(sub {
+        $handle->push_read(sub {
+          $data .= $_[0]{rbuf};
+          $_[0]{rbuf} = '';
+        });
+      });
+    });
+    
+    my $ret = eval { $xfer->recv };
+    isa_ok $ret, 'AnyEvent::FTP::Response';
+    my @data = split /\015?\012/, $data;
+    is $data[0], 'line 1';
+    is $data[1], 'line 2';
+  };
+  
   do {
     my $data = '';
     my $ret = eval { $client->retr('foo.txt', sub { $data .= shift })->recv; };

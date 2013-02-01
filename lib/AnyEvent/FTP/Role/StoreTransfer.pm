@@ -14,6 +14,8 @@ sub xfer
   
   my $handle = $self->handle($fh);
   
+  return unless defined $destination;
+  
   $handle->on_drain(sub {
     my $data = $destination->();
     if(defined $data)
@@ -31,6 +33,7 @@ sub convert_destination
 {
   my($self, $destination) = @_;
   
+  return unless defined $destination;
   return $destination if ref($destination) eq 'CODE';
   
   if(ref($destination) eq '')

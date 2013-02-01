@@ -13,6 +13,8 @@ sub xfer
   my($self, $fh, $destination) = @_;
   
   my $handle = $self->handle($fh);
+
+  return unless defined $destination;
   
   $handle->on_read(sub {
     $handle->push_read(sub {
