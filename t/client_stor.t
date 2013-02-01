@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 46;
+use Test::More tests => 48;
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
@@ -53,6 +53,7 @@ foreach my $passive (0,1)
     isa_ok $xfer, 'AnyEvent::FTP::Transfer';
 
     my $called_open = 0;
+    my $called_close = 0;
 
     $xfer->on_open(sub {
       $called_open = 1;
@@ -63,6 +64,10 @@ foreach my $passive (0,1)
           $handle->push_shutdown;
         });
       });
+    });
+    
+    $xfer->on_close(sub {
+      $called_close = 1;
     });
     
     my $res = eval { $xfer->recv };
@@ -77,6 +82,7 @@ foreach my $passive (0,1)
     is $remote, $data, 'remote matches';
     
     is $called_open, 1, 'open emit';
+    is $called_close, 1, 'close emit';
   };
 
   unlink $fn;

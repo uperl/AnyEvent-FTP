@@ -14,7 +14,7 @@ use Role::Tiny::With;
 
 with 'AnyEvent::FTP::Role::Event';
 
-__PACKAGE__->define_events(qw( open ));
+__PACKAGE__->define_events(qw( open close ));
 
 sub new
 {

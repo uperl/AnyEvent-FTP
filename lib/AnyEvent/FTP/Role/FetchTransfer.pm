@@ -46,9 +46,7 @@ sub convert_destination
   elsif(ref($destination) eq '')
   {
     open my $fh, '>', $destination;
-    # better would be to have an on_close event
-    # and close $fh there
-    $fh->autoflush(1);
+    $self->on_close(sub { close $fh });
     return sub {
       print $fh shift;
     };

@@ -39,6 +39,7 @@ sub convert_destination
   if(ref($destination) eq '')
   {
     open my $fh, '<', $destination;
+    $self->on_close(sub { close $fh });
     return sub {
       local $/;
       <$fh>;

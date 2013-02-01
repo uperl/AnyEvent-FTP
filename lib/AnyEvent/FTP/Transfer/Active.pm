@@ -45,6 +45,10 @@ sub new
     );
   };
   
+  $self->{cv}->cb(sub {
+    $self->emit('close');
+  });
+  
   $self;
 }
 

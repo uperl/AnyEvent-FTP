@@ -50,6 +50,10 @@ sub new
     $args->{command},
     $self->{cv},
   );
+
+  $self->{cv}->cb(sub {
+    $self->emit('close');
+  });
   
   $self;
 }
