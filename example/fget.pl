@@ -21,22 +21,20 @@ GetOptions(
   'p' => \$progress,
   'a' => \$active,
 );
-
-my $local = shift;
+    
 my $remote = shift;
 
-unless(defined $local && defined $remote)
+unless(defined $remote)
 {
-  say STDERR "usage: perl fput.pl [ -d | -p ] [ -a ] local remote";
-  say STDERR "  where local is a local file";
-  say STDERR "  and remote is a URL for a FTP server";
+  say STDERR "usage: perl fget.pl [ -d | -p ] [ -a ] remote";
+  say STDERR "  where remote is a URL for a file on an FTP server";
+  say STDERR "  and local is a local filename (optional) where to transfer it to";
   say STDERR "  -d (optional) prints FTP commands and responses";
   say STDERR "  -p (optional) displays a progress bar as the file uploads";
-  say STDERR "  -a (optional) use an active transfer instead of passive";
+  say STDERR "  -a (optional) use active mode transfer";
   exit 2;
 }
 
-$local  = file($local);
 $remote = URI->new($remote);
 
 unless($remote->scheme eq 'ftp')
@@ -52,13 +50,19 @@ unless(defined $remote->password)
 }
 
 do {
-  my $from = URI::file->new_abs($local);
-  my $to = $remote->clone;
-  $to->password(undef);
+  my $from = $remote->clone;
+  $from->password(undef);
   
   say "SRC: ", $from;
-  say "DST: ", $to;
 };
+
+my @path = split /\//, $remote->path;
+my $fn = pop @path;
+if(-e $fn)
+{
+  say STDERR "local file already exists";
+  exit 2;
+}
 
 my $ftp = AnyEvent::FTP::Client->new( passive => $active ? 0 : 1 );
 
@@ -78,47 +82,57 @@ $ftp->on_each_response(sub {
   }
 });
 
-
 $ftp->connect($remote->host, $remote->port)->recv;
 $ftp->login($remote->user, $remote->password)->recv;
 $ftp->type('I')->recv;
 
-if(defined $remote->path)
+$ftp->cwd(join '/', '', @path)->recv;
+
+my $remote_size;
+
+if($progress)
 {
-  $ftp->cwd($remote->path)->recv;
+  my $listing = $ftp->list($fn)->recv;
+  foreach my $class (qw( File::Listing File::Listing::Ftpcopy ))
+  {
+    my $parsed_listing = eval qq{ use $class; ${class}::parse_dir(\$listing->[0]) };
+    next if $@;
+    my ($name, $type, $size, $mtime, $mode) = @{ $parsed_listing->[0] };
+    $remote_size = $size;
+    last;
+  }
+  
+  if(defined $remote_size)
+  {
+  }
+  else
+  {
+    say STDERR "could not determine size of remote file, cannot provide progress bar";
+    $progress = 0;
+  }
 }
 
-open my $fh, '<', $local;
-binmode $fh;
+open my $fh, '>', $fn;
 
-my $buffer;
-my $count;
-
+my $xfer = $ftp->retr($fn);
 my $pb;
-
-my $xfer = $ftp->stor($local->basename);
+my $count = 0;
 
 $xfer->on_open(sub {
-  my $whandle = shift;
-  $pb = Term::ProgressBar->new({ count => -s $fh })
+  my $handle = shift;
+  $pb = Term::ProgressBar->new({ count => $remote_size })
     if $progress;
-  $whandle->on_drain(sub {
-    $pb->update($count) if $pb;
-    my $ret = read $fh, $buffer, 1024 * 512;
-    $count += $ret;
-    if($ret > 0)
-    {
-      $whandle->push_write($buffer);
-    }
-    else
-    {
-      $pb->update($count) if $pb;
-      $whandle->push_shutdown;
-      close $fh;
-    }
+  $handle->on_read(sub {
+    $handle->push_read(sub {
+      print $fh $_[0]{rbuf};
+      $pb->update($count += length($_[0]{rbuf})) if $pb;
+      $_[0]{rbuf} = '';
+    });
   });
 });
 
 $xfer->recv;
+
+close $fh;
 
 $ftp->quit->recv;
