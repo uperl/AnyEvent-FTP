@@ -1,14 +1,15 @@
 use strict;
 use warnings;
+use v5.10;
 use YAML::XS qw( LoadFile );
 use File::HomeDir;
+use FindBin ();
+use Path::Class ();
 
 our $config;
-do {
-  my $save_dir = $config->{dir};
-  $config = LoadFile(File::HomeDir->my_home . '/ftptest.yml');
-  $config->{dir} = $save_dir if defined $save_dir;
-};
+$config = LoadFile(File::HomeDir->my_home . '/ftptest.yml');
+$config->{dir} //= "$FindBin::Bin/..";
+$config->{dir} = Path::Class::Dir->new($config->{dir})->resolve;
 
 our $anyevent_test_timeout = AnyEvent->timer( after => 5, cb => sub { say STDERR "TIMEOUT"; exit } );
 
