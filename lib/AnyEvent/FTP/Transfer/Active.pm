@@ -46,7 +46,8 @@ sub new
   };
   
   $self->{cv}->cb(sub {
-    $self->emit('close');
+    my $res = eval { shift->recv } // $@;
+    $self->emit('close' => $res);
   });
   
   $self;
