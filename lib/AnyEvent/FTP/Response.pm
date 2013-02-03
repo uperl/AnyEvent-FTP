@@ -8,6 +8,12 @@ use overload '""' => sub { shift->as_string };
 # ABSTRACT: Response class for asynchronous ftp client
 # VERSION
 
+sub new
+{
+  my($class, $code, $message) = @_;
+  bless { code => $code, message => $message }, 'AnyEvent::FTP::Response';
+}
+
 sub code    { shift->{code}    }
 sub message { shift->{message} }
 

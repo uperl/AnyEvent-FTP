@@ -31,10 +31,10 @@ sub process_message_line
     push @{ $self->{response_buffer}->{message} }, $line;
     if($2 eq ' ')
     {
-      my $response = bless {
-        code    => $self->{response_buffer}->{code},
-        message => $self->{response_buffer}->{message},
-      }, 'AnyEvent::FTP::Response';
+      my $response = AnyEvent::FTP::Response->new(
+        $self->{response_buffer}->{code},
+        $self->{response_buffer}->{message},
+      );
       delete $self->{response_buffer}->{$_} for qw( code message );
       my $once = delete $self->{response_buffer}->{once};
       $_->($response) 
