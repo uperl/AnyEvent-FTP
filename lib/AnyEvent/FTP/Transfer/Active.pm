@@ -12,11 +12,12 @@ use AnyEvent::Socket qw( tcp_server );
 # args:
 #  - command
 #  - destination
-#  - prefix
+#  - restart
 sub new
 {
   my($class) = shift;
   my $args   = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
+  $args->{restart} //= 0;
   my $self = $class->SUPER::new($args);
   
   my $destination = $self->convert_destination($args->{destination});
@@ -39,7 +40,7 @@ sub new
 
     $self->{client}->push_command(
       [ PORT => $ip_and_port ],
-      @{ $args->{prefix} },
+      ($args->{restart} > 0 ? ([ REST => $args->{restart} ]) : ()),
       $args->{command},
       $self->{cv},
     );

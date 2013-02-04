@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 10;
+use Test::More tests => 6;
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
@@ -36,17 +36,9 @@ foreach my $passive (0,1)
     diag $@ if $@;
     isa_ok $ret1, 'AnyEvent::FTP::Response';
     
-    my $ret2 = eval { $client->retr('foo.txt', sub { $data .= shift })->recv; };
+    my $ret2 = eval { $client->retr('foo.txt', sub { $data .= shift }, restart => length $data)->recv; };
     diag $@ if $@;
     isa_ok $ret2, 'AnyEvent::FTP::Response';
-    is $data, "012345678901234567890", 'data = "012345678901234567890"';
-  };
-
-  do {
-    my $data = '0123456789';
-    my $ret = eval { $client->resume_retr('foo.txt', \$data)->recv; };
-    diag $@ if $@;
-    isa_ok $ret, 'AnyEvent::FTP::Response';
     is $data, "012345678901234567890", 'data = "012345678901234567890"';
   };
 

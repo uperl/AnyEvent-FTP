@@ -159,23 +159,13 @@ sub login
 
 sub retr
 {
-  my($self, $filename, $destination) = @_;
+  my($self, $filename, $destination) = (shift, shift, shift);
+  my $args   = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
   $self->{fetch}->new({
     command     => [ RETR => $filename ],
     destination => $destination,
     client      => $self,
-  });
-}
-
-sub resume_retr
-{
-  my($self, $filename, $destination) = @_;
-  croak "resume_retr only works with a SCALAR ref destination" unless ref($destination) eq 'SCALAR';
-  $self->{fetch}->new({
-    command     => [ RETR => $filename ],
-    destination => $destination,
-    prefix      => [[REST => do { use bytes; length $$destination }]],
-    client      => $self,
+    restart     => $args->{restart},
   });
 }
 
