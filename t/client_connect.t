@@ -33,6 +33,9 @@ is eval { $client->push_command([USER => $config->{user}])->recv->code }, 331, '
 diag $@ if $@;
 is eval { $client->push_command([PASS => $config->{pass}])->recv->code }, 230, 'code = 230';
 diag $@ if $@;
+
+my $help_cv = $client->push_command(['HELP']);
+
 is eval { $client->push_command(['QUIT'])                 ->recv->code }, 221, 'code = 221';
 diag $@ if $@;
 
@@ -42,16 +45,14 @@ $done = AnyEvent->condvar;
 is eval { $client->connect($config->{host}, $config->{port})->recv->code }, 220, 'code = 220';
 diag $@ if $@;
 
-my $cv = $client->push_command(['HELP']);
-
 is eval { $client->push_command([USER => 'bogus'])->recv->code }, 331, 'code = 331';
 diag $@ if $@;
 eval { $client->push_command([PASS => 'bogus'])->recv };
 is $@->code, 530, 'code = 530';
-is eval { $client->push_command(['QUIT'])                 ->recv->code }, 221, 'code = 221';
+is eval { $client->push_command(['QUIT'])                 ->recv->code }, 221, 'code = 221 (2)';
 diag $@ if $@;
 
-is $cv->recv->code, 214, 'code = 214';
+is $help_cv->recv->code, 214, 'code = 214';
 $done->recv;
 $done = AnyEvent->condvar;
 
