@@ -38,8 +38,8 @@ sub new
     my $ip_and_port = join(',', split(/\./, $self->{client}->{my_ip}), $port >> 8, $port & 0xff);
 
     $self->{client}->push_command(
-      @{ $args->{prefix} },
       [ PORT => $ip_and_port ],
+      @{ $args->{prefix} },
       $args->{command},
       $self->{cv},
     );

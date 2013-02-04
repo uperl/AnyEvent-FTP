@@ -8,6 +8,13 @@ require "$FindBin::Bin/lib.pl";
 
 my $client = AnyEvent::FTP::Client->new;
 
+my $wu = 0;
+
+$client->on_greeting(sub {
+  my $res = shift;
+  $wu = 1 if $res->message->[0] =~ /FTP server \(Version wu/;
+});
+
 prep_client( $client );
 our $config;
 
@@ -32,7 +39,8 @@ do {
   like $code, qr{^21[123]$}, 'code = ' . $code;
 };
 
-do {
+SKIP: {
+  skip 'wu-ftpd does not return 450 on bogus file', 2 if $wu;
   eval { $client->stat('bogus')->recv };
   my $res = $@;
   isa_ok $res, 'AnyEvent::FTP::Response';

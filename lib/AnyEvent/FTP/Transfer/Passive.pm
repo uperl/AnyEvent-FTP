@@ -45,8 +45,8 @@ sub new
   };
 
   $self->{client}->push_command(
-    @{ $args->{prefix} },
     [ 'PASV', undef, $data_connection ],
+    @{ $args->{prefix} },
     $args->{command},
     $self->{cv},
   );

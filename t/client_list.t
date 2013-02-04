@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 8;
+use Test::More tests => 22;
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
@@ -46,16 +46,28 @@ foreach my $passive (0,1)
     diag $@ if $@;
     isa_ok $list, 'ARRAY';
     $list //= [];
+    # wu-ftpd
+    shift @$list if $list->[0] =~ /^total \d+$/i;
     is scalar(@$list), 4, 'list length 4';
+    is scalar(grep /foo.txt$/, @$list), 1, 'has foo.txt';
+    is scalar(grep /bar.txt$/, @$list), 1, 'has bar.txt';
+    is scalar(grep /baz.txt$/, @$list), 1, 'has baz.txt';
+    is scalar(grep /dir2$/, @$list), 1, 'has dir2';
     #note "list: $_" for @$list;
   };
+
 
   do {
     my $list = eval { $client->list('dir2')->recv };
     diag $@ if $@;
     isa_ok $list, 'ARRAY';
     $list //= [];
+    # wu-ftpd
+    shift @$list if $list->[0] =~ /^total \d+$/i;
     is scalar(@$list), 3, 'list length 3';
+    is scalar(grep /dr.pepper.txt$/, @$list), 1, 'has dr.pepper.txt';
+    is scalar(grep /coke.txt$/, @$list), 1, 'has coke.txt';
+    is scalar(grep /pepsi.txt$/, @$list), 1, 'has pepsi.txt';
     #note "list: $_" for @$list;
   };
 

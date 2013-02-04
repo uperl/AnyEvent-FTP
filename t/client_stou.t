@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 12;
+use Test::More;
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
@@ -15,6 +15,15 @@ foreach my $passive (0,1)
 {
 
   my $client = AnyEvent::FTP::Client->new( passive => $passive );
+
+  $client->on_greeting(sub {
+    state $first = 0;
+    return unless ++$first == 1;
+    my $res = shift;
+    plan skip_all => 'wu-ftpd does not support STOU'
+      if $res->message->[0] =~ /FTP server \(Version wu/;
+    plan tests => 12;
+  });
 
   prep_client( $client );
 
