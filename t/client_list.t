@@ -48,6 +48,9 @@ foreach my $passive (0,1)
     $list //= [];
     # wu-ftpd
     shift @$list if $list->[0] =~ /^total \d+$/i;
+    # Net::FTPServer
+    shift @$list if $list->[0] =~ /\s\.$/;
+    shift @$list if $list->[0] =~ /\s\.\.$/;
     is scalar(@$list), 4, 'list length 4';
     is scalar(grep /foo.txt$/, @$list), 1, 'has foo.txt';
     is scalar(grep /bar.txt$/, @$list), 1, 'has bar.txt';
@@ -64,6 +67,9 @@ foreach my $passive (0,1)
     $list //= [];
     # wu-ftpd
     shift @$list if $list->[0] =~ /^total \d+$/i;
+    # Net::FTPServer
+    shift @$list if $list->[0] =~ /\s\.$/;
+    shift @$list if $list->[0] =~ /\s\.\.$/;
     is scalar(@$list), 3, 'list length 3';
     is scalar(grep /dr.pepper.txt$/, @$list), 1, 'has dr.pepper.txt';
     is scalar(grep /coke.txt$/, @$list), 1, 'has coke.txt';

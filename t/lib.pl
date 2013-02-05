@@ -10,6 +10,8 @@ our $config;
 $config = LoadFile(File::HomeDir->my_home . '/ftptest.yml');
 $config->{dir} //= "$FindBin::Bin/..";
 $config->{dir} = Path::Class::Dir->new($config->{dir})->resolve;
+$config->{port} = getservbyname($config->{port}, "tcp")
+  if defined $config->{port} && $config->{port} !~ /^\d+$/;
 
 our $anyevent_test_timeout = AnyEvent->timer( after => 5, cb => sub { say STDERR "TIMEOUT"; exit } );
 

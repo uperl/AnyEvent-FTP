@@ -12,6 +12,8 @@ $client->on_greeting(sub {
   my $res = shift;
   plan skip_all => 'wu-ftpd does not support ALLO'
     if $res->message->[0] =~ /FTP server \(Version wu/;
+  plan skip_all => 'Net::FTPServer returns wrong code for ALLO'
+    if $res->message->[0] =~ /FTP server \(Net::FTPServer/;
 });
 
 prep_client( $client );
