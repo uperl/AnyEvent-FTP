@@ -65,20 +65,20 @@ package AnyEvent::FTP::Transfer::Passive::Fetch;
 use base qw( AnyEvent::FTP::Transfer::Passive );
 use Role::Tiny::With;
 
-with 'AnyEvent::FTP::Role::FetchTransfer';
+with 'AnyEvent::FTP::Client::Role::FetchTransfer';
 
 package AnyEvent::FTP::Transfer::Passive::Store;
 
 use base qw( AnyEvent::FTP::Transfer::Passive );
 use Role::Tiny::With;
 
-with 'AnyEvent::FTP::Role::StoreTransfer';
+with 'AnyEvent::FTP::Client::Role::StoreTransfer';
 
 package AnyEvent::FTP::Transfer::Passive::List;
 
 use base qw( AnyEvent::FTP::Transfer::Passive );
 use Role::Tiny::With;
 
-with 'AnyEvent::FTP::Role::ListTransfer';
+with 'AnyEvent::FTP::Client::Role::ListTransfer';
 
 1;

@@ -1,4 +1,4 @@
-package AnyEvent::FTP::Role::StoreTransfer;
+package AnyEvent::FTP::Client::Role::StoreTransfer;
 
 use strict;
 use warnings;

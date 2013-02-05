@@ -1,4 +1,4 @@
-package AnyEvent::FTP::Role::FetchTransfer;
+package AnyEvent::FTP::Client::Role::FetchTransfer;
 
 use strict;
 use warnings;

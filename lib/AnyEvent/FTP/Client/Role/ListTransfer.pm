@@ -1,4 +1,4 @@
-package AnyEvent::FTP::Role::ListTransfer;
+package AnyEvent::FTP::Client::Role::ListTransfer;
 
 use strict;
 use warnings;
