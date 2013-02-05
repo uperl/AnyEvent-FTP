@@ -7,6 +7,7 @@ use FindBin ();
 use Path::Class ();
 
 our $config;
+our $detect;
 $config = LoadFile(File::HomeDir->my_home . '/ftptest.yml');
 $config->{dir} //= "$FindBin::Bin/..";
 $config->{dir} = Path::Class::Dir->new($config->{dir})->resolve;
@@ -34,6 +35,17 @@ sub prep_client
       note sprintf "SERVER: [ %d ] %s\n", $res->code, $_ for @{ $res->message };
     });
   }
+
+  $client->on_greeting(sub {
+    my $res = shift;
+    $detect->{wu} = 1 if $res->message->[0] =~ /FTP server \(Version wu/;
+    $detect->{pu} = 1 if $res->message->[0] =~ /Welcome to Pure-FTPd/;
+    $detect->{vs} = 1 if $res->message->[0] =~ /\(vsFTPd /;
+    $detect->{pl} = 1 if $res->message->[0] =~ /FTP server \(Net::FTPServer/;
+    $detect->{pr} = 1 if $res->message->[0] =~ /ProFTPD/;
+  });
+
+
 }
 
 1;

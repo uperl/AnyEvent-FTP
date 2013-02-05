@@ -32,7 +32,11 @@ do {
   like $code, qr{^21[14]$}, 'code = ' . $code;
 };
 
-do {
+SKIP: {
+  our $detect;
+  skip 'pure-FTPd does not return [45]50 on bogus file', 2 if $detect->{pu};
+  skip 'vsftp does not return 502 on bogus help', 2 if $detect->{vs};
+  skip 'Net::FTPServer does not return 502 on bogus help', 2 if $detect->{pl};
   eval { $client->help('bogus')->recv };
   my $res = $@;
   isa_ok $res, 'AnyEvent::FTP::Response';

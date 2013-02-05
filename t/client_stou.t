@@ -11,13 +11,16 @@ require "$FindBin::Bin/lib.pl";
 our $config;
 $config->{dir} = tempdir( CLEANUP => 1 );
 
-my $greeting_callback = sub {
+my $plan = sub {
   state $first = 0;
   return unless ++$first == 1;
-  my $res = shift;
+  our $detect;
   plan skip_all => 'wu-ftpd does not support STOU'
-    if $res->message->[0] =~ /FTP server \(Version wu/;
+    if $detect->{wu};
+  plan skip_all => 'vsftpd does not support STOU without an argument'
+    if $detect->{vs};
   plan tests => 12;
+  
 };
   
 foreach my $passive (0,1)
@@ -25,14 +28,14 @@ foreach my $passive (0,1)
 
   my $client = AnyEvent::FTP::Client->new( passive => $passive );
 
-  $client->on_greeting($greeting_callback);
-
   prep_client( $client );
 
   $client->connect($config->{host}, $config->{port})->recv;
   $client->login($config->{user}, $config->{pass})->recv;
   $client->type('I')->recv;
   $client->cwd($config->{dir})->recv;
+  
+  $plan->();
 
   do {
     my $data = 'some data';

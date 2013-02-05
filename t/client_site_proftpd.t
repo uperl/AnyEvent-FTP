@@ -15,16 +15,13 @@ my $client = AnyEvent::FTP::Client->new;
 
 prep_client( $client );
 
-$client->on_greeting(sub {
-  my $res = shift;
-  plan skip_all => 'requires Proftpd to test against' unless $res->message->[0] =~ /^ProFTPD/;
-});
-
 eval {
-  $client->connect('localhost')->recv;
+  $client->connect($config->{host}, $config->{port})->recv;
   $client->login($config->{user}, $config->{pass})->recv;
   $client->type('I')->recv;
   $client->cwd($config->{dir})->recv;
+  our $detect;
+  die "not ProFTPd" unless $detect->{pr};
 };
 plan skip_all => 'requires Proftpd to test against' if $@;
 plan tests => 6;
