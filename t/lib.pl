@@ -8,7 +8,7 @@ use Path::Class ();
 
 our $config;
 our $detect;
-$config = LoadFile(File::HomeDir->my_home . '/ftptest.yml');
+$config = LoadFile($ENV{AEF_CONFIG} // (File::HomeDir->my_home . '/ftptest.yml'));
 $config->{dir} //= "$FindBin::Bin/..";
 $config->{dir} = Path::Class::Dir->new($config->{dir})->resolve;
 $config->{port} //= $ENV{AEF_PORT} if defined $ENV{AEF_PORT};
