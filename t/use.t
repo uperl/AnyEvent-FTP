@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 16;
+use Test::More tests => 17;
 
 use_ok 'AnyEvent::FTP';
 use_ok 'AnyEvent::FTP::Client';
@@ -16,5 +16,6 @@ use_ok 'AnyEvent::FTP::Client::Role::ResponseBuffer';
 use_ok 'AnyEvent::FTP::Client::Transfer';
 use_ok 'AnyEvent::FTP::Client::Transfer::Passive';
 use_ok 'AnyEvent::FTP::Client::Transfer::Active';
+use_ok 'AnyEvent::FTP::Client::Response';
 use_ok 'AnyEvent::FTP::Role::Event';
 use_ok 'AnyEvent::FTP::Response';

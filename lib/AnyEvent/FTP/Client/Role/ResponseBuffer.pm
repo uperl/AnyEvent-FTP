@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use v5.10;
 use Role::Tiny;
-use AnyEvent::FTP::Response;
+use AnyEvent::FTP::Client::Response;
 
 # ABSTRACT: Response buffer role for asynchronous ftp client
 # VERSION
@@ -31,7 +31,7 @@ sub process_message_line
     push @{ $self->{response_buffer}->{message} }, $line;
     if($2 eq ' ')
     {
-      my $response = AnyEvent::FTP::Response->new(
+      my $response = AnyEvent::FTP::Client::Response->new(
         $self->{response_buffer}->{code},
         $self->{response_buffer}->{message},
       );
