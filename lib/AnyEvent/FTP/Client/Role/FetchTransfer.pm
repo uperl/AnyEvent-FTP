@@ -57,4 +57,21 @@ sub convert_local
   }
 }
 
+sub push_command
+{
+  my $self = shift;
+  my $cv = $self->{client}->push_command(
+    @_,
+  );
+  
+  $self->on_eof(sub {
+    $cv->cb(sub {
+      my $res = eval { $cv->recv };
+      my $err = $@;
+      if($err) { $self->{cv}->croak($err) }
+      else     { $self->{cv}->send($res) }
+    });
+  });
+}
+
 1;

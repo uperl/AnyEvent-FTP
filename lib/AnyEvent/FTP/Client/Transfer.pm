@@ -14,7 +14,7 @@ use Role::Tiny::With;
 
 with 'AnyEvent::FTP::Role::Event';
 
-__PACKAGE__->define_events(qw( open close ));
+__PACKAGE__->define_events(qw( open close eof ));
 
 sub new
 {
@@ -40,9 +40,11 @@ sub handle
     fh => $fh,
     on_error => sub {
       my($hdl, $fatal, $msg) = @_;
+      $self->emit('eof');
       $_[0]->destroy;
     },
     on_eof => sub {
+      $self->emit('eof');
       $handle->destroy;
     },
     # this avoids deep recursion exception error (usually

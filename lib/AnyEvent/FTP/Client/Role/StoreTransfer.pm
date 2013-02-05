@@ -69,4 +69,13 @@ sub convert_local
   }
 }
 
+sub push_command
+{
+  my $self = shift;
+  $self->{client}->push_command(
+    @_,
+    $self->{cv},
+  );
+}
+
 1;

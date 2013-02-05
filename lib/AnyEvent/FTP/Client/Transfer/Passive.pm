@@ -45,11 +45,10 @@ sub new
     }
   };
 
-  $self->{client}->push_command(
+  $self->push_command(
     [ 'PASV', undef, $data_connection ],
     ($args->{restart} > 0 ? ([ REST => $args->{restart} ]) : ()),
     $args->{command},
-    $self->{cv},
   );
 
   $self->{cv}->cb(sub {

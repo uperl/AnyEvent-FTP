@@ -38,11 +38,10 @@ sub new
     my($fh, $host, $port) = @_;
     my $ip_and_port = join(',', split(/\./, $self->{client}->{my_ip}), $port >> 8, $port & 0xff);
 
-    $self->{client}->push_command(
+    $self->push_command(
       [ PORT => $ip_and_port ],
       ($args->{restart} > 0 ? ([ REST => $args->{restart} ]) : ()),
       $args->{command},
-      $self->{cv},
     );
   };
   
