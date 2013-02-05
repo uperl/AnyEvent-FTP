@@ -1,4 +1,4 @@
-package AnyEvent::FTP::Role::ResponseBuffer;
+package AnyEvent::FTP::Client::Role::ResponseBuffer;
 
 use strict;
 use warnings;

@@ -7,7 +7,7 @@ eval {
 
   use Role::Tiny::With;
 
-  with 'AnyEvent::FTP::Role::ResponseBuffer';
+  with 'AnyEvent::FTP::Client::Role::ResponseBuffer';
 
   sub new { bless { }, 'Client' }
 };

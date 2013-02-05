@@ -14,8 +14,8 @@ use Socket qw( unpack_sockaddr_in inet_ntoa );
 # VERSION
 
 with 'AnyEvent::FTP::Role::Event';
-with 'AnyEvent::FTP::Role::ResponseBuffer';
-with 'AnyEvent::FTP::Role::RequestBuffer';
+with 'AnyEvent::FTP::Client::Role::ResponseBuffer';
+with 'AnyEvent::FTP::Client::Role::RequestBuffer';
 
 __PACKAGE__->define_events(qw( error close send greeting ));
 
