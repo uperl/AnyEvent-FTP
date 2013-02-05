@@ -1,9 +1,9 @@
-package AnyEvent::FTP::Transfer::Active;
+package AnyEvent::FTP::Client::Transfer::Active;
 
 use strict;
 use warnings;
 use v5.10;
-use base qw( AnyEvent::FTP::Transfer );
+use base qw( AnyEvent::FTP::Client::Transfer );
 use AnyEvent::Socket qw( tcp_server );
 
 # ABSTRACT: Active transfer class for asynchronous ftp client
@@ -54,23 +54,23 @@ sub new
   $self;
 }
 
-package AnyEvent::FTP::Transfer::Active::Fetch;
+package AnyEvent::FTP::Client::Transfer::Active::Fetch;
 
-use base qw( AnyEvent::FTP::Transfer::Active );
+use base qw( AnyEvent::FTP::Client::Transfer::Active );
 use Role::Tiny::With;
 
 with 'AnyEvent::FTP::Client::Role::FetchTransfer';
 
-package AnyEvent::FTP::Transfer::Active::Store;
+package AnyEvent::FTP::Client::Transfer::Active::Store;
 
-use base qw( AnyEvent::FTP::Transfer::Active );
+use base qw( AnyEvent::FTP::Client::Transfer::Active );
 use Role::Tiny::With;
 
 with 'AnyEvent::FTP::Client::Role::StoreTransfer';
 
-package AnyEvent::FTP::Transfer::Active::List;
+package AnyEvent::FTP::Client::Transfer::Active::List;
 
-use base qw( AnyEvent::FTP::Transfer::Active );
+use base qw( AnyEvent::FTP::Client::Transfer::Active );
 use Role::Tiny::With;
 
 with 'AnyEvent::FTP::Client::Role::ListTransfer';

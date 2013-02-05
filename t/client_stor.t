@@ -50,7 +50,7 @@ foreach my $passive (0,1)
   do {
     my $data = 'some data';
     my $xfer = eval { $client->stor('foo.txt') };
-    isa_ok $xfer, 'AnyEvent::FTP::Transfer';
+    isa_ok $xfer, 'AnyEvent::FTP::Client::Transfer';
 
     my $called_open = 0;
     my $called_close = 0;
@@ -92,7 +92,7 @@ foreach my $passive (0,1)
     my $data = 'some data';
     my $xfer = eval { $client->stor('foo.txt', \$data) };
     diag $@ if $@;
-    isa_ok $xfer, 'AnyEvent::FTP::Transfer';
+    isa_ok $xfer, 'AnyEvent::FTP::Client::Transfer';
     my $ret = eval { $xfer->recv; };
     diag $@ if $@;
     isa_ok $ret, 'AnyEvent::FTP::Response';

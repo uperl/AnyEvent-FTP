@@ -1,4 +1,4 @@
-package AnyEvent::FTP::Transfer;
+package AnyEvent::FTP::Client::Transfer;
 
 use strict;
 use warnings;

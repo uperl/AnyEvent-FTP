@@ -31,17 +31,17 @@ sub new
 
   if($self->{passive})
   { 
-    require AnyEvent::FTP::Transfer::Passive;
-    $self->{store} = 'AnyEvent::FTP::Transfer::Passive::Store';
-    $self->{fetch} = 'AnyEvent::FTP::Transfer::Passive::Fetch';
-    $self->{list}  = 'AnyEvent::FTP::Transfer::Passive::List';
+    require AnyEvent::FTP::Client::Transfer::Passive;
+    $self->{store} = 'AnyEvent::FTP::Client::Transfer::Passive::Store';
+    $self->{fetch} = 'AnyEvent::FTP::Client::Transfer::Passive::Fetch';
+    $self->{list}  = 'AnyEvent::FTP::Client::Transfer::Passive::List';
   }
   else
   {
-    require AnyEvent::FTP::Transfer::Active;
-    $self->{store} = 'AnyEvent::FTP::Transfer::Active::Store';
-    $self->{fetch} = 'AnyEvent::FTP::Transfer::Active::Fetch';
-    $self->{list}  = 'AnyEvent::FTP::Transfer::Active::List';
+    require AnyEvent::FTP::Client::Transfer::Active;
+    $self->{store} = 'AnyEvent::FTP::Client::Transfer::Active::Store';
+    $self->{fetch} = 'AnyEvent::FTP::Client::Transfer::Active::Fetch';
+    $self->{list}  = 'AnyEvent::FTP::Client::Transfer::Active::List';
   }
   
   $self->on_error(sub { warn shift });

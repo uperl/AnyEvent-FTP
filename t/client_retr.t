@@ -49,7 +49,7 @@ foreach my $passive (0,1)
   do {
     my $data = '';
     my $xfer = eval { $client->retr('foo.txt') };
-    isa_ok $xfer, 'AnyEvent::FTP::Transfer';
+    isa_ok $xfer, 'AnyEvent::FTP::Client::Transfer';
     $xfer->on_open(sub {
       my $handle = shift;
       $handle->on_read(sub {
