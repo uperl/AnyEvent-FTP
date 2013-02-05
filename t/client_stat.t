@@ -37,6 +37,7 @@ SKIP: {
   skip 'wu-ftpd does not return [45]50 on bogus file', 2 if $detect->{wu};
   skip 'pure-FTPd does not return [45]50 on bogus file', 2 if $detect->{pu};
   skip 'vsftp does not return [45]50 on bogus file', 2 if $detect->{vs};
+  skip 'IIS does not return [45]50 on bogus file', 2 if $detect->{ms};
   eval { $client->stat('bogus')->recv };
   my $res = $@;
   isa_ok $res, 'AnyEvent::FTP::Response';

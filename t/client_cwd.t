@@ -1,10 +1,13 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 8;
+use Test::More;
 use AnyEvent::FTP::Client;
 use FindBin ();
 require "$FindBin::Bin/lib.pl";
+
+plan skip_all => 'requires client and server on localhost' if $ENV{AEF_REMOTE};
+plan tests => 8;
 
 my $client = eval { AnyEvent::FTP::Client->new };
 diag $@ if $@;
