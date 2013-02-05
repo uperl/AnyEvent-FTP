@@ -16,15 +16,24 @@ $client->login($config->{user}, $config->{pass})->recv;
 
 our $detect;
 plan skip_all => 'wu-ftpd does not support ALLO' if $detect->{wu};
-plan skip_all => 'pure-ftpd does not support ALLO without argument' if $detect->{pu};
-plan skip_all => 'IIS does not support ALLO without argument' if $detect->{ms};
-plan tests => 2;
+plan tests => 4;
 
-my $res = eval { $client->allo->recv };
+my $res = eval { $client->allo('foo')->recv };
 diag $@ if $@;
 isa_ok $res, 'AnyEvent::FTP::Response';
 like eval { $res->code }, qr{^20[02]$}, 'code = ' . eval { $res->code };
 diag $@ if $@;
+
+SKIP: {
+  skip 'pure-ftpd does not support ALLO without argument', 2 if $detect->{pu};
+  skip 'IIS does not support ALLO without argument', 2 if $detect->{ms};
+
+  my $res = eval { $client->allo->recv };
+  diag $@ if $@;
+  isa_ok $res, 'AnyEvent::FTP::Response';
+  like eval { $res->code }, qr{^20[02]$}, 'code = ' . eval { $res->code };
+  diag $@ if $@;
+}
 
 $client->quit->recv;
 
