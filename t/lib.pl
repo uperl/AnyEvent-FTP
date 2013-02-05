@@ -13,7 +13,7 @@ $config->{dir} = Path::Class::Dir->new($config->{dir})->resolve;
 $config->{port} = getservbyname($config->{port}, "tcp")
   if defined $config->{port} && $config->{port} !~ /^\d+$/;
 
-our $anyevent_test_timeout = AnyEvent->timer( after => 5, cb => sub { say STDERR "TIMEOUT"; exit } );
+our $anyevent_test_timeout = AnyEvent->timer( after => 15, cb => sub { say STDERR "TIMEOUT"; exit } );
 
 sub prep_client
 {
