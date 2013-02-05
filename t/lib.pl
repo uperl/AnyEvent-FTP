@@ -12,6 +12,7 @@ $config = LoadFile(File::HomeDir->my_home . '/ftptest.yml');
 $config->{dir} //= "$FindBin::Bin/..";
 $config->{dir} = Path::Class::Dir->new($config->{dir})->resolve;
 $config->{port} //= $ENV{AEF_PORT} if defined $ENV{AEF_PORT};
+$config->{host} //= $ENV{AEF_HOST} // 'localhost';
 $config->{port} = getservbyname($config->{port}, "tcp")
   if defined $config->{port} && $config->{port} !~ /^\d+$/;
 
@@ -43,6 +44,7 @@ sub prep_client
     $detect->{vs} = 1 if $res->message->[0] =~ /\(vsFTPd /;
     $detect->{pl} = 1 if $res->message->[0] =~ /FTP server \(Net::FTPServer/;
     $detect->{pr} = 1 if $res->message->[0] =~ /ProFTPD/;
+    $detect->{ms} = 1 if $res->message->[0] =~ /Microsoft FTP Service/;
   });
 
 

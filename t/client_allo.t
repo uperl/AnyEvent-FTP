@@ -16,7 +16,8 @@ $client->login($config->{user}, $config->{pass})->recv;
 
 our $detect;
 plan skip_all => 'wu-ftpd does not support ALLO' if $detect->{wu};
-plan skip_all => 'pure-ftpd does not support ALLO without arument' if $detect->{pu};
+plan skip_all => 'pure-ftpd does not support ALLO without argument' if $detect->{pu};
+plan skip_all => 'IIS does not support ALLO without argument' if $detect->{ms};
 plan tests => 2;
 
 my $res = eval { $client->allo->recv };
