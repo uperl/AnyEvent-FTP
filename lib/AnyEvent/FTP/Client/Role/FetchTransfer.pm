@@ -64,12 +64,16 @@ sub push_command
     @_,
   );
   
+  $cv->cb(sub {
+    eval { $cv->recv };
+    my $err = $@;
+    $self->{cv}->croak($err) if $err;
+  });
+  
   $self->on_eof(sub {
     $cv->cb(sub {
       my $res = eval { $cv->recv };
-      my $err = $@;
-      if($err) { $self->{cv}->croak($err) }
-      else     { $self->{cv}->send($res) }
+      $self->{cv}->send($res) unless $@;
     });
   });
 }
