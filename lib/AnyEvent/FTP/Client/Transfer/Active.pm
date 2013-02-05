@@ -11,7 +11,7 @@ use AnyEvent::Socket qw( tcp_server );
 
 # args:
 #  - command
-#  - destination
+#  - local
 #  - restart
 sub new
 {
@@ -20,7 +20,7 @@ sub new
   $args->{restart} //= 0;
   my $self = $class->SUPER::new($args);
   
-  my $destination = $self->convert_destination($args->{destination});
+  my $local = $self->convert_local($args->{local});
   
   my $count = 0;
   my $guard;
@@ -32,7 +32,7 @@ sub new
     
     undef $guard; # close to additional connections.
 
-    $self->xfer($fh,$destination);
+    $self->xfer($fh,$local);
   }, sub {
   
     my($fh, $host, $port) = @_;

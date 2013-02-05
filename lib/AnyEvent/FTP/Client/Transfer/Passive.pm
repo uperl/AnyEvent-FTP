@@ -11,7 +11,7 @@ use AnyEvent::Socket qw( tcp_connect );
 
 # args:
 #  - command
-#  - destination
+#  - local
 #  - restart
 sub new
 {
@@ -20,7 +20,7 @@ sub new
   $args->{restart} //= 0;
   my $self = $class->SUPER::new($args);
   
-  my $destination = $self->convert_destination($args->{destination});
+  my $local = $self->convert_local($args->{local});
   
   my $data_connection = sub {
     my $res = shift;
@@ -35,7 +35,7 @@ sub new
           return "unable to connect to data port: $!";
         }
         
-        $self->xfer($fh,$destination);
+        $self->xfer($fh,$local);
       };
       return;
     }

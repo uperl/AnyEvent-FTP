@@ -10,42 +10,42 @@ use Role::Tiny;
 
 sub xfer
 {
-  my($self, $fh, $destination) = @_;
+  my($self, $fh, $local) = @_;
   
   my $handle = $self->handle($fh);
 
-  return unless defined $destination;
+  return unless defined $local;
   
   $handle->on_read(sub {
     $handle->push_read(sub {
-      $destination->($_[0]{rbuf});
+      $local->($_[0]{rbuf});
       $_[0]{rbuf} = '';
     });
   });
 }
 
-sub convert_destination
+sub convert_local
 {
-  my($self, $destination) = @_;
+  my($self, $local) = @_;
   
-  return unless defined $destination;
-  return $destination if ref($destination) eq 'CODE';
+  return unless defined $local;
+  return $local if ref($local) eq 'CODE';
   
-  if(ref($destination) eq 'SCALAR')
+  if(ref($local) eq 'SCALAR')
   {
     return sub {
-      $$destination .= shift;
+      $$local .= shift;
     };
   }
-  elsif(ref($destination) eq 'GLOB')
+  elsif(ref($local) eq 'GLOB')
   {
     return sub {
-      print $destination shift;
+      print $local shift;
     };
   }
-  elsif(ref($destination) eq '')
+  elsif(ref($local) eq '')
   {
-    open my $fh, '>', $destination;
+    open my $fh, '>', $local;
     $self->on_close(sub { close $fh });
     return sub {
       print $fh shift;
@@ -53,7 +53,7 @@ sub convert_destination
   }
   else
   {
-    die 'unimplemented: ' . ref $destination;
+    die 'unimplemented: ' . ref $local;
   }
 }
 

@@ -159,11 +159,11 @@ sub login
 
 sub retr
 {
-  my($self, $filename, $destination) = (shift, shift, shift);
+  my($self, $filename, $local) = (shift, shift, shift);
   my $args   = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
   $self->{fetch}->new({
     command     => [ RETR => $filename ],
-    destination => $destination,
+    local       => $local,
     client      => $self,
     restart     => $args->{restart},
   });
@@ -171,17 +171,17 @@ sub retr
 
 sub stor
 {
-  my($self, $filename, $destination) = @_;
+  my($self, $filename, $local) = @_;
   $self->{store}->new(
     command     => [STOR => $filename],
-    destination => $destination,
+    local       => $local,
     client      => $self,
   );
 }
 
 sub stou
 {
-  my($self, $filename, $destination) = @_;
+  my($self, $filename, $local) = @_;
   my $xfer;
   my $cb = sub {
     my $name = shift->get_file;
@@ -190,7 +190,7 @@ sub stou
   };
   $xfer = $self->{store}->new(
     command     => [STOU => $filename, $cb],
-    destination => $destination,
+    local       => $local,
     client      => $self,
   );
 }
@@ -198,10 +198,10 @@ sub stou
 # for this to work under ProFTPd: AllowStoreRestart off
 sub appe
 {
-  my($self, $filename, $destination) = @_;
+  my($self, $filename, $local) = @_;
   $self->{store}->new(
     command     => [APPE => $filename],
-    destination => $destination,
+    local       => $local,
     client      => $self,
   );
 }
@@ -225,7 +225,7 @@ sub _list
   my $cv = AnyEvent->condvar;
   $self->{list}->new(
     command     => [ $verb => $location ],
-    destination => \@lines,
+    local       => \@lines,
     client      => $self,
   )->cb(sub {
     my $res = eval { shift->recv };

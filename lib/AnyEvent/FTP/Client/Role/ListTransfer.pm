@@ -10,7 +10,7 @@ use Role::Tiny;
 
 sub xfer
 {
-  my($self, $fh, $destination) = @_;
+  my($self, $fh, $local) = @_;
   
   my $handle = $self->handle($fh);
 
@@ -18,15 +18,15 @@ sub xfer
     $handle->push_read(line => sub {
       my($handle, $line) = @_;
       $line =~ s/\015?\012//g;
-      push @{ $destination }, $line;
+      push @{ $local }, $line;
     });
   });
 }
 
-sub convert_destination
+sub convert_local
 {
-  my($self, $destination) = @_;
-  return $destination;
+  my($self, $local) = @_;
+  return $local;
 }
 
 1;

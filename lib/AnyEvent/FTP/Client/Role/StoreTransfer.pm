@@ -10,14 +10,14 @@ use Role::Tiny;
 
 sub xfer
 {
-  my($self, $fh, $destination) = @_;
+  my($self, $fh, $local) = @_;
   
   my $handle = $self->handle($fh);
   
-  return unless defined $destination;
+  return unless defined $local;
   
   $handle->on_drain(sub {
-    my $data = $destination->();
+    my $data = $local->();
     if(defined $data)
     {
       $handle->push_write($data);
@@ -29,43 +29,43 @@ sub xfer
   });
 }
 
-sub convert_destination
+sub convert_local
 {
-  my($self, $destination) = @_;
+  my($self, $local) = @_;
   
-  return unless defined $destination;
-  return $destination if ref($destination) eq 'CODE';
+  return unless defined $local;
+  return $local if ref($local) eq 'CODE';
   
-  if(ref($destination) eq '')
+  if(ref($local) eq '')
   {
-    open my $fh, '<', $destination;
+    open my $fh, '<', $local;
     $self->on_close(sub { close $fh });
     return sub {
       local $/;
       <$fh>;
     };
   }
-  elsif(ref($destination) eq 'SCALAR')
+  elsif(ref($local) eq 'SCALAR')
   {
-    my $buffer = $$destination;
+    my $buffer = $$local;
     return sub {
       my $tmp = $buffer;
       undef $buffer;
       $tmp;
     };
   }
-  elsif(ref($destination) eq 'GLOB')
+  elsif(ref($local) eq 'GLOB')
   {
     sub {
       # TODO: for big files, maybe
       # break this up into batches
       local $/;
-      <$destination>;
+      <$local>;
     };
   }
   else
   {
-    die 'bad destination type';
+    die 'bad local type';
   }
 }
 
