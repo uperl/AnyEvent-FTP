@@ -46,7 +46,7 @@ SKIP: {
   isa_ok $res, 'AnyEvent::FTP::Response';
   my $code = eval { $res->code };
   diag $@ if $@;
-  is $code, 450, 'code = 450';
+  like $code, qr{^[45]50$}, 'code = ' . $code;
 };
 
 $client->quit->recv;

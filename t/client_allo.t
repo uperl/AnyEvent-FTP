@@ -12,8 +12,6 @@ $client->on_greeting(sub {
   my $res = shift;
   plan skip_all => 'wu-ftpd does not support ALLO'
     if $res->message->[0] =~ /FTP server \(Version wu/;
-  plan skip_all => 'Net::FTPServer returns wrong code for ALLO'
-    if $res->message->[0] =~ /FTP server \(Net::FTPServer/;
 });
 
 prep_client( $client );
@@ -27,7 +25,7 @@ plan tests => 2;
 my $res = eval { $client->allo->recv };
 diag $@ if $@;
 isa_ok $res, 'AnyEvent::FTP::Response';
-is eval { $res->code }, 202, 'code = 202';
+like eval { $res->code }, qr{^20[02]$}, 'code = ' . eval { $res->code };
 diag $@ if $@;
 
 $client->quit->recv;

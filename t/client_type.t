@@ -37,7 +37,7 @@ do {
   eval { $client->type('X')->recv };
   my $error = $@;
   isa_ok $error, 'AnyEvent::FTP::Response';
-  is eval { $error->code }, 500, 'code = 500';
+  like eval { $error->code }, qr{^50[04]$}, 'code = ' . eval { $error->code };
   diag $@ if $@;
 };
 
