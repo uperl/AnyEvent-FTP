@@ -10,6 +10,7 @@ our $config;
 $config = LoadFile(File::HomeDir->my_home . '/ftptest.yml');
 $config->{dir} //= "$FindBin::Bin/..";
 $config->{dir} = Path::Class::Dir->new($config->{dir})->resolve;
+$config->{port} //= $ENV{AEF_PORT} if defined $ENV{AEF_PORT};
 $config->{port} = getservbyname($config->{port}, "tcp")
   if defined $config->{port} && $config->{port} !~ /^\d+$/;
 
@@ -19,7 +20,7 @@ sub prep_client
 {
   my($client) = @_;
 
-  if($ENV{ANYEVENT_FTP_DEBUG})
+  if($ENV{AEF_DEBUG})
   {
     $client->on_send(sub {
       my($cmd, $arguments) = @_;
