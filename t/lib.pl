@@ -45,6 +45,7 @@ sub prep_client
     $detect->{pl} = 1 if $res->message->[0] =~ /FTP server \(Net::FTPServer/;
     $detect->{pr} = 1 if $res->message->[0] =~ /ProFTPD/;
     $detect->{ms} = 1 if $res->message->[0] =~ /Microsoft FTP Service/;
+    $detect->{nc} = 1 if $res->message->[0] =~ /NcFTPd Server/;
   });
 
 

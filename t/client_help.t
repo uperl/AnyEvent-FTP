@@ -37,6 +37,7 @@ SKIP: {
   skip 'pure-FTPd does not return 502 on bogus help', 2 if $detect->{pu};
   skip 'vsftp does not return 502 on bogus help', 2 if $detect->{vs};
   skip 'Net::FTPServer does not return 502 on bogus help', 2 if $detect->{pl};
+  skip 'ncftpd does not return 502 on bogus help', 2 if $detect->{nc};
   eval { $client->help('bogus')->recv };
   my $res = $@;
   isa_ok $res, 'AnyEvent::FTP::Response';
