@@ -14,8 +14,6 @@ my @services = do {
 
 chdir "$FindBin::Bin/..";
 
-@services = ();
-
 foreach my $service (@services)
 {
   local $ENV{AEF_CONFIG} = File::Spec->catfile(File::HomeDir->my_home, '.ftptest', 'localhost.yml');

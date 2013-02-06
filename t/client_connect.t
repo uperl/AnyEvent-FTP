@@ -42,19 +42,23 @@ diag $@ if $@;
 $done->recv;
 $done = AnyEvent->condvar;
 
-is eval { $client->connect($config->{host}, $config->{port})->recv->code }, 220, 'code = 220';
-diag $@ if $@;
+SKIP: {
+  our $detect;
+  skip 'bftp quit broken', 5 if $detect->{xb};
+  is eval { $client->connect($config->{host}, $config->{port})->recv->code }, 220, 'code = 220';
+  diag $@ if $@;
 
-is eval { $client->push_command([USER => 'bogus'])->recv->code }, 331, 'code = 331';
-diag $@ if $@;
-eval { $client->push_command([PASS => 'bogus'])->recv };
-is $@->code, 530, 'code = 530';
-is eval { $client->push_command(['QUIT'])                 ->recv->code }, 221, 'code = 221 (2)';
-diag $@ if $@;
+  is eval { $client->push_command([USER => 'bogus'])->recv->code }, 331, 'code = 331';
+  diag $@ if $@;
+  eval { $client->push_command([PASS => 'bogus'])->recv };
+  is $@->code, 530, 'code = 530';
+  is eval { $client->push_command(['QUIT'])                 ->recv->code }, 221, 'code = 221 (2)';
+  diag $@ if $@;
 
-is $help_cv->recv->code, 214, 'code = 214';
-$done->recv;
-$done = AnyEvent->condvar;
+  is $help_cv->recv->code, 214, 'code = 214';
+  $done->recv;
+  $done = AnyEvent->condvar;
+}
 
 my $cv1 = $client->push_command([USER => $config->{user}]);
 my $cv2 = $client->push_command([PASS => $config->{pass}]);

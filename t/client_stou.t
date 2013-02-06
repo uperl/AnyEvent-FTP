@@ -19,10 +19,11 @@ my $plan = sub {
   our $detect;
   plan skip_all => 'wu-ftpd does not support STOU'
     if $detect->{wu};
+  plan skip_all => 'bftp does not support STOU'
+    if $detect->{xb};
   plan skip_all => 'vsftpd does not support STOU without an argument'
     if $detect->{vs};
-  plan tests => 12;
-  
+  plan tests => 12;  
 };
   
 foreach my $passive (0,1)

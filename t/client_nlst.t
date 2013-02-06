@@ -33,7 +33,6 @@ foreach my $name (qw( dr.pepper coke pepsi ))
 
 foreach my $passive (0,1)
 {
-
   my $client = AnyEvent::FTP::Client->new( passive => $passive );
 
   prep_client( $client );
@@ -61,7 +60,7 @@ foreach my $passive (0,1)
     $list //= [];
     our $detect;
     # workaround here for Net::FTPServer and pure-ftpd, unlike other wu,vs and pro ftpd does not include the path name
-    is_deeply [ sort @$list ], [ sort map { $detect->{pl} || $detect->{pu} ? "$_.txt" : "dir2/$_.txt" } qw( dr.pepper coke pepsi ) ], 'nlst 1';
+    is_deeply [ sort @$list ], [ sort map { $detect->{pl} || $detect->{pu} || $detect->{xb} ? "$_.txt" : "dir2/$_.txt" } qw( dr.pepper coke pepsi ) ], 'nlst 1';
     #note "list: $_" for @$list;
   };
 

@@ -15,6 +15,7 @@ diag $@ if $@;
 isa_ok $client, 'AnyEvent::FTP::Client';
 
 our $config;
+our $detect;
 
 prep_client( $client );
 
@@ -47,7 +48,8 @@ do {
 $uri->user('bogus');
 $uri->password('bogus');
 
-do {
+SKIP: {
+  skip 'bftp quit broken', 2 if $detect->{xb};
   eval { $client->connect($uri->as_string)->recv };
   my $error = $@;
   isa_ok $error, 'AnyEvent::FTP::Response';
@@ -59,7 +61,8 @@ $uri->user($config->{user});
 $uri->password($config->{pass});
 $uri->path('/bogus/bogus/bogus');
 
-do {
+SKIP: {
+  skip 'bftp quit broken', 2 if $detect->{xb};
   eval { $client->connect($uri->as_string)->recv };
   my $error = $@;
   isa_ok $error, 'AnyEvent::FTP::Response';

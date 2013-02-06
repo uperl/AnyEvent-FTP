@@ -8,7 +8,7 @@ use Path::Class ();
 
 our $config;
 our $detect;
-$config = LoadFile($ENV{AEF_CONFIG} // (File::HomeDir->my_home . '/ftptest.yml'));
+$config = LoadFile($ENV{AEF_CONFIG} // File::Spec->catfile(File::HomeDir->my_home, '.ftptest', 'localhost.yml'));
 $config->{dir} //= "$FindBin::Bin/..";
 $config->{dir} = Path::Class::Dir->new($config->{dir})->resolve;
 $config->{port} //= $ENV{AEF_PORT} if defined $ENV{AEF_PORT};
@@ -46,8 +46,8 @@ sub prep_client
     $detect->{pr} = 1 if $res->message->[0] =~ /ProFTPD/;
     $detect->{ms} = 1 if $res->message->[0] =~ /Microsoft FTP Service/;
     $detect->{nc} = 1 if $res->message->[0] =~ /NcFTPd Server/;
+    $detect->{xb} = 1 if $res->message->[0] =~ /^bftpd /;
   });
-
 
 }
 
