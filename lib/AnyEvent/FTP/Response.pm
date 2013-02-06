@@ -11,6 +11,7 @@ use overload '""' => sub { shift->as_string };
 sub new
 {
   my($class, $code, $message) = @_;
+  $message = [ $message ] unless ref($message) eq 'ARRAY';
   bless { code => $code, message => $message }, $class;
 }
 

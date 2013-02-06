@@ -136,7 +136,6 @@ sub connect
     $self->{handle}->on_read(sub {
       $self->{handle}->push_read( line => sub {
         my($handle, $line) = @_;
-        $line =~ s/\015?\012//g;
         $self->process_message_line($line);
       });
     });

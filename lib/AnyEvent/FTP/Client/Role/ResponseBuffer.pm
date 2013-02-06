@@ -25,6 +25,8 @@ sub process_message_line
 {
   my($self, $line) = @_;
 
+  $line =~ s/\015?\012//g;
+
   if($line =~ s/^(\d\d\d)([- ])//)
   {
     $self->{response_buffer}->{code} //= $1;
