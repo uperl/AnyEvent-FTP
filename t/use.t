@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 19;
+use Test::More tests => 29;
 
 use_ok 'AnyEvent::FTP';
 use_ok 'AnyEvent::FTP::Client';
@@ -19,5 +19,15 @@ use_ok 'AnyEvent::FTP::Client::Transfer::Active';
 use_ok 'AnyEvent::FTP::Client::Response';
 use_ok 'AnyEvent::FTP::Role::Event';
 use_ok 'AnyEvent::FTP::Response';
+use_ok 'AnyEvent::FTP::Request';
+use_ok 'AnyEvent::FTP::Server';
+use_ok 'AnyEvent::FTP::Server::Role::Auth';
+use_ok 'AnyEvent::FTP::Server::Role::Context';
+use_ok 'AnyEvent::FTP::Server::Role::Help';
+use_ok 'AnyEvent::FTP::Server::Role::Old';
+use_ok 'AnyEvent::FTP::Server::Role::Type';
 use_ok 'AnyEvent::FTP::Server::Role::ResponseEncoder';
 use_ok 'AnyEvent::FTP::Server::UnambiguousResponseEncoder';
+use_ok 'AnyEvent::FTP::Server::Connection';
+use_ok 'AnyEvent::FTP::Server::Context';
+use_ok 'AnyEvent::FTP::Server::Context::FullRW';

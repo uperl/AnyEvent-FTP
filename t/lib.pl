@@ -8,13 +8,48 @@ use Path::Class ();
 
 our $config;
 our $detect;
-$config = LoadFile($ENV{AEF_CONFIG} // File::Spec->catfile(File::HomeDir->my_home, '.ftptest', 'localhost.yml'));
-$config->{dir} //= "$FindBin::Bin/..";
-$config->{dir} = Path::Class::Dir->new($config->{dir})->resolve;
-$config->{port} //= $ENV{AEF_PORT} if defined $ENV{AEF_PORT};
-$config->{host} //= $ENV{AEF_HOST} // 'localhost';
-$config->{port} = getservbyname($config->{port}, "tcp")
-  if defined $config->{port} && $config->{port} !~ /^\d+$/;
+
+if(defined $ENV{AEF_CONFIG})
+{
+  $config = LoadFile($ENV{AEF_CONFIG});
+  $config->{dir} //= "$FindBin::Bin/..";
+  $config->{dir} = Path::Class::Dir->new($config->{dir})->resolve;
+  $config->{port} //= $ENV{AEF_PORT} if defined $ENV{AEF_PORT};
+  $config->{host} //= $ENV{AEF_HOST} // 'localhost';
+  $config->{port} = getservbyname($config->{port}, "tcp")
+    if defined $config->{port} && $config->{port} !~ /^\d+$/;
+}
+else
+{
+  require AnyEvent::FTP::Server;
+  my $server = AnyEvent::FTP::Server->new(
+    host => 'localhost',
+    port => 0,
+    default_context => 'AnyEvent::FTP::Server::Context::FullRW',
+  );
+  
+  $config->{host} = 'localhost';
+  $config->{user} = join '', map { chr(ord('a') + int rand(26)) } (1..10);
+  $config->{pass} = join '', map { chr(ord('a') + int rand(26)) } (1..10);
+  note "using fake credentials ", join ':', $config->{user}, $config->{pass};
+  
+  $server->on_bind(sub {
+    my $port = shift;
+    $config->{port} = $port;
+    note "binding aeftpd localhost:$port";
+  });
+  
+  $server->on_connect(sub {
+    my $con = shift;
+    $con->context->authenticator(sub {
+      my($user, $pass) = @_;
+      $user eq $config->{user} && $pass eq $config->{pass} ? 1 : 0;
+    });
+    $con->context->bad_authentication_delay(0);
+  });
+  
+  $server->start;
+}
 
 our $anyevent_test_timeout = AnyEvent->timer( after => 15, cb => sub { say STDERR "TIMEOUT"; exit } );
 
