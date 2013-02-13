@@ -1,0 +1,75 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use v5.10;
+use AnyEvent;
+use AnyEvent::FTP::Server;
+use Getopt::Long qw( GetOptions );
+use URI;
+
+# PODNAME: aeftpd
+# ABSTRACT: FTP Server
+# VERSION
+
+my $port;
+my $host;
+my $inet = 0;
+my $stderr;
+my $pam;
+
+GetOptions(
+  'port=i'     => \$port,
+  'hostname=s' => \$host,
+  'inet'       => \$inet,
+  'stderr=s'   => \$stderr,
+  'pam=s'      => \$pam,
+);
+
+$port //= ($> && $^O !~ /^(cygwin|MSWin32)$/) ? 8021 : 21;
+
+if($stderr)
+{
+  open STDERR, '>>', $stderr;
+}
+
+unless($inet)
+{
+  my $uri = URI->new('ftp:');
+  $uri->host($host // 'localhost');
+  $uri->port($port);
+  say $uri;
+}
+
+my $server = AnyEvent::FTP::Server->new(
+  hostname => $host,
+  port     => $port,
+  inet     => $inet,
+);
+
+if($pam)
+{
+  eval { require Authen::Simple::PAM };
+  if($@)
+  {
+    say STDERR "PAM authentication requires Authen::Simple::PAM to be installed";
+    exit 2;
+  }
+  
+  $pam = Authen::Simple::PAM->new(
+    service => $pam,
+  );
+  
+  $server->on_connect(sub {
+    my $con = shift;
+    $con->context->authenticator(sub {
+      my($user, $pass) = @_;
+      $pam->authenticate( @_ ) ? 1 : 0;
+    });
+    $con->context->bad_authentication_delay(0);
+  });
+}
+
+$server->start;
+
+AnyEvent->condvar->recv;

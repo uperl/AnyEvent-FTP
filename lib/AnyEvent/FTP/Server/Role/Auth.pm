@@ -15,6 +15,8 @@ sub user
   $self->{user};
 }
 
+sub authenticated { shift->{authenticated} }
+
 sub authenticator
 {
   my($self, $value) = @_;
@@ -67,6 +69,7 @@ sub cmd_pass
   if($self->authenticator->($user, $pass))
   {
     $con->send_response(230 => "User $user logged in");
+    $self->{authenticated} = 1;
     $self->done;
   }
   else

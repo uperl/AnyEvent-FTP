@@ -23,9 +23,10 @@ sub new
   my $args   = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
   my $self = bless {
     hostname        => $args->{hostname},
-    port            => $args->{port} // 21,
-    default_context => $args->{default_context} // 'AnyEvent::FTP::Server::Context::FullRW',
-    welcome         => $args->{welcome} // [ 220 => "aeftpd $AnyEvent::FTP::Server::VERSION" ],
+    port            => $args->{port}            // 21,
+    default_context => $args->{default_context} // 'AnyEvent::FTP::Server::Context::Full',
+    welcome         => $args->{welcome}         // [ 220 => "aeftpd $AnyEvent::FTP::Server::VERSION" ],
+    inet            => $args->{inet}            // 0,
   }, $class;
   
   eval 'use ' . $self->{default_context};
@@ -35,6 +36,63 @@ sub new
 }
 
 sub start
+{
+  my($self) = @_;
+  $self->{inet} ? $self->_start_inet : $self->_start_standalone;
+}
+
+sub _start_inet
+{
+  my($self) = @_;
+  
+  my $con = AnyEvent::FTP::Server::Connection->new(
+    context => $self->{default_context}->new,
+  );
+
+  my $handle;
+  $handle = AnyEvent::Handle->new(
+    fh => *STDIN,
+      on_error => sub {
+        my($hdl, $fatal, $msg) = @_;
+        $_[0]->destroy;
+        undef $handle;
+        undef $con;
+      },
+      on_eof   => sub {
+        $handle->destroy;
+        undef $handle;
+        undef $con;
+      },
+  );
+  
+  $self->emit(connect => $con);
+
+  STDOUT->autoflush(1);
+  STDIN->autoflush(1);
+
+  $con->on_response(sub {
+    my($raw) = @_;
+    print STDOUT $raw;
+  });
+    
+  $con->on_close(sub {
+    close STDOUT;
+    exit;
+  });
+    
+  $con->send_response(@{ $self->{welcome} });
+    
+  $handle->on_read(sub {
+    $handle->push_read( line => sub {
+      my($handle, $line) = @_;
+      $con->process_request($line);
+    });
+  });
+  
+  $self;
+}
+
+sub _start_standalone
 {
   my($self) = @_;
   

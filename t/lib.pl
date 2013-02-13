@@ -4,15 +4,17 @@ use v5.10;
 use YAML::XS qw( LoadFile );
 use File::HomeDir;
 use FindBin ();
+use Path::Class qw( dir );
 use Path::Class ();
 
 our $config;
 our $detect;
 
+$config->{dir} //= dir( $FindBin::Bin )->parent->stringify;
+
 if(defined $ENV{AEF_CONFIG})
 {
   $config = LoadFile($ENV{AEF_CONFIG});
-  $config->{dir} //= "$FindBin::Bin/..";
   $config->{dir} = Path::Class::Dir->new($config->{dir})->resolve;
   $config->{port} //= $ENV{AEF_PORT} if defined $ENV{AEF_PORT};
   $config->{host} //= $ENV{AEF_HOST} // 'localhost';
@@ -25,7 +27,7 @@ else
   my $server = AnyEvent::FTP::Server->new(
     host => 'localhost',
     port => 0,
-    default_context => 'AnyEvent::FTP::Server::Context::FullRW',
+    default_context => 'AnyEvent::FTP::Server::Context::Full',
   );
   
   $config->{host} = 'localhost';
@@ -49,9 +51,11 @@ else
   });
   
   $server->start;
+  
+  $detect->{ae} = 1;
 }
 
-our $anyevent_test_timeout = AnyEvent->timer( after => 15, cb => sub { say STDERR "TIMEOUT"; exit } );
+our $anyevent_test_timeout = AnyEvent->timer( after => ($detect->{ae} ? 5 : 15), cb => sub { say STDERR "TIMEOUT"; exit } );
 
 sub prep_client
 {

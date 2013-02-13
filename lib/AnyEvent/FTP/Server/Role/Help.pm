@@ -12,11 +12,24 @@ sub cmd_help
 {
   my($self, $con, $req) = @_;
   
-  $con->send_response(214, [
-    'The following commands are recognized:',
-    'USER PASS HELP QUIT',
-    'Direct comments to devnull@bogus',
-  ]);
+  my $topic = $req->args;
+  $topic =~ s/^\s+//;
+  $topic =~ s/\s+$//;
+
+  $DB::single = 1;
+  
+  if($topic eq '' || $self->can("cmd_$topic"))
+  {
+    $con->send_response(214, [
+      'The following commands are recognized:',
+      'USER PASS HELP QUIT',
+      'Direct comments to devnull@bogus',
+    ]);
+  }
+  else
+  {
+    $con->send_response(502 => 'Unknown command');
+  }
   
   $self->done;
 }

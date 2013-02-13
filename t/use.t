@@ -30,4 +30,4 @@ use_ok 'AnyEvent::FTP::Server::Role::ResponseEncoder';
 use_ok 'AnyEvent::FTP::Server::UnambiguousResponseEncoder';
 use_ok 'AnyEvent::FTP::Server::Connection';
 use_ok 'AnyEvent::FTP::Server::Context';
-use_ok 'AnyEvent::FTP::Server::Context::FullRW';
+use_ok 'AnyEvent::FTP::Server::Context::Full';
