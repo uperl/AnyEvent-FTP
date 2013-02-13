@@ -8,12 +8,16 @@ use Role::Tiny;
 # ABSTRACT: Role for old archaic FTP server commands
 # VERSION
 
+sub help_allo { 'ALLO is not implemented (ignored)' }
+
 sub cmd_allo
 {
   my($self, $con, $req) = @_;
   $con->send_response(202 => 'No storage allocation necessary');
   $self->done;
 }
+
+sub help_noop { 'NOOP' }
 
 sub cmd_noop
 {
@@ -28,6 +32,8 @@ sub syst
   $self->{syst} = $value if defined $value;
   $self->{syst} //= 'UNIX Type: L8';
 }
+
+sub help_syst { 'SYST' }
 
 sub cmd_syst
 {

@@ -15,6 +15,8 @@ sub type
   $self->{type} // 'A';
 }
 
+sub help_type { 'TYPE <sp> type-code (A, I)' }
+
 sub cmd_type
 {
   my($self, $con, $req) = @_;

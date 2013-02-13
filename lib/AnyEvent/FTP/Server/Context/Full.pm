@@ -39,6 +39,8 @@ sub _not_logged_in
   return;
 }
 
+sub help_cwd { 'CWD <sp> pathname' }
+
 sub cmd_cwd
 {
   my($self, $con, $req) = @_;
@@ -59,6 +61,8 @@ sub cmd_cwd
   $self->done;
 }
 
+sub help_cdup { 'CDUP' }
+
 sub cmd_cdup
 {
   my($self, $con, $req) = @_;
@@ -77,6 +81,8 @@ sub cmd_cdup
   $self->done;
 }
 
+sub help_pwd { 'PWD' }
+
 sub cmd_pwd
 {
   my($self, $con, $req) = @_;
@@ -87,6 +93,8 @@ sub cmd_pwd
   $con->send_response(257 => "\"$cwd\" is the current directory");
   $self->done;
 }
+
+sub help_mkd { 'MKD <sp> pathname' }
 
 sub cmd_mkd
 {
@@ -105,6 +113,8 @@ sub cmd_mkd
   $self->done;
 }
 
+sub help_rmd { 'RMD <sp> pathname' }
+
 sub cmd_rmd
 {
   my($self, $con, $req) = @_;
@@ -122,6 +132,8 @@ sub cmd_rmd
   $self->done;
 }
 
+sub help_dele { 'DELE <sp> pathname' }
+
 sub cmd_dele
 {
   my($self, $con, $req) = @_;
@@ -138,6 +150,8 @@ sub cmd_dele
   $con->send_response(550 => "DELE error") if $@;
   $self->done;
 }
+
+sub help_rnfr { 'RNFR <sp> pathname' }
 
 sub cmd_rnfr
 {
@@ -178,6 +192,8 @@ sub cmd_rnfr
   $self->done;
 }
 
+sub help_rnto { 'RNTO <sp> pathname' }
+
 sub cmd_rnto
 {
   my($self, $con, $req) = @_;
@@ -216,6 +232,8 @@ sub cmd_rnto
   }
   $self->done;
 }
+
+sub help_stat { 'STAT [<sp> pathname]' }
 
 sub cmd_stat
 {

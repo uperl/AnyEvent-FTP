@@ -31,6 +31,8 @@ sub bad_authentication_delay
   $self->{bad_authentication_delay} //= 5;
 }
 
+sub help_user { 'USER <sp> username' }
+
 sub cmd_user
 {
   my($self, $con, $req) = @_;
@@ -51,6 +53,8 @@ sub cmd_user
   
   $self->done;
 }
+
+sub help_pass { 'PASS <sp> password' }
 
 sub cmd_pass
 {
