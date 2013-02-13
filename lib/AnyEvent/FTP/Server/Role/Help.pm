@@ -16,8 +16,6 @@ sub cmd_help
   $topic =~ s/^\s+//;
   $topic =~ s/\s+$//;
 
-  $DB::single = 1;
-  
   if($topic eq '' || $self->can("cmd_$topic"))
   {
     $con->send_response(214, [
