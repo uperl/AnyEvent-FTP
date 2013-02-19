@@ -48,7 +48,11 @@ sub _start_inet
   
   my $con = AnyEvent::FTP::Server::Connection->new(
     context => $self->{default_context}->new,
-    # FIXME ip
+    ip      => do {
+      my $sockname = getsockname STDIN;
+      my ($sockport, $sockaddr) = unpack_sockaddr_in ($sockname);
+      inet_ntoa ($sockaddr);
+    },
   );
 
   my $handle;
