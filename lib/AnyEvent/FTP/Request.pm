@@ -18,4 +18,10 @@ sub command { shift->{command} }
 sub args    { shift->{args}    }
 sub raw     { shift->{raw}     }
 
+sub as_string
+{
+  my $self = shift;
+  join ' ', $self->command, $self->args;
+}
+
 1;

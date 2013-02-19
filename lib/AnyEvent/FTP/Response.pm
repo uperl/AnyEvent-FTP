@@ -20,4 +20,10 @@ sub message        { shift->{message}         }
 sub is_success     { shift->{code} !~ /^[45]/ }
 sub is_preliminary { shift->{code} =~ /^1/    }
 
+sub as_string
+{
+  my($self) = @_;
+  sprintf "[%d] %s%s", $self->{code}, $self->{message}->[0], @{ $self->{message} } > 1 ? '...' : '';
+}
+
 1;

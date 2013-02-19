@@ -30,10 +30,4 @@ sub get_file
   return shift->{message}->[0] =~ /^FILE: (.*)/i ? $1 : ();
 }
 
-sub as_string
-{
-  my($self) = @_;
-  sprintf "[%d] %s%s", $self->{code}, $self->{message}->[0], @{ $self->{message} } > 1 ? '...' : '';
-}
-
 1;
