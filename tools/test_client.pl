@@ -17,7 +17,7 @@ my @services = do {
 chdir dir($FindBin::Bin)->parent->stringify;
 
 say "[self test]";
-system 'prove', '-l', '-j', 3, '-r', 't', 'xt';
+system 'prove', '-l', '-j', 3, '-r', 't', ;#'xt';
 
 my @client_tests = map { $_->stringify } grep { $_->basename =~ /^client_.*\.t$/ } dir(File::Spec->curdir)->subdir('t')->children(no_hidden => 1);
 

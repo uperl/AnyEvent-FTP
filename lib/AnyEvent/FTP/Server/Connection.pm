@@ -59,6 +59,7 @@ sub send_response
   my $self = shift;
   my $raw = $self->response_encoder->encode(@_);
   $self->emit(response => $raw);
+  $self;
 }
 
 sub close

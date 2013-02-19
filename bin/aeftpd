@@ -67,6 +67,27 @@ if($pam)
       $pam->authenticate( @_ ) ? 1 : 0;
     });
     $con->context->bad_authentication_delay(0);
+
+    if($stderr)
+    {
+      say STDERR "CONNECT";
+    
+      $con->on_request(sub {
+        my $raw = shift;
+        say STDERR "CLIENT: $raw";
+      });
+    
+      $con->on_response(sub {
+        my $raw = shift;
+        $raw =~ s/\015?\012$//g;
+        say STDERR "SERVER: $raw";
+      });
+    
+      $con->on_close(sub {
+        say STDERR "DISCONNECT";
+      });
+    }
+    
   });
 }
 
