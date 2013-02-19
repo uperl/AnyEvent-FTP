@@ -6,15 +6,23 @@ use File::HomeDir;
 use FindBin ();
 use Path::Class qw( dir );
 use Path::Class ();
+use File::Spec;
 
 our $config;
 our $detect;
 
 $config->{dir} //= dir( $FindBin::Bin )->parent->stringify;
 
+if(defined $ENV{AEF_PORT} && ! defined $ENV{AEF_CONFIG})
+{
+  $ENV{AEF_CONFIG} = File::Spec->catfile(File::HomeDir->my_home, '.ftptest', 'localhost.yml');
+}
+
 if(defined $ENV{AEF_CONFIG})
 {
+  my $save = $config->{dir};
   $config = LoadFile($ENV{AEF_CONFIG});
+  $config->{dir} = $save if defined $save;
   $config->{dir} = Path::Class::Dir->new($config->{dir})->resolve;
   $config->{port} //= $ENV{AEF_PORT} if defined $ENV{AEF_PORT};
   $config->{host} //= $ENV{AEF_HOST} // 'localhost';
@@ -45,6 +53,8 @@ else
     my $con = shift;
     $con->context->authenticator(sub {
       my($user, $pass) = @_;
+      diag "INPUT: ($user,$pass)";
+      diag "EXPEC: (", $config->{user}, ',', $config->{pass}, ")";
       $user eq $config->{user} && $pass eq $config->{pass} ? 1 : 0;
     });
     $con->context->bad_authentication_delay(0);

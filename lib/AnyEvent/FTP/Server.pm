@@ -7,6 +7,7 @@ use Role::Tiny::With;
 use AnyEvent::Handle;
 use AnyEvent::Socket qw( tcp_server );
 use AnyEvent::FTP::Server::Connection;
+use Socket qw( unpack_sockaddr_in inet_ntoa );
 
 # ABSTRACT: Simple asynchronous ftp server
 # VERSION
@@ -47,6 +48,7 @@ sub _start_inet
   
   my $con = AnyEvent::FTP::Server::Connection->new(
     context => $self->{default_context}->new,
+    # FIXME ip
   );
 
   my $handle;
@@ -107,6 +109,10 @@ sub _start_standalone
     
     my $con = AnyEvent::FTP::Server::Connection->new(
       context => $self->{default_context}->new,
+      ip => do {
+        my($port, $addr) = unpack_sockaddr_in getsockname $fh;
+        inet_ntoa $addr;
+      },
     );
     
     my $handle;

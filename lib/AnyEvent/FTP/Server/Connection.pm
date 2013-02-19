@@ -28,6 +28,7 @@ sub new
       require AnyEvent::FTP::Server::UnambiguousResponseEncoder;
       AnyEvent::FTP::Server::UnambiguousResponseEncoder->new;
     },
+    ip               => $args->{ip},
   }, $class;
 }
 
@@ -66,6 +67,7 @@ sub close
   $self->emit('close');
 }
 
+sub ip               { shift->{ip}               }
 sub context          { shift->{context}          }
 sub response_encoder { shift->{response_encoder} }
 

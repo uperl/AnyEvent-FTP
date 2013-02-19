@@ -4,6 +4,8 @@ use autodie;
 use v5.10;
 use File::Spec;
 use File::HomeDir;
+use Path::Class qw( dir );
+use File::Spec;
 use FindBin ();
 use YAML::XS qw( LoadFile );
 
@@ -12,14 +14,19 @@ my @services = do {
   map { [split /\t/]->[0] } grep /^(..)?ftp\s/, <$fh>;
 };
 
-chdir "$FindBin::Bin/..";
+chdir dir($FindBin::Bin)->parent->stringify;
+
+say "[self test]";
+system 'prove', '-l', '-j', 3, '-r', 't', 'xt';
+
+my @client_tests = map { $_->stringify } grep { $_->basename =~ /^client_.*\.t$/ } dir(File::Spec->curdir)->subdir('t')->children(no_hidden => 1);
 
 foreach my $service (@services)
 {
   local $ENV{AEF_CONFIG} = File::Spec->catfile(File::HomeDir->my_home, '.ftptest', 'localhost.yml');
   local $ENV{AEF_PORT} = $service;
   say "[$service]";
-  system 'prove', '-l', '-j', 3;
+  system 'prove', '-l', '-j', 3, @client_tests;
 }
 
 my @list = do {
@@ -36,5 +43,5 @@ foreach my $config (@list)
   local $ENV{AEF_REMOTE} = LoadFile($config)->{remote};
   local $ENV{AEF_CONFIG} = $config;
   say "[$config]";
-  system 'prove', '-l', '-j', 3;
+  system 'prove', '-l', '-j', 3, @client_tests;
 }
