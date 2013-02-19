@@ -41,6 +41,12 @@ foreach my $passive (0,1)
     my $res = $client->nlst->recv;
     isa_ok $res, 'ARRAY';
     is scalar(@$res), 0, 'list empty';
+    if(scalar(@$res) > 0)
+    {
+      diag "~~~ nlst ~~~";
+      diag $_ for @$res;
+      diag "~~~~~~~~~~~~";
+    }
   };
   
   isa_ok $client->stor('foo.txt', \"here is some data eh\n")->recv, 'AnyEvent::FTP::Response';
@@ -48,7 +54,7 @@ foreach my $passive (0,1)
   do {
     my $res = $client->nlst->recv;
     isa_ok $res, 'ARRAY';
-    is scalar(@$res), 1, 'list empty';
+    is scalar(@$res), 1, 'list not empty';
     is $res->[0], 'foo.txt';
   };
   
@@ -77,7 +83,7 @@ foreach my $passive (0,1)
   do {
     my $res = $client->nlst->recv;
     isa_ok $res, 'ARRAY';
-    is scalar(@$res), 1, 'list empty';
+    is scalar(@$res), 1, 'list not empty';
     is $res->[0], 'bar.txt';
   };
   

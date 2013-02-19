@@ -468,15 +468,13 @@ sub cmd_nlst
     $con->send_response(150 => "Opening ASCII mode data connection for file list");
     my $dh;
     opendir $dh, $dir;
-    $self->data->push_write(
-      join "\015\012", 
+    my @list = 
       map { $req->args ? File::Spec->catfile($dir, $_) : $_ } 
       sort 
       grep !/^\.\.?$/, 
-      readdir $dh
-    );
+      readdir $dh;
     closedir $dh;
-    $self->data->push_write("\015\012");
+    $self->data->push_write(join '', map { $_ . "\015\012" } @list);
     $self->data->push_shutdown;
     $con->send_response(226 => 'Transfer complete');
   };
