@@ -53,8 +53,6 @@ else
     my $con = shift;
     $con->context->authenticator(sub {
       my($user, $pass) = @_;
-      diag "INPUT: ($user,$pass)";
-      diag "EXPEC: (", $config->{user}, ',', $config->{pass}, ")";
       $user eq $config->{user} && $pass eq $config->{pass} ? 1 : 0;
     });
     $con->context->bad_authentication_delay(0);

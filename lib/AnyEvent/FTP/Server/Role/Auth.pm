@@ -39,7 +39,7 @@ sub cmd_user
   
   my $user = $req->args;
   $user =~ s/^\s+//;
-  $user =~ s/s+$//;
+  $user =~ s/\s+$//;
   
   if($user ne '')
   {
