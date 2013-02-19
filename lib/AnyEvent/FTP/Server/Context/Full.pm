@@ -525,4 +525,154 @@ sub cmd_list
   $self->done;
 }
 
+sub cmd_stor
+{
+  my($self, $con, $req) = @_;
+
+  return $self->_not_logged_in($con) unless $self->authenticated;
+  
+  my $fn = $req->args;
+  
+  unless(defined $self->data)
+  {
+    $con->send_response(425 => 'Unable to build data connection');
+    return;
+  }
+  
+  eval {
+    use autodie;
+    local $CWD = $self->cwd;
+
+    my $type = $self->type eq 'A' ? 'ASCII' : 'Binary';
+    $con->send_response(150 => "Opening $type mode data connection for $fn");
+
+    open my $fh, '>', $fn;
+    binmode $fh;
+    $self->data->on_read(sub {
+      $self->data->push_read(sub {
+        print $fh $_[0]{rbuf};
+        $_[0]{rbuf} = '';
+      });
+    });
+    $self->data->on_error(sub {
+      close $fh;
+      $self->data->push_shutdown;
+      $con->send_response(226 => 'Transfer complete');
+      $self->clear_data;
+      $self->done;
+    });
+  };
+  if(my $error = $@)
+  {
+    warn $error;
+    $con->send_response(500 => 'FIXME');
+    $self->clear_data;
+    $self->done;
+  };
+}
+
+sub cmd_appe
+{
+  my($self, $con, $req) = @_;
+
+  return $self->_not_logged_in($con) unless $self->authenticated;
+  
+  my $fn = $req->args;
+  
+  unless(defined $self->data)
+  {
+    $con->send_response(425 => 'Unable to build data connection');
+    return;
+  }
+  
+  eval {
+    use autodie;
+    local $CWD = $self->cwd;
+
+    my $type = $self->type eq 'A' ? 'ASCII' : 'Binary';
+    $con->send_response(150 => "Opening $type mode data connection for $fn");
+
+    open my $fh, '>>', $fn;
+    binmode $fh;
+    $self->data->on_read(sub {
+      $self->data->push_read(sub {
+        print $fh $_[0]{rbuf};
+        $_[0]{rbuf} = '';
+      });
+    });
+    $self->data->on_error(sub {
+      close $fh;
+      $self->data->push_shutdown;
+      $con->send_response(226 => 'Transfer complete');
+      $self->clear_data;
+      $self->done;
+    });
+  };
+  if(my $error = $@)
+  {
+    warn $error;
+    $con->send_response(500 => 'FIXME');
+    $self->clear_data;
+    $self->done;
+  };
+}
+
+use File::Temp qw( tempfile );
+
+sub cmd_stou
+{
+  my($self, $con, $req) = @_;
+
+  return $self->_not_logged_in($con) unless $self->authenticated;
+  
+  my $fn = $req->args;
+  
+  unless(defined $self->data)
+  {
+    $con->send_response(425 => 'Unable to build data connection');
+    return;
+  }
+  
+  eval {
+    use autodie;
+    local $CWD = $self->cwd;
+
+    my $fh;
+
+    if($fn && ! -e $fn)
+    {
+      open $fh, '>', $fn;
+    }
+    else
+    {
+      ($fh,$fn) = tempfile( "aefXXXXXX", TMPDIR => 0 )
+    }
+
+    my $type = $self->type eq 'A' ? 'ASCII' : 'Binary';
+    $con->send_response(150 => "FILE: $fn");
+
+    binmode $fh;
+    $self->data->on_read(sub {
+      $self->data->push_read(sub {
+        print $fh $_[0]{rbuf};
+        $_[0]{rbuf} = '';
+      });
+    });
+    $self->data->on_error(sub {
+      close $fh;
+      $self->data->push_shutdown;
+      $con->send_response(226 => 'Transfer complete');
+      $self->clear_data;
+      $self->done;
+    });
+  };
+  if(my $error = $@)
+  {
+    warn $error;
+    $con->send_response(500 => 'FIXME');
+    $self->clear_data;
+    $self->done;
+  };
+}
+
 1;
