@@ -323,7 +323,12 @@ sub cmd_pasv
   }, sub {
     my($fh, $host, $port) = @_;
     my $ip_and_port = join(',', split(/\./, $con->ip), $port >> 8, $port & 0xff);
-    $con->send_response(227 => "Entering Passive Mode ($ip_and_port)");
+
+    my $w;
+    $w = AnyEvent->timer(after => 0, cb => sub {
+      $con->send_response(227 => "Entering Passive Mode ($ip_and_port)");
+      undef $w;
+    });
     
   };
   
