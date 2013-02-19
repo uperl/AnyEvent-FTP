@@ -26,6 +26,8 @@ GetOptions(
   'pam=s'      => \$pam,
 );
 
+$0 = 'aeftpd';
+
 $port //= ($> && $^O !~ /^(cygwin|MSWin32)$/) ? 8021 : 21;
 
 if($stderr)

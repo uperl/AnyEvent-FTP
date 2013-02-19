@@ -265,6 +265,7 @@ sub cmd_stat
 
 #################################################
 
+use AnyEvent;
 use AnyEvent::Socket qw( tcp_server tcp_connect );
 use AnyEvent::Handle;
 use File::Spec;

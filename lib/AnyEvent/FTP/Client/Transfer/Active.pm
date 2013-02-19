@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use v5.10;
 use base qw( AnyEvent::FTP::Client::Transfer );
+use AnyEvent;
 use AnyEvent::Socket qw( tcp_server );
 
 # ABSTRACT: Active transfer class for asynchronous ftp client
@@ -38,11 +39,15 @@ sub new
     my($fh, $host, $port) = @_;
     my $ip_and_port = join(',', split(/\./, $self->{client}->{my_ip}), $port >> 8, $port & 0xff);
 
-    $self->push_command(
-      [ PORT => $ip_and_port ],
-      ($args->{restart} > 0 ? ([ REST => $args->{restart} ]) : ()),
-      $args->{command},
-    );
+    my $w;
+    $w = AnyEvent->timer(after => 0, cb => sub {
+      $self->push_command(
+        [ PORT => $ip_and_port ],
+        ($args->{restart} > 0 ? ([ REST => $args->{restart} ]) : ()),
+        $args->{command},
+      );
+      undef $w;
+    });
   };
   
   $self->{cv}->cb(sub {
