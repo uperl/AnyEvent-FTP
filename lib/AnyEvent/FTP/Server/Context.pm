@@ -11,6 +11,8 @@ use Role::Tiny::With;
 with 'AnyEvent::FTP::Role::Event';
 with 'AnyEvent::FTP::Server::Role::Context';
 
+__PACKAGE__->define_events(qw( auth ));
+
 sub new
 {
   my($class) = shift;

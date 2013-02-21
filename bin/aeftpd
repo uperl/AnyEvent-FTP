@@ -17,6 +17,7 @@ my $host;
 my $inet = 0;
 my $stderr;
 my $pam;
+my $chroot = 0;
 
 GetOptions(
   'port=i'     => \$port,
@@ -24,6 +25,7 @@ GetOptions(
   'inet'       => \$inet,
   'stderr=s'   => \$stderr,
   'pam=s'      => \$pam,
+  'chroot'     => \$chroot,
 );
 
 $0 = 'aeftpd';
@@ -69,6 +71,16 @@ if($pam)
       $pam->authenticate( @_ ) ? 1 : 0;
     });
     $con->context->bad_authentication_delay(0);
+
+    if($inet && $< == 0 && $^O !~ /^(cygwin|MSWin32)$/)
+    {
+      require AnyEvent::FTP::UNIX;
+      $con->context->on_auth(sub {
+        my $info = AnyEvent::FTP::UNIX->user_info(shift);
+        AnyEvent::FTP::UNIX->jail($info) if $chroot;
+        AnyEvent::FTP::UNIX->drop_privileges($info);
+      });
+    }
 
     if($stderr)
     {

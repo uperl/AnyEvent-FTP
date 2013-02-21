@@ -74,6 +74,7 @@ sub cmd_pass
   {
     $con->send_response(230 => "User $user logged in");
     $self->{authenticated} = 1;
+    $self->emit(auth => $user);
     $self->done;
   }
   else
