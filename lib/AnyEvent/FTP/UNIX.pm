@@ -2,8 +2,9 @@ package AnyEvent::FTP::UNIX;
 
 use strict;
 use warnings;
+use v5.10;
 
-sub user_info
+sub new
 {
   my($class, $query) = @_;
   my($name, $pw, $uid, $gid, $quota, $comment, $gcos, $dir, $shell, $expire) = getpwnam $query;
@@ -25,34 +26,34 @@ sub user_info
     }
   }
   
-  return {
+  return bless {
     name   => $name,
     uid    => $uid,
     gid    => $gid,
     home   => $dir,
     shell  => $shell,
     groups => \@groups,
-  }
+  }, $class;
 }
 
 sub jail
 {
-  my($class, $info) = @_;
-  chroot $info->{home};
-  return;
+  my($self) = @_;
+  chroot $self->{home};
+  return $self;
 }
 
 sub drop_privileges
 {
-  my($class, $info) = @_;
+  my($self) = @_;
   
-  $) = join ' ', $info->{gid}, $info->{gid}, @{ $info->{groups} };
-  $> = $info->{uid};
+  $) = join ' ', $self->{gid}, $self->{gid}, @{ $self->{groups} };
+  $> = $self->{uid};
   
-  $( = $info->{gid};
-  $< = $info->{uid};
+  $( = $self->{gid};
+  $< = $self->{uid};
 
-  return;
+  return $self;
 }
 
 1;

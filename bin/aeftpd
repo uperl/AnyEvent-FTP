@@ -66,21 +66,37 @@ if($pam)
   
   $server->on_connect(sub {
     my $con = shift;
-    $con->context->authenticator(sub {
-      my($user, $pass) = @_;
-      $pam->authenticate( @_ ) ? 1 : 0;
-    });
-    $con->context->bad_authentication_delay(0);
-
+    
+    my $user_class;
     if($inet && $< == 0 && $^O !~ /^(cygwin|MSWin32)$/)
     {
-      require AnyEvent::FTP::UNIX;
-      $con->context->on_auth(sub {
-        my $info = AnyEvent::FTP::UNIX->user_info(shift);
-        AnyEvent::FTP::UNIX->jail($info) if $chroot;
-        AnyEvent::FTP::UNIX->drop_privileges($info);
-      });
+      $user_class = 'AnyEvent::FTP::UNIX';
+      eval "use $user_class"; die $@ if $@;
     }
+    
+    $con->context->authenticator(sub {
+      my($name, $pass) = @_;
+      
+      $name = 'ftp' if $name eq 'anonymous';
+      
+      my $user;
+      if(defined $user_class)
+      {
+        $user = eval { $user_class->new($name) };
+        return 0 if $@;
+      }
+      
+      return 0 if $name ne 'ftp' && ! $pam->authenticate( $name, $pass );
+      
+      if(defined $user)
+      {
+        $user->jail if $chroot || $name eq 'ftp';
+        $user->drop_privileges;
+      }
+      
+      1;
+    });
+    $con->context->bad_authentication_delay(0);
 
     if($stderr)
     {
