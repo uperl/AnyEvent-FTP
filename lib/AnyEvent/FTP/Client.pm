@@ -1,12 +1,11 @@
 package AnyEvent::FTP::Client;
 
-use strict;
-use warnings;
 use v5.10;
+use Moo;
+use warnings NONFATAL => 'all';
 use AnyEvent;
 use AnyEvent::Socket qw( tcp_connect );
 use AnyEvent::Handle;
-use Role::Tiny::With;
 use Carp qw( croak );
 use Socket qw( unpack_sockaddr_in inet_ntoa );
 
@@ -19,39 +18,47 @@ with 'AnyEvent::FTP::Client::Role::RequestBuffer';
 
 __PACKAGE__->define_events(qw( error close send greeting ));
 
-sub new
-{
-  my($class) = shift;
-  my $args   = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
-  my $self = bless {
-    connected => 0, 
-    timeout   => 30,
-    passive   => $args->{passive}  // 1,
-  }, $class;
+has _connected => (
+  is       => 'rw',
+  default  => sub { 0 },
+  init_arg => undef,
+);
 
-  if($self->{passive})
-  { 
-    require AnyEvent::FTP::Client::Transfer::Passive;
-    $self->{store} = 'AnyEvent::FTP::Client::Transfer::Passive::Store';
-    $self->{fetch} = 'AnyEvent::FTP::Client::Transfer::Passive::Fetch';
-    $self->{list}  = 'AnyEvent::FTP::Client::Transfer::Passive::List';
-  }
-  else
-  {
-    require AnyEvent::FTP::Client::Transfer::Active;
-    $self->{store} = 'AnyEvent::FTP::Client::Transfer::Active::Store';
-    $self->{fetch} = 'AnyEvent::FTP::Client::Transfer::Active::Fetch';
-    $self->{list}  = 'AnyEvent::FTP::Client::Transfer::Active::List';
-  }
-  
+has timeout => (
+  is      => 'rw',
+  default => sub { 30 },
+);
+
+has passive => (
+  is      => 'ro',
+  default => sub { 1 },
+);
+
+foreach my $xfer (qw( Store Fetch List ))
+{
+  my $cb = sub {
+    return shift->passive
+    ? 'AnyEvent::FTP::Client::Transfer::Passive::'.$xfer
+    : 'AnyEvent::FTP::Client::Transfer::Active::'.$xfer;
+  };
+  has '_'.lc($xfer) => ( is => 'ro', lazy => 1, default => $cb, init_arg => undef ),
+}
+
+sub BUILD
+{
+  my($self) = @_;
   $self->on_error(sub { warn shift });
   $self->on_close(sub {
     $self->clear_command;
-    $self->{connected} = 0;
+    $self->_connected(0);
     delete $self->{handle};
   });
   
-  $self;
+  require ($self->passive
+    ? 'AnyEvent/FTP/Client/Transfer/Passive.pm'
+    : 'AnyEvent/FTP/Client/Transfer/Active.pm');
+  
+  return;
 }
 
 sub connect
@@ -77,17 +84,17 @@ sub connect
     $port //= 21;
   }
   
-  croak "Tried to reconnect while connected" if $self->{connected};
+  croak "Tried to reconnect while connected" if $self->_connected;
   
   my $cv = AnyEvent->condvar;
-  $self->{connected} = 1;
+  $self->_connected(1);
   
   tcp_connect $host, $port, sub {
     my($fh) = @_;
     unless($fh)
     {
       $cv->croak("unable to connect: $!");
-      $self->{connected} = 0;
+      $self->_connected(0);
       $self->clear_command;
       return;
     }
@@ -141,7 +148,7 @@ sub connect
     });
     
   }, sub { 
-    $self->{timeout}
+    $self->timeout;
   };
   
   return $cv;
@@ -160,7 +167,7 @@ sub retr
 {
   my($self, $filename, $local) = (shift, shift, shift);
   my $args   = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
-  $self->{fetch}->new({
+  $self->_fetch->new({
     command     => [ RETR => $filename ],
     local       => $local,
     client      => $self,
@@ -171,7 +178,7 @@ sub retr
 sub stor
 {
   my($self, $filename, $local) = @_;
-  $self->{store}->new(
+  $self->_store->new(
     command     => [STOR => $filename],
     local       => $local,
     client      => $self,
@@ -187,7 +194,7 @@ sub stou
     $xfer->{remote_name} = $name if defined $name;
     return;
   };
-  $xfer = $self->{store}->new(
+  $xfer = $self->_store->new(
     command     => [STOU => $filename, $cb],
     local       => $local,
     client      => $self,
@@ -198,7 +205,7 @@ sub stou
 sub appe
 {
   my($self, $filename, $local) = @_;
-  $self->{store}->new(
+  $self->_store->new(
     command     => [APPE => $filename],
     local       => $local,
     client      => $self,
@@ -208,21 +215,16 @@ sub appe
 sub nlst
 {
   my($self, $location) = @_;
-  $self->_list(NLST => $location);
+  $self->list($location, 'NLST');
 }
 
 sub list
 {
-  my($self, $location) = @_;
-  $self->_list(LIST => $location);
-}
-
-sub _list
-{
-  my($self, $verb, $location) = @_;
+  my($self, $location, $verb) = @_;
+  $verb //= 'LIST';
   my @lines;
   my $cv = AnyEvent->condvar;
-  $self->{list}->new(
+  $self->_list->new(
     command     => [ $verb => $location ],
     local       => \@lines,
     client      => $self,
