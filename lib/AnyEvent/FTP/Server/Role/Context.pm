@@ -1,9 +1,8 @@
 package AnyEvent::FTP::Server::Role::Context;
 
-use strict;
-use warnings;
 use v5.10;
-use Role::Tiny;
+use Moo::Role;
+use warnings NONFATAL => 'all';
 
 # ABSTRACT: Server connection context role
 # VERSION

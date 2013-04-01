@@ -5,11 +5,10 @@ use Test::More tests => 14;
 eval {
   package Client;
 
-  use Role::Tiny::With;
+  use Moo;
+  use warnings NONFATAL => 'all';
 
   with 'AnyEvent::FTP::Client::Role::ResponseBuffer';
-
-  sub new { bless { }, 'Client' }
 };
 diag $@ if $@;
 

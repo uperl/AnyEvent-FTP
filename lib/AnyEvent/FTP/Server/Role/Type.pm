@@ -1,9 +1,8 @@
 package AnyEvent::FTP::Server::Role::Type;
 
-use strict;
-use warnings;
 use v5.10;
-use Role::Tiny;
+use Moo::Role;
+use warnings NONFATAL => 'all';
 
 # ABSTRACT: Type role for FTP server
 # VERSION

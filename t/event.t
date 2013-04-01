@@ -5,13 +5,12 @@ use Test::More tests => 20;
 eval {
   package Foo;
 
-  use Role::Tiny::With;
+  use Moo;
+  use warnings NONFATAL => 'all';
 
   with 'AnyEvent::FTP::Role::Event';
 
   __PACKAGE__->define_events(qw(bar baz other));
-
-  sub new { bless { }, 'Foo' }
 };
 is $@, '', 'Create class Foo';
 

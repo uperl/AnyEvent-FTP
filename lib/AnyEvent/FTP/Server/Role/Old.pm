@@ -1,9 +1,8 @@
 package AnyEvent::FTP::Server::Role::Old;
 
-use strict;
-use warnings;
 use v5.10;
-use Role::Tiny;
+use Moo::Role;
+use warnings NONFATAL => 'all';
 
 # ABSTRACT: Role for old archaic FTP server commands
 # VERSION

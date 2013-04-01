@@ -1,9 +1,8 @@
 package AnyEvent::FTP::Client::Role::ListTransfer;
 
-use strict;
-use warnings;
 use v5.10;
-use Role::Tiny;
+use Moo::Role;
+use warnings NONFATAL => 'all';
 
 # ABSTRACT: Fetch transfer interface for AnyEvent::FTP objects
 # VERSION

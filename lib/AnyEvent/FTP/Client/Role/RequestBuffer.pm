@@ -1,9 +1,8 @@
 package AnyEvent::FTP::Client::Role::RequestBuffer;
 
-use strict;
-use warnings;
 use v5.10;
-use Role::Tiny;
+use Moo::Role;
+use warnings NONFATAL => 'all';
 use AnyEvent;
 
 # ABSTRACT: Request buffer role for asynchronous ftp client

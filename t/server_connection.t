@@ -7,11 +7,10 @@ use AnyEvent::FTP::Server::Connection;
 eval q{
   package Context;
   
-  use Role::Tiny::With;
+  use Moo;
+  use warnings NONFATAL => 'all';
   
   with 'AnyEvent::FTP::Server::Role::Context';
-
-  sub new { bless {}, 'Context' }
 
   sub push_request
   {

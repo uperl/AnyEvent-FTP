@@ -1,9 +1,8 @@
 package AnyEvent::FTP::Server::Role::Help;
 
-use strict;
-use warnings;
 use v5.10;
-use Role::Tiny;
+use Moo::Role;
+use warnings NONFATAL => 'all';
 
 # ABSTRACT: Help role for FTP server
 # VERSION

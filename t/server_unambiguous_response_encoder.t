@@ -11,15 +11,10 @@ isa_ok $encoder, 'AnyEvent::FTP::Server::UnambiguousResponseEncoder';
 eval q{
   package Client;
   
-  use Role::Tiny::With;
+  use Moo;
+  use warnings NONFATAL => 'all';
   
   with 'AnyEvent::FTP::Client::Role::ResponseBuffer';
-  
-  sub new
-  {
-    my $class = shift;
-    bless {}, $class;
-  }
 };
 die $@ if $@;
 
