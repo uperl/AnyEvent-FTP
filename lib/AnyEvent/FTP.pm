@@ -7,9 +7,32 @@ use v5.10;
 # ABSTRACT: Simple asynchronous ftp client and server
 # VERSION
 
+=head1 SYNOPSIS
+
+ # for the client
+ use AnyEvent::FTP::Client;
+ 
+ # for the server
+ use AnyEvent::FTP::Server;
+
+=head1 DESCRIPTION
+
+This distribution provides client and server implementations for 
+File Transfer Protocol (FTP) in an AnyEvent environment.  For the
+specific interfaces, see L<AnyEvent::FTP::Client> and L<AnyEvent::FTP::Server>
+for details.
+
 =head1 SEE ALSO
 
 =over 4
+
+=item *
+
+L<AnyEvent::FTP::Client>
+
+=item *
+
+L<AnyEvent::FTP::Server>
 
 =item *
 

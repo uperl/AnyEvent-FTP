@@ -4,6 +4,9 @@ use strict;
 use warnings;
 use v5.10;
 
+# ABSTRACT: UNIX implementations for AnyEvent::FTP
+# VERSION
+
 sub new
 {
   my($class, $query) = @_;
