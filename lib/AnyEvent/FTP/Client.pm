@@ -12,9 +12,57 @@ use Socket qw( unpack_sockaddr_in inet_ntoa );
 # ABSTRACT: Simple asynchronous ftp client
 # VERSION
 
+=head1 SYNOPSIS
+
+ use AnyEvent;
+ use AnyEvent::FTP::Client;
+ 
+ my $client = AnyEvent::FTP::Cient->new;
+
+=head1 DESCRIPTION
+
+This class provides an AnyEvent client interface to the File
+Transfer Protocol (FTP).
+
+=head1 ROLES
+
+This class consumes these roles:
+
+=over 4
+
+=item *
+
+L<AnyEvent::FTP::Role::Event>
+
+=item *
+
+L<AnyEvent::FTP::Client::Role::ResponseBuffer>
+
+=item *
+
+L<AnyEvent::FTP::Client::Role::RequestBuffer>
+
+=back 4
+
+=cut
+
 with 'AnyEvent::FTP::Role::Event';
 with 'AnyEvent::FTP::Client::Role::ResponseBuffer';
 with 'AnyEvent::FTP::Client::Role::RequestBuffer';
+
+=head1 EVENTS
+
+For details on the event interface see L<AnyEvent::FTP::Role::Event>.
+
+=head2 error
+
+=head2 close
+
+=head2 send
+
+=head2 greeting
+
+=cut
 
 __PACKAGE__->define_events(qw( error close send greeting ));
 
@@ -24,10 +72,20 @@ has _connected => (
   init_arg => undef,
 );
 
+=head1 ATTRIBUTES
+
+=head2 timeout
+
+=cut
+
 has timeout => (
   is      => 'rw',
   default => sub { 30 },
 );
+
+=head2 passive
+
+=cut
 
 has passive => (
   is      => 'ro',
@@ -60,6 +118,12 @@ sub BUILD
   
   return;
 }
+
+=head1 METHODS
+
+=head2 $client-E<gt>connect($host, [ $port ])
+
+=cut
 
 sub connect
 {
@@ -154,6 +218,10 @@ sub connect
   return $cv;
 }
 
+=head2 $client-E<gt>login($user, $pass)
+
+=cut
+
 sub login
 {
   my($self, $user, $pass) = @_;
@@ -162,6 +230,10 @@ sub login
     [ PASS => $pass ]
   );
 }
+
+=head2 $client-E<gt>retr($filename, $local)
+
+=cut
 
 sub retr
 {
@@ -175,6 +247,10 @@ sub retr
   });
 }
 
+=head2 $client-E<gt>stor($filename, $local)
+
+=cut
+
 sub stor
 {
   my($self, $filename, $local) = @_;
@@ -184,6 +260,10 @@ sub stor
     client      => $self,
   );
 }
+
+=head2 $client-E<gt>stou($filename, $local)
+
+=cut
 
 sub stou
 {
@@ -201,6 +281,10 @@ sub stou
   );
 }
 
+=head2 $client-E<gt>appe($filename, $local)
+
+=cut
+
 # for this to work under ProFTPd: AllowStoreRestart off
 sub appe
 {
@@ -212,11 +296,19 @@ sub appe
   );
 }
 
+=head2 $client-E<gt>nlst($location)
+
+=cut
+
 sub nlst
 {
   my($self, $location) = @_;
   $self->list($location, 'NLST');
 }
+
+=head2 $client-E<gt>list($location)
+
+=cut
 
 sub list
 {
@@ -236,6 +328,10 @@ sub list
   $cv;
 }
 
+=head2 $client-E<gt>rename($from, $to)
+
+=cut
+
 sub rename
 {
   my($self, $from, $to) = @_;
@@ -245,9 +341,49 @@ sub rename
   );
 }
 
+=head2 $client-E<gt>cwd
+
+=head2 $client-E<gt>cdup
+
+=head2 $client-E<gt>noop
+
+=head2 $client-E<gt>allo
+
+=head2 $client-E<gt>syst
+
+=head2 $client-E<gt>type
+
+=head2 $client-E<gt>stru
+
+=head2 $client-E<gt>mode
+
+=head2 $client-E<gt>rest
+
+=head2 $client-E<gt>mkd
+
+=head2 $client-E<gt>rmd
+
+=head2 $client-E<gt>stat
+
+=head2 $client-E<gt>help
+
+=head2 $client-E<gt>dele
+
+=head2 $client-E<gt>rnfr
+
+=head2 $client-E<gt>rnto
+
+=head2 $client-E<gt>user
+
+=head2 $client-E<gt>pass
+
+=head2 $client-E<gt>acct
+
+=cut
+
 (eval sprintf('sub %s { shift->push_command([ %s => @_])};1', lc $_, $_)) // die $@ 
   for qw( CWD CDUP NOOP ALLO SYST TYPE STRU MODE REST MKD RMD STAT HELP DELE RNFR RNTO USER PASS ACCT );
-
+  
 sub pwd
 {
   my($self) = @_;
@@ -260,6 +396,10 @@ sub pwd
   });
   $cv;
 }
+
+=head2 $client-E<gt>quit
+
+=cut
 
 sub quit
 {
@@ -287,6 +427,10 @@ sub quit
   return $cv;
 }
 
+=head2 $client-E<gt>site
+
+=cut
+
 sub site
 {
   require AnyEvent::FTP::Client::Site;
@@ -294,3 +438,19 @@ sub site
 }
 
 1;
+
+=head1 SEE ALSO
+
+=over 4
+
+=item *
+
+L<AnyEvent::FTP>
+
+=item *
+
+L<AnyEvent::FTP::Server>
+
+=back
+
+=cut
