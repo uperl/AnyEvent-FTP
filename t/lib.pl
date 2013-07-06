@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use v5.10;
-use YAML::XS qw( LoadFile );
+use YAML qw( LoadFile );
 use File::HomeDir;
 use FindBin ();
 use Path::Class qw( dir );
