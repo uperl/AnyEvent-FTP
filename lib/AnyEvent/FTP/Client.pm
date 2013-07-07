@@ -42,7 +42,7 @@ L<AnyEvent::FTP::Client::Role::ResponseBuffer>
 
 L<AnyEvent::FTP::Client::Role::RequestBuffer>
 
-=back 4
+=back
 
 =cut
 
