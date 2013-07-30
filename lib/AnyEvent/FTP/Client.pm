@@ -364,7 +364,7 @@ sub login
   );
 }
 
-=head2 $client-E<gt>retr($filename, $local)
+=head2 $client-E<gt>retr($filename, $local, %options)
 
 Retrieve the given file from the server and use C<$local> to store the results.
 
@@ -400,6 +400,16 @@ server.
  $client-E<gt>retr('foo.txt', 'foo.txt');
  
 =back
+
+In order to resume a transfer, you need to include the C<restart> option after the 
+C<$local> argument.  Here is an example:
+
+ # assumes foo.txt (partial download) exists in the current
+ # loacal directory and foo.txt (full file) exists in the
+ # current remote directory.
+ my $filename = 'foo.txt';
+ open my $fh, '>>', $filename;
+ $client->retr($filename, $fh, restart => tell $fh);
 
 =cut
 
@@ -636,7 +646,9 @@ after logging on:
 
 =head2 $client-E<gt>rest
 
-TODO
+This command is used to resume a download transfer.  Typically you would
+not use this method directly, but instead add a C<restart> option on
+the C<retr> method instead.
 
 =head2 $client-E<gt>mkd( $path )
 
@@ -828,7 +840,7 @@ to see the long form of the file listing.
 
 =head2 fput.pl
 
-This script uploads a loal file to the remote given a local filename
+This script uploads a local file to the remote given a local filename
 and a remote FTP URL.
 
 # EXAMPLE: example/fput.pl

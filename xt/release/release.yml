@@ -15,6 +15,9 @@ pod_spelling_system:
     - SKIPJACK
     - IP
     - unparsed
+    - fget
+    - fput
+    - fls
 
 pod_coverage:
   # format is "Class#method" or "Class", regex allowed
