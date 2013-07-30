@@ -796,7 +796,7 @@ See L<AnyEvent::FTP::Client::Site::Microsoft>.
 
 =item $client-E<gt>site-E<gt>net_ftp_server
 
-For commands specific to L<Net::FTP::Server>.
+For commands specific to L<Net::FTPServer>.
 See L<AnyEvent::FTP::Client::Site::NetFtpServer>.
 
 =item $client-E<gt>site-E<gt>proftpd
