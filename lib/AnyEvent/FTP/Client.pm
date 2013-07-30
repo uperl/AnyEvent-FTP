@@ -579,10 +579,20 @@ Specify the password to use for login.  See C<connect> or C<login> methods for a
 Specify user's account.  This is sometimes used for authentication and authorization when you login
 to some servers, but is seldom used today in practice.  See RFC959 for details.
 
+=head2 $client-E<gt>size( $path )
+
+Get the size of the remote file specified by C<$path>.  This is an extension to the FTP standard specified in
+RFC3659, and may not be implemented by older (or even newer) servers.
+
+=head2 $client-E<gt>mdtm( $path )
+
+Get the modification time of the remote file specified by C<$path>.  This is an extension to the FTP standard
+specified in RFC3659, and may not be implemented by older (or even newer) servers.
+
 =cut
 
 (eval sprintf('sub %s { shift->push_command([ %s => @_])};1', lc $_, $_)) // die $@ 
-  for qw( CWD CDUP NOOP ALLO SYST TYPE STRU MODE REST MKD RMD STAT HELP DELE RNFR RNTO USER PASS ACCT );
+  for qw( CWD CDUP NOOP ALLO SYST TYPE STRU MODE REST MKD RMD STAT HELP DELE RNFR RNTO USER PASS ACCT SIZE MDTM );
   
 sub pwd
 {
