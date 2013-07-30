@@ -19,11 +19,29 @@ pod_spelling_system:
     - fput
     - fls
     - aeftpd
+    - CDPATH
+    - CHECKMETHOD
+    - CHECKSUM
+    - cb
 
 pod_coverage:
   # format is "Class#method" or "Class", regex allowed
   # for either Class or method.
   private:
     - .*#new
+    - .*#BUILD
     - AnyEvent::FTP::Client::Role::RequestBuffer
     - AnyEvent::FTP::Client::Role::ResponseBuffer
+    - AnyEvent::FTP::Client::Transfer#handle
+    - AnyEvent::FTP::Client::Transfer::Active
+    - AnyEvent::FTP::Client::Transfer::Passive
+    - AnyEvent::FTP::Client::Role::FetchTransfer
+    - AnyEvent::FTP::Client::Role::ListTransfer
+    - AnyEvent::FTP::Client::Role::StoreTransfer
+    
+    # The ::Site:: module documentation actually cover these methods,
+    # but Test::Pod::Coverage doesn't like the multipe arrow thing that is
+    # going on there, but I think it be more clear
+    - AnyEvent::FTP::Client::Site::Microsoft#dirstyle
+    - AnyEvent::FTP::Client::Site::NetFtpServer#version
+    - AnyEvent::FTP::Client::Site::Proftpd#(chgrp|chmod|help|quota|ratio|rmdir|symlink|utime|mkdir)
