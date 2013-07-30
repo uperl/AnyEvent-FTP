@@ -804,6 +804,35 @@ sub site
 
 1;
 
+=head1 EXAMPLES
+
+Here are some longer examples.  They are also included with the
+L<AnyEvent::FTP> distribution in its C<example> directory.
+
+=head2 fget.pl
+
+Given a URL to a file, this script will fetch the file and store it
+on your local machine.  If you use the C<-d> option you can see the
+FTP commands and their responses as they happen.
+
+# EXAMPLE: example/fget.pl
+
+=head2 fls.pl
+
+Here is a similar example, which does a directory listing on a FTP
+directory URL.  If you use the C<-d> option to see the FTP commands
+and their responses as they happen.  You can use the C<-l> option
+to see the long form of the file listing.
+
+# EXAMPLE: example/fls.pl
+
+=head2 fput.pl
+
+This script uploads a loal file to the remote given a local filename
+and a remote FTP URL.
+
+# EXAMPLE: example/fput.pl
+
 =head1 SEE ALSO
 
 =over 4
