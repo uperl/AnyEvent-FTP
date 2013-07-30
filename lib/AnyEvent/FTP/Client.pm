@@ -57,13 +57,71 @@ with 'AnyEvent::FTP::Client::Role::RequestBuffer';
 
 For details on the event interface see L<AnyEvent::FTP::Role::Event>.
 
+=head2 send
+
+This event gets fired on every command sent to the remote server.  Keep
+in mind that some methods of L<AnyEvent::FTP> may make multiple FTP commands
+in order to implement their functionality (for example, C<recv>, C<stor>, etc).
+One use of this event is to print out commands as they are sent for debugging:
+
+ $client->on_send(sub {
+   my($cmd, $arguments) = @_;
+   $arguments //= '';
+   # hide passwords
+   $arguments = 'XXXX' if $cmd =~ /^pass$/i;
+   say "CLIENT: $cmd $arguments";
+ });
+
 =head2 error
+
+This event is emitted when there is a network error with the remote server.
+It passes in a string which describes in human readable description of what
+went wrong.
+
+ $client->on_error(sub {
+   my($message) = @_;
+   warn "network error: $message";
+ });
 
 =head2 close
 
-=head2 send
+This event is emitted when the connection with the remote server is closed,
+either due to an error, or when you send the FTP C<QUIT> command using the
+C<quid> method.
+
+ $client->on_close(sub {
+   # called when connection closed
+ });
 
 =head2 greeting
+
+This event gets fired on the first response returned from the server.  This
+is usually a C<220> message which may or may not reveal the server software.
+
+ $client->on_greeting(sub {
+   # $res is a AnyEvent::FTP::Client::Response
+   my($res) = @_;
+   if($res->message->[0] =~ /ProFTPD/)
+   {
+     # detected a ProFTPD server
+   }
+ });
+
+=head2 each_response
+
+This event gets fired for each response returned from the server.  This can
+be useful for printing the responses for debugging.
+
+ $client->on_each_response(sub {
+   # $res isa AnyEvent::FTP::Client::Response
+   my($res) = @_;
+   print "SERVER: $res\n";
+ });
+
+=head2 next_response
+
+Works just like C<each_response> event, but only gets fired for the next response
+received.
 
 =cut
 
@@ -133,10 +191,42 @@ sub BUILD
 
 =head1 METHODS
 
-Unless otherwise specified, these methods will return an AnyEvent condition variable (AnyEvent->condvar)
-or an object that implements its interface (methods C<recv>, C<cb>).  On success the C<send> will be used
-on the condition variable, on failure C<croak> will be used instead.  Unless otherwise specified the object
-sent (for both success and failure) will be an instance of L<AnyEvent::FTP::Client::Response>.
+Unless otherwise specified, these methods will return an AnyEvent condition variable 
+(AnyEvent->condvar) or an object that implements its interface (methods C<recv>, C<cb>).  
+On success the C<send> will be used on the condition variable, on failure C<croak> will be 
+used instead.  Unless otherwise specified the object sent (for both success and failure) 
+will be an instance of L<AnyEvent::FTP::Client::Response>.
+
+As an example, here is a fairly thorough handling of a response to the standard FTP C<HELP>
+command:
+
+ $client-E<gt>help->cb(sub {
+   my $res = eval { shift->recv };
+   if(my $error = $@)
+   {
+     # $error isa AnyEvent::FTP::Client::Response with a 4xx or 5xx
+     # code
+     my $code = $error->code;
+     # the message component is always a list ref, even if
+     # the response had just one message line
+     my @msg  = @{ $error->message };
+     # $error is stringified into something human readable when
+     # it is streated as a string
+     warn "error trying FTP HELP command: $error";
+   }
+   else
+   {
+     # $res isa AnyEvent::FTP::Client::Response with a 2xx or 3xx
+     # code
+     my $code = $res->code;
+     # the message component is always a list ref, even if
+     # the response had just one message line
+     my @msg = @{ $res->message };
+     # $res is stringified into something human readable when
+     # it is streated as a string
+     print "help message: $res";
+   }
+ });
 
 =head2 $client-E<gt>connect(@remote_host)
 
@@ -498,6 +588,26 @@ sub rename
 
 Change to the given directory on the remote server.
 
+=head2 $client-E<gt>pwd
+
+Gets the current working directory on the remote server.  This gets just the string
+representing the directory path instead of a L<AnyEvent::FTP::Client::Response> object.
+
+=cut
+  
+sub pwd
+{
+  my($self) = @_;
+  my $cv = AnyEvent->condvar;
+  $self->push_command(['PWD'])->cb(sub {
+    my $res = eval { shift->recv } // $@;
+    my $dir = $res->get_dir;
+    if($dir) { $cv->send($dir) } 
+    else { $cv->croak($res) }
+  });
+  $cv;
+}
+
 =head2 $client-E<gt>cdup
 
 Change to the parent directory on the remote server.  This is usually the same
@@ -594,19 +704,6 @@ specified in RFC3659, and may not be implemented by older (or even newer) server
 (eval sprintf('sub %s { shift->push_command([ %s => @_])};1', lc $_, $_)) // die $@ 
   for qw( CWD CDUP NOOP ALLO SYST TYPE STRU MODE REST MKD RMD STAT HELP DELE RNFR RNTO USER PASS ACCT SIZE MDTM );
   
-sub pwd
-{
-  my($self) = @_;
-  my $cv = AnyEvent->condvar;
-  $self->push_command(['PWD'])->cb(sub {
-    my $res = eval { shift->recv } // $@;
-    my $dir = $res->get_dir;
-    if($dir) { $cv->send($dir) } 
-    else { $cv->croak($res) }
-  });
-  $cv;
-}
-
 =head2 $client-E<gt>quit
 
 Send the FTP C<QUIT> command and close the connection to the remote server.

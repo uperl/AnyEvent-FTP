@@ -7,6 +7,22 @@ use v5.10;
 # ABSTRACT: UNIX implementations for AnyEvent::FTP
 # VERSION
 
+=head1 SYNOPSIS
+
+ use AnyEvent::FTP::UNIX;
+ 
+ # interface using user fred
+ my $unix = AnyEvent::FTP::UNIX->new('fred');
+ $unix->jail;            # chroot
+ $unix->drop_privileges; # transform into user fred
+
+=head1 DESCRIPTION
+
+This class provides some utility functionality for interacting with the
+UNIX and UNIX like operating systems.
+
+=cut
+
 sub new
 {
   my($class, $query) = @_;
@@ -39,12 +55,26 @@ sub new
   }, $class;
 }
 
+=head1 METHODS
+
+=head2 $unix-E<gt>jail
+
+C<chroot> to the users' home directory.  Requires root and the chroot function.
+
+=cut
+
 sub jail
 {
   my($self) = @_;
   chroot $self->{home};
   return $self;
 }
+
+=head2 $unix-E<gt>drop_privileges
+
+Drop super user privileges
+
+=cut
 
 sub drop_privileges
 {

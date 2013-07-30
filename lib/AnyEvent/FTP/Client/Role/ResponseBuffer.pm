@@ -8,6 +8,12 @@ use AnyEvent::FTP::Client::Response;
 # ABSTRACT: Response buffer role for asynchronous ftp client
 # VERSION
 
+=head1 DESCRIPTION
+
+Used internally by L<AnyEvent::FTP::Client>.
+
+=cut
+
 sub on_next_response
 {
   my($self, $cb) = @_;

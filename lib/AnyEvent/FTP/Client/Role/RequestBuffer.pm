@@ -8,6 +8,12 @@ use AnyEvent;
 # ABSTRACT: Request buffer role for asynchronous ftp client
 # VERSION
 
+=head1 DESCRIPTION
+
+Used internally by L<AnyEvent::FTP::Client>.
+
+=cut
+
 sub push_command
 {
   my $cv;
