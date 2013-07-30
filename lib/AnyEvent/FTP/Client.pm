@@ -14,10 +14,13 @@ use Socket qw( unpack_sockaddr_in inet_ntoa );
 
 =head1 SYNOPSIS
 
- use AnyEvent;
- use AnyEvent::FTP::Client;
- 
- my $client = AnyEvent::FTP::Cient->new;
+Non blocking example:
+
+# EXAMPLE: example/non_blocking_retr.pl
+
+Same, but using recv to wait for each command to complete (not supported in all event loops):
+
+# EXAMPLE: example/blocking_retr.pl
 
 =head1 DESCRIPTION
 
@@ -76,6 +79,9 @@ has _connected => (
 
 =head2 timeout
 
+Timeout for the initial connection to the FTP server.  The default
+is 30.
+
 =cut
 
 has timeout => (
@@ -84,6 +90,12 @@ has timeout => (
 );
 
 =head2 passive
+
+If set to true (the default) then data will be transferred using the 
+passive (PASV) command, meaning the server will open a port for the
+client to connect to.  If set to false then data will be transferred
+using data port (PORT) command, meaning the client will open a port
+for the server to send to.
 
 =cut
 
@@ -121,7 +133,35 @@ sub BUILD
 
 =head1 METHODS
 
-=head2 $client-E<gt>connect($host, [ $port ])
+Unless otherwise specified, these methods will return an AnyEvent condition variable (AnyEvent->condvar)
+or an object that implements its interface (methods C<recv>, C<cb>).  On success the C<send> will be used
+on the condition variable, on failure C<croak> will be used instead.  Unless otherwise specified the object
+sent (for both success and failure) will be an instance of L<AnyEvent::FTP::Client::Response>.
+
+=head2 $client-E<gt>connect(@remote_host)
+
+Connect to the FTP server.  The remote host may be specified in one
+of these ways:
+
+=over 4
+
+=item $client-E<gt>connect($host, [ $port ])
+
+The host and port of the remote server.  If not specified, the default FTP port will be used (21).
+
+=item $client-E<gt>connect($uri)
+
+The URI of the remote FTP server.  C<$uri> must be either an instance of L<URI> with the C<ftp>
+scheme, or a string with an FTP URL.
+
+If you use this method to connect to the FTP server, connect will also attempt to login with
+the username and password specified in the URL (or anonymous FTP if no credentials are 
+specified).
+
+If there is a path included in the URL, then connect will also do a C<CWD> so that you start
+in that directory.
+
+=back
 
 =cut
 
@@ -220,6 +260,9 @@ sub connect
 
 =head2 $client-E<gt>login($user, $pass)
 
+Attempt to login to the FTP server which has already been connected to using
+the C<connect> method.  This is not necessary if you used C<connect> with a URI.
+
 =cut
 
 sub login
@@ -232,6 +275,41 @@ sub login
 }
 
 =head2 $client-E<gt>retr($filename, $local)
+
+Retrieve the given file from the server and use C<$local> to store the results.
+
+Returns an instance of L<AnyEvent::FTP::Client::Transfer>, which supports the
+AnyEvent condition variable interface (that is it has C<cb> and C<recv> methods).
+Its callback will be called when the transfer is complete.
+
+C<$local> may be one of
+
+=over 4
+
+=item scalar reference
+
+The contents of the file will be stored in the scalar referred to by the reference.
+
+ my $local;
+ $client-E<gt>retr('foo.txt', \$local);
+
+=item file handle
+
+The content of the remote file will be written into the local file handle as it is
+received
+
+ open my $fh, '>', 'foo.txt';
+ $client-E<gt>retr('foo.txt', $fh);
+
+=item the name of the local file
+
+If C<$local> is just a regular non reference scalar, then it will be treated as the
+local filename, which will be created and written to as data is received from the
+server.
+
+ $client-E<gt>retr('foo.txt', 'foo.txt');
+ 
+=back
 
 =cut
 
@@ -249,6 +327,41 @@ sub retr
 
 =head2 $client-E<gt>stor($filename, $local)
 
+Send a file to the server with the given remote filename (C<$filename>)
+and using C<$local> as a source.
+
+Returns an instance of L<AnyEvent::FTP::Client::Transfer>, which supports the
+AnyEvent condition variable interface (that is it has C<cb> and C<recv> methods).
+Its callback will be called when the transfer is complete.
+
+C<$local> may be one of
+
+=over 4
+
+=item scalar reference
+
+The contents of the file will be retrieved from the scalar referred to by the reference.
+
+ my $local = 'some data for foo.txt';
+ $client-E<gt>stor('foo.txt', \$local);
+
+=item file handle
+
+The contents of the file will be read from the file handle.
+
+ open my $fh, '<', 'foo.txt';
+ $client-E<gt>stor('foo.txt', $fh);
+
+=item the name of the local file
+
+If C<$local> is just a regular non reference scalar, then it will be treated as the
+local filename, which will be opened and read from in order to create the file on
+the server.
+
+ $client-E<gt>stor('foo.txt', 'foo.txt');
+ 
+=back
+
 =cut
 
 sub stor
@@ -262,6 +375,16 @@ sub stor
 }
 
 =head2 $client-E<gt>stou($filename, $local)
+
+Works exactly like the C<stor> method, except use the FTP C<STOU> command instead of
+C<STOR>.  Since the remote filename is optional for C<STOU> you may pass in C<undef>
+as the remote filename.  You can get the remote filename after the fact using the
+C<remote_name> method.
+
+ my $xfer;
+ $xfer = $client->stou(undef, $local)->cb(sub {
+   my $remote_filename = $xfer->remote_name;
+ });
 
 =cut
 
@@ -283,6 +406,13 @@ sub stou
 
 =head2 $client-E<gt>appe($filename, $local)
 
+Works exactly like the C<stor> method, except use the FTP C<APPE> command instead of
+C<STOR>.  This method will append C<$local> to the remote file.  If you want to resume
+a transfer, you should make C<$local> a file handle, seek to the appropriate location
+in the file and use this method.
+
+TODO: resume example
+
 =cut
 
 # for this to work under ProFTPd: AllowStoreRestart off
@@ -296,17 +426,13 @@ sub appe
   );
 }
 
-=head2 $client-E<gt>nlst($location)
-
-=cut
-
-sub nlst
-{
-  my($self, $location) = @_;
-  $self->list($location, 'NLST');
-}
-
 =head2 $client-E<gt>list($location)
+
+Execute the FTP C<LIST> command.  The results will be sent as a list reference
+(instead of a L<AnyEvent::FTP::Client::Response> object) to the returned condition
+variable.
+
+# EXAMPLE: example/list.pl
 
 =cut
 
@@ -328,7 +454,34 @@ sub list
   $cv;
 }
 
+=head2 $client-E<gt>nlst($location)
+
+Works exactly like the C<list> method, except the FTP C<NLST> command is used.
+The main difference is that this method returns filenames only.
+
+=cut
+
+sub nlst
+{
+  my($self, $location) = @_;
+  $self->list($location, 'NLST');
+}
+
 =head2 $client-E<gt>rename($from, $to)
+
+This method renames the remote file from C<$from> to C<$to>.
+It uses the FTP C<RNFR> and C<RNTO> commands and thus this:
+
+ my $cv = $client->rename($from, $to);
+
+is a short cut for:
+
+ my $cv;
+ $client->rnfr($from)->cb(sub {
+   $cv = $client->rnto($to);
+ });
+
+Although C<$cv> may not be defined right away, so use the second with care.
 
 =cut
 
@@ -341,43 +494,90 @@ sub rename
   );
 }
 
-=head2 $client-E<gt>cwd
+=head2 $client-E<gt>cwd( $dir )
+
+Change to the given directory on the remote server.
 
 =head2 $client-E<gt>cdup
 
-=head2 $client-E<gt>noop
+Change to the parent directory on the remote server.  This is usually the same
+as
 
-=head2 $client-E<gt>allo
-
-=head2 $client-E<gt>syst
+ $client->cwd('..');
 
 =head2 $client-E<gt>type
 
-=head2 $client-E<gt>stru
+Set the transfer type.  You almost always want to set to binary mode immediately
+after logging on:
 
-=head2 $client-E<gt>mode
+ $client->type('I');
 
 =head2 $client-E<gt>rest
 
-=head2 $client-E<gt>mkd
+TODO
 
-=head2 $client-E<gt>rmd
+=head2 $client-E<gt>mkd( $path )
 
-=head2 $client-E<gt>stat
+Create a directory on the remote server.
 
+=head2 $client-E<gt>rmd( $path )
+
+Remove a directory on the remote server.
+ 
 =head2 $client-E<gt>help
 
-=head2 $client-E<gt>dele
+Gets a list of commands understood by the server.
+The actual format depends on the server.
+
+=head2 $client-E<gt>dele( $path )
+
+Delete the file on the remote server.
 
 =head2 $client-E<gt>rnfr
 
+Specify the old name for renaming a file.  See C<rename> method for a shortcut.
+
 =head2 $client-E<gt>rnto
 
-=head2 $client-E<gt>user
+Specify the new name for renaming a file.  See C<rename> method for a shortcut.
+ 
+=head2 $client-E<gt>noop
+
+Don't do anything.  The server will send an OK reply.
+
+=head2 $client-E<gt>allo( $size )
+
+Send the FTP C<ALLO> command.  Is not used by modern FTP servers.  See RFC959 for details.
+
+=head2 $client-E<gt>syst
+
+Returns the type of operating system used by the server.
+
+=head2 $client-E<gt>stru
+
+Specify the file structure mode.  This is not used by modern FTP servers.  See RFC959 for details.
+
+=head2 $client-E<gt>mode
+
+Specify the transfer mode.  This is not used by modern FTP servers.  See RFC959 for details.
+
+=head2 $client-E<gt>stat( [ $path ] )
+
+Get information about a file or directory on the remote server.  The actual format is totally
+server dependant.
+
+=head2 $client-E<gt>user( $username )
+
+Specify the user to login as.  See C<connect> or C<login> methods for a shortcut.
 
 =head2 $client-E<gt>pass
 
+Specify the password to use for login.  See C<connect> or C<login> methods for a shortcut.
+
 =head2 $client-E<gt>acct
+
+Specify user's account.  This is sometimes used for authentication and authorization when you login
+to some servers, but is seldom used today in practice.  See RFC959 for details.
 
 =cut
 
@@ -398,6 +598,8 @@ sub pwd
 }
 
 =head2 $client-E<gt>quit
+
+Send the FTP C<QUIT> command and close the connection to the remote server.
 
 =cut
 
@@ -428,6 +630,31 @@ sub quit
 }
 
 =head2 $client-E<gt>site
+
+The C<site> method provides an interface to site specific FTP commands.  Many
+FTP servers will support an extended set of commands using the standard FTP
+C<SITE> command.  This command will not check to see if the site commands are
+supported by the remote server, so it is up to you to determine if you can 
+really use these interfaces yourself.
+
+=over 4
+
+=item $client-E<gt>site-E<gt>microsoft
+
+For commands specific to Microsoft's IIS FTP server.
+See L<AnyEvent::FTP::Client::Site::Microsoft>.
+
+=item $client-E<gt>site-E<gt>net_ftp_server
+
+For commands specific to L<Net::FTP::Server>.
+See L<AnyEvent::FTP::Client::Site::NetFtpServer>.
+
+=item $client-E<gt>site-E<gt>proftpd
+
+For commands specific to proftpd.
+See L<AnyEvent::FTP::Client::Site::Proftpd>.
+
+=back
 
 =cut
 
