@@ -1,4 +1,4 @@
-package AnyEvent::FTP::UNIX;
+package AnyEvent::FTP::Server::OS::UNIX;
 
 use strict;
 use warnings;
@@ -9,10 +9,10 @@ use v5.10;
 
 =head1 SYNOPSIS
 
- use AnyEvent::FTP::UNIX;
+ use AnyEvent::FTP::Server::OS::UNIX;
  
  # interface using user fred
- my $unix = AnyEvent::FTP::UNIX->new('fred');
+ my $unix = AnyEvent::FTP::Server::OS::UNIX->new('fred');
  $unix->jail;            # chroot
  $unix->drop_privileges; # transform into user fred
 

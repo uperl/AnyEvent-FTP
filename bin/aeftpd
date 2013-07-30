@@ -70,7 +70,7 @@ if($pam)
     my $user_class;
     if($inet && $< == 0 && $^O !~ /^(cygwin|MSWin32)$/)
     {
-      $user_class = 'AnyEvent::FTP::UNIX';
+      $user_class = 'AnyEvent::FTP::Server::OS::UNIX';
       eval "use $user_class"; die $@ if $@;
     }
     

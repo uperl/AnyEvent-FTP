@@ -31,4 +31,4 @@ use_ok 'AnyEvent::FTP::Server::UnambiguousResponseEncoder';
 use_ok 'AnyEvent::FTP::Server::Connection';
 use_ok 'AnyEvent::FTP::Server::Context';
 use_ok 'AnyEvent::FTP::Server::Context::Full';
-use_ok 'AnyEvent::FTP::UNIX';
+use_ok 'AnyEvent::FTP::Server::OS::UNIX';
