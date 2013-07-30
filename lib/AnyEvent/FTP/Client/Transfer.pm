@@ -10,7 +10,7 @@ use Role::Tiny::With;
 # ABSTRACT: Transfer class for asynchronous ftp client
 # VERSION
 
-# FIXME: implement ABOR
+# TODO: implement ABOR
 
 with 'AnyEvent::FTP::Role::Event';
 

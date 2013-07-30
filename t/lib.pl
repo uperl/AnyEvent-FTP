@@ -7,6 +7,7 @@ use FindBin ();
 use Path::Class qw( dir );
 use Path::Class ();
 use File::Spec;
+use Test::More;
 
 our $config;
 our $detect;

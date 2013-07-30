@@ -18,8 +18,12 @@ pod_spelling_system:
     - fget
     - fput
     - fls
+    - aeftpd
 
 pod_coverage:
   # format is "Class#method" or "Class", regex allowed
   # for either Class or method.
-  private: []
+  private:
+    - .*#new
+    - AnyEvent::FTP::Client::Role::RequestBuffer
+    - AnyEvent::FTP::Client::Role::ResponseBuffer

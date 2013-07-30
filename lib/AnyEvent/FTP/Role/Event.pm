@@ -1,5 +1,7 @@
 package AnyEvent::FTP::Role::Event;
 
+use strict;
+use warnings;
 use v5.10;
 use Moo::Role;
 use warnings NONFATAL => 'all';
