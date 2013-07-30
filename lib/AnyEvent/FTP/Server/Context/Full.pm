@@ -94,6 +94,34 @@ sub cmd_pwd
   $self->done;
 }
 
+sub help_size { 'SIZE <sp> pathname' }
+
+sub cmd_size
+{
+  my($self, $con, $req) = @_;
+  
+  return $self->_not_logged_in($con) unless $self->authenticated;
+
+  eval {
+    use autodie;
+    local $CWD = $self->cwd;
+    if(-e $req->args)
+    {
+      my $size = -s $req->args;
+      $con->send_response(213 => $size);
+    }
+    else
+    {
+      die 'fail';
+    }
+  };
+  if($@)
+  {
+    $con->send_response(550 => $req->args . ": No such file or directory");
+  }
+  $self->done;
+}
+
 sub help_mkd { 'MKD <sp> pathname' }
 
 sub cmd_mkd

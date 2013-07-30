@@ -497,11 +497,23 @@ sub stou
 =head2 $client-E<gt>appe($filename, $local)
 
 Works exactly like the C<stor> method, except use the FTP C<APPE> command instead of
-C<STOR>.  This method will append C<$local> to the remote file.  If you want to resume
-a transfer, you should make C<$local> a file handle, seek to the appropriate location
-in the file and use this method.
+C<STOR>.  This method will append C<$local> to the remote file.  One way to resume an
+upload to the remote FTP server would be to open the local file, determine the remote
+file's size and seek to that position in the local file and use the C<appe> method
+with C<$local> as that file handle, as in this example:
 
-TODO: resume example
+ # assume that foo.txt is in the current local dir
+ # and the remote local dir
+ my $filename = "foo.txt";
+ $client->size($filename)->cb(sub {
+   my $size = shift->recv;
+   open my $fh, '<', $filename;
+   seek $fh, $size, 0;
+   $client->appe($filename, $fh);
+ });
+
+Note that the C<SIZE> command is an extension to FTP, and may not be available on all
+servers.
 
 =cut
 
@@ -691,8 +703,27 @@ to some servers, but is seldom used today in practice.  See RFC959 for details.
 
 =head2 $client-E<gt>size( $path )
 
-Get the size of the remote file specified by C<$path>.  This is an extension to the FTP standard specified in
-RFC3659, and may not be implemented by older (or even newer) servers.
+Get the size of the remote file specified by C<$path>.  This is an extension to the FTP 
+standard specified in RFC3659, and may not be implemented by older (or even newer) 
+servers.
+
+Send the size of the file on success, instead of the response object.
+
+=cut
+
+sub size
+{
+  my($self, $path) = @_;
+  my $cv = AnyEvent->condvar;
+  $self->push_command(['SIZE', $path])->cb(sub {
+    my $res = eval { shift->recv };
+    if(my $error = $@)
+    { $cv->croak($error) }
+    else
+    { $cv->send($res->message->[0]) }
+  });
+  $cv;
+}
 
 =head2 $client-E<gt>mdtm( $path )
 
@@ -702,7 +733,7 @@ specified in RFC3659, and may not be implemented by older (or even newer) server
 =cut
 
 (eval sprintf('sub %s { shift->push_command([ %s => @_])};1', lc $_, $_)) // die $@ 
-  for qw( CWD CDUP NOOP ALLO SYST TYPE STRU MODE REST MKD RMD STAT HELP DELE RNFR RNTO USER PASS ACCT SIZE MDTM );
+  for qw( CWD CDUP NOOP ALLO SYST TYPE STRU MODE REST MKD RMD STAT HELP DELE RNFR RNTO USER PASS ACCT MDTM );
   
 =head2 $client-E<gt>quit
 
