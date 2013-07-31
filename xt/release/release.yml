@@ -26,6 +26,19 @@ pod_spelling_system:
     - callbacks
     - callback
     - pl
+    - APPE
+    - CDUP
+    - CWD
+    - DELE
+    - MKD
+    - NLST
+    - PWD
+    - RMD
+    - RNFR
+    - RNTO
+    - STAT
+    - STOR
+    - STOU
 
 pod_coverage:
   # format is "Class#method" or "Class", regex allowed
@@ -41,6 +54,10 @@ pod_coverage:
     - AnyEvent::FTP::Client::Role::FetchTransfer
     - AnyEvent::FTP::Client::Role::ListTransfer
     - AnyEvent::FTP::Client::Role::StoreTransfer
+    
+    # server context requires coverage of commands,
+    # not methods
+    - AnyEvent::FTP::Server::Context::Full
     
     # The ::Site:: module documentation actually cover these methods,
     # but Test::Pod::Coverage doesn't like the multipe arrow thing that is

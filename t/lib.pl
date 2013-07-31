@@ -12,7 +12,7 @@ use Test::More;
 our $config;
 our $detect;
 
-$config->{dir} //= dir( $FindBin::Bin )->parent->stringify;
+$config->{dir} //= dir( -l file(__FILE__) ? file(readlink file(__FILE__))->parent : $FindBin::Bin )->parent->stringify;
 
 if(defined $ENV{AEF_PORT} && ! defined $ENV{AEF_CONFIG})
 {

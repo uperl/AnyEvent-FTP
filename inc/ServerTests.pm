@@ -38,7 +38,7 @@ sub test
   
   foreach my $test_file (grep { $_->basename =~ /^client_/ } sort { $a->basename cmp $b->basename } $test_root->subdir('t')->children)
   {
-    $self->zilla->log("test = $test_file");
+    #$self->zilla->log("test = $test_file");
     foreach my $service (@services)
     {
       my $link = $test_root->file('t', 'server', $service, $test_file->basename);
@@ -47,7 +47,7 @@ sub test
   }
 
   local $ENV{AEF_PORT} = 'from_config';
-  system 'prove', '-br', 't/server';  
+  system 'prove', '-br', ($ENV{AEF_JOBS} ? ('-j' => $ENV{AEF_JOBS}) : ()), 't/server';  
   $self->log_fatal('server test failure') unless $? == 0;
 }
 

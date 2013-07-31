@@ -7,9 +7,49 @@ use base qw( AnyEvent::FTP::Server::Context );
 use Role::Tiny::With;
 use File::chdir;
 use File::Spec;
+use File::Temp qw( tempfile );
 
 # ABSTRACT: FTP Server client context class with full read/write access
 # VERSION
+
+=head1 SYNOPSIS
+
+ use AnyEvent::FTP::Server;
+ 
+ my $server = AnyEvent::FTP::Server->new(
+   default_context => 'AnyEvent::FTP::Server::Context::Full',
+ );
+
+=head1 DESCRIPTION
+
+This class provides a context for L<AnyEvent::FTP::Server> which uses the
+actual filesystem to provide storage.
+
+=head1 ROLES
+
+This class consumes these roles:
+
+=over 4
+
+=item *
+
+L<AnyEvent::FTP::Server::Role::Auth>
+
+=item *
+
+L<AnyEvent::FTP::Server::Role::Help>
+
+=item *
+
+L<AnyEvent::FTP::Server::Role::Old>
+
+=item *
+
+L<AnyEvent::FTP::Server::Role::Type>
+
+=back
+
+=cut
 
 with 'AnyEvent::FTP::Server::Role::Auth';
 with 'AnyEvent::FTP::Server::Role::Help';
@@ -39,6 +79,17 @@ sub _not_logged_in
   return;
 }
 
+=head1 COMMANDS
+
+In addition to the commands provided by the above roles,
+this context provides these FTP commands:
+
+=over 4
+
+=item CWD
+
+=cut
+
 sub help_cwd { 'CWD <sp> pathname' }
 
 sub cmd_cwd
@@ -61,6 +112,10 @@ sub cmd_cwd
   $self->done;
 }
 
+=item CDUP
+
+=cut
+
 sub help_cdup { 'CDUP' }
 
 sub cmd_cdup
@@ -81,6 +136,10 @@ sub cmd_cdup
   $self->done;
 }
 
+=item PWD
+
+=cut
+
 sub help_pwd { 'PWD' }
 
 sub cmd_pwd
@@ -93,6 +152,10 @@ sub cmd_pwd
   $con->send_response(257 => "\"$cwd\" is the current directory");
   $self->done;
 }
+
+=item SIZE
+
+=cut
 
 sub help_size { 'SIZE <sp> pathname' }
 
@@ -122,6 +185,10 @@ sub cmd_size
   $self->done;
 }
 
+=item MKD
+
+=cut
+
 sub help_mkd { 'MKD <sp> pathname' }
 
 sub cmd_mkd
@@ -140,6 +207,10 @@ sub cmd_mkd
   $con->send_response(550 => "MKD error") if $@;
   $self->done;
 }
+
+=item RMD
+
+=cut
 
 sub help_rmd { 'RMD <sp> pathname' }
 
@@ -160,6 +231,10 @@ sub cmd_rmd
   $self->done;
 }
 
+=item DELE
+
+=cut
+
 sub help_dele { 'DELE <sp> pathname' }
 
 sub cmd_dele
@@ -178,6 +253,10 @@ sub cmd_dele
   $con->send_response(550 => "DELE error") if $@;
   $self->done;
 }
+
+=item RNFR
+
+=cut
 
 sub help_rnfr { 'RNFR <sp> pathname' }
 
@@ -220,6 +299,10 @@ sub cmd_rnfr
   $self->done;
 }
 
+=item RNTO
+
+=cut
+
 sub help_rnto { 'RNTO <sp> pathname' }
 
 sub cmd_rnto
@@ -260,6 +343,10 @@ sub cmd_rnto
   }
   $self->done;
 }
+
+=item STAT
+
+=cut
 
 sub help_stat { 'STAT [<sp> pathname]' }
 
@@ -319,6 +406,12 @@ sub clear_data
   delete $self->{restart_offset};
 }
 
+=item PASV
+
+=cut
+
+# FIXME: help_pasv
+
 sub cmd_pasv
 {
   my($self, $con, $req) = @_;
@@ -363,6 +456,12 @@ sub cmd_pasv
   
   return;
 }
+
+=item PORT
+
+=cut
+
+# FIXME: help_port
 
 sub cmd_port
 {
@@ -411,6 +510,12 @@ sub cmd_port
     return;
   }
 }
+
+=item REST
+
+=cut
+
+# FIXME: help_rest
 
 sub cmd_rest
 {
@@ -481,6 +586,12 @@ sub cmd_retr
   $self->done;
 }
 
+=item NLST
+
+=cut
+
+# FIXME: help_nlst
+
 sub cmd_nlst
 {
   my($self, $con, $req) = @_;
@@ -521,6 +632,12 @@ sub cmd_nlst
   $self->done;
 }
 
+=item LIST
+
+=cut
+
+# FIXME: help_list
+
 sub cmd_list
 {
   my($self, $con, $req) = @_;
@@ -556,6 +673,12 @@ sub cmd_list
   $self->clear_data;
   $self->done;
 }
+
+=item STOR
+
+=cut
+
+# FIXME: help_stor
 
 sub cmd_stor
 {
@@ -603,6 +726,12 @@ sub cmd_stor
   };
 }
 
+=item APPE
+
+=cut
+
+# FIXME: help_appe
+
 sub cmd_appe
 {
   my($self, $con, $req) = @_;
@@ -649,7 +778,11 @@ sub cmd_appe
   };
 }
 
-use File::Temp qw( tempfile );
+=item STOU
+
+=cut
+
+# FIXME: help_stou
 
 sub cmd_stou
 {
@@ -708,3 +841,7 @@ sub cmd_stou
 }
 
 1;
+
+=back
+
+=cut
