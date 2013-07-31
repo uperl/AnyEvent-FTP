@@ -1,7 +1,6 @@
 use strict;
 use warnings;
 use v5.10;
-use YAML qw( LoadFile );
 use File::HomeDir;
 use FindBin ();
 use Path::Class qw( dir file );
@@ -27,7 +26,8 @@ if(defined $ENV{AEF_PORT} && ! defined $ENV{AEF_CONFIG})
 if(defined $ENV{AEF_CONFIG})
 {
   my $save = $config->{dir};
-  $config = LoadFile($ENV{AEF_CONFIG});
+  require YAML;
+  $config = YAML::LoadFile($ENV{AEF_CONFIG});
   $config->{dir} = $save if defined $save;
   $config->{dir} = Path::Class::Dir->new($config->{dir})->resolve;
   $config->{port} //= $ENV{AEF_PORT} if defined $ENV{AEF_PORT};
