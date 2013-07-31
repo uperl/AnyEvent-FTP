@@ -24,7 +24,7 @@ specific interfaces, see L<AnyEvent::FTP::Client> and L<AnyEvent::FTP::Server>
 for details.
 
 Before each release, L<AnyEvent::FTP::Client> is tested against these FTP servers
-using the t/client_*.t tests that come with this distribution:
+using the C<t/client_*.t> tests that come with this distribution:
 
 =over 4
 
