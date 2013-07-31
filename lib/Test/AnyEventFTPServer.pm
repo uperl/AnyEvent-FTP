@@ -37,7 +37,7 @@ sub create_ftpserver_ok (;$$)
   
   my $uri = URI->new("ftp://127.0.0.1");
   
-  $context //= 'Full'; # FIXME change to ::Memory when available
+  $context //= 'Memory';
   $context = "AnyEvent::FTP::Server::Context::$context"
     unless $context =~ /::/;
   my $name = (split /::/, $context)[-1];
