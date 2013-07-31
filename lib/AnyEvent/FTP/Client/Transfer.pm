@@ -132,6 +132,7 @@ has command => (
 has restart => (
   is      => 'ro',
   default => sub { 0 },
+  coerce  => sub { $_[0] // 0 },
 );
 
 =head1 METHODS
