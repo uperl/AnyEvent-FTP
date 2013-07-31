@@ -3,7 +3,8 @@ package AnyEvent::FTP::Server::Context;
 use strict;
 use warnings;
 use v5.10;
-use Role::Tiny::With;
+use Moo;
+use warnings NONFATAL => 'all';
 
 # ABSTRACT: FTP Server client context class
 # VERSION
@@ -13,12 +14,10 @@ with 'AnyEvent::FTP::Server::Role::Context';
 
 __PACKAGE__->define_events(qw( auth ));
 
-sub new
-{
-  my($class) = shift;
-  my $args   = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
-  my $self = bless { ready => 1 }, $class;
-}
+has ready => (
+  is      => 'rw',
+  default => sub { 1 },
+);
 
 sub push_request
 {
@@ -26,7 +25,7 @@ sub push_request
   
   push @{ $self->{request_queue} }, [ $con, $req ];
   
-  $self->process_queue if $self->{ready};
+  $self->process_queue if $self->ready;
   
   $self;
 }
@@ -37,7 +36,7 @@ sub process_queue
   
   return $self unless @{ $self->{request_queue} } > 0;
   
-  $self->{ready} = 0;
+  $self->ready(0);
 
   my($con, $req) = @{ shift @{ $self->{request_queue} } };
 
@@ -80,7 +79,7 @@ sub cmd_quit
 sub done
 {
   my($self) = @_;
-  $self->{ready} = 1;
+  $self->ready(1);
   $self->process_queue;
   $self;
 }

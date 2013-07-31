@@ -3,11 +3,13 @@ package AnyEvent::FTP::Server::Context::Full;
 use strict;
 use warnings;
 use v5.10;
-use base qw( AnyEvent::FTP::Server::Context );
-use Role::Tiny::With;
+use Moo;
+use warnings NONFATAL => 'all';
 use File::chdir;
 use File::Spec;
 use File::Temp qw( tempfile );
+
+extends 'AnyEvent::FTP::Server::Context';
 
 # ABSTRACT: FTP Server client context class with full read/write access
 # VERSION

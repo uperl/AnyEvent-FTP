@@ -3,7 +3,8 @@ package AnyEvent::FTP::Server;
 use strict;
 use warnings;
 use v5.10;
-use Role::Tiny::With;
+use Moo;
+use warnings NONFATAL => 'all';
 use AnyEvent::Handle;
 use AnyEvent::Socket qw( tcp_server );
 use AnyEvent::FTP::Server::Connection;
@@ -18,28 +19,44 @@ with 'AnyEvent::FTP::Role::Event';
 
 __PACKAGE__->define_events(qw( bind connect ));
 
-sub new
+has hostname => (
+  is       => 'ro',
+);
+
+has port => (
+  is      => 'ro',
+  default => sub { 21 },
+);
+
+has default_context => (
+  is      => 'ro',
+  default => sub { 'AnyEvent::FTP::Server::Context::Full' },
+);
+
+has welcome => (
+  is      => 'ro',
+  default => sub { [ 220 => "aeftpd $AnyEvent::FTP::Server::VERSION" ] },
+);
+
+has bindport => (
+  is => 'rw',
+);
+
+has inet => (
+  is      => 'ro',
+  default => sub { 0 },
+);
+
+sub BUILD
 {
-  my($class) = shift;
-  my $args   = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
-  my $self = bless {
-    hostname        => $args->{hostname},
-    port            => $args->{port}            // 21,
-    default_context => $args->{default_context} // 'AnyEvent::FTP::Server::Context::Full',
-    welcome         => $args->{welcome}         // [ 220 => "aeftpd $AnyEvent::FTP::Server::VERSION" ],
-    inet            => $args->{inet}            // 0,
-  }, $class;
-  
-  eval 'use ' . $self->{default_context};
+  eval 'use ' . shift->default_context;
   die $@ if $@;
-  
-  $self;
 }
 
 sub start
 {
   my($self) = @_;
-  $self->{inet} ? $self->_start_inet : $self->_start_standalone;
+  $self->inet ? $self->_start_inet : $self->_start_standalone;
 }
 
 sub _start_inet
@@ -86,7 +103,7 @@ sub _start_inet
     exit;
   });
     
-  $con->send_response(@{ $self->{welcome} });
+  $con->send_response(@{ $self->welcome });
     
   $handle->on_read(sub {
     $handle->push_read( line => sub {
@@ -104,7 +121,7 @@ sub _start_standalone
   
   my $prepare = sub {
     my($fh, $host, $port) = @_;
-    $self->{bindport} = $port;
+    $self->bindport($port);
     $self->emit(bind => $port);
   };
   
@@ -146,7 +163,7 @@ sub _start_standalone
       $handle->push_shutdown;
     });
     
-    $con->send_response(@{ $self->{welcome} });
+    $con->send_response(@{ $self->welcome });
     
     $handle->on_read(sub {
       $handle->push_read( line => sub {
@@ -157,13 +174,9 @@ sub _start_standalone
   
   };
   
-  delete $self->{port} if $self->{port} == 0;
-  
-  tcp_server $self->{hostname}, $self->{port}, $connect, $prepare;
+  tcp_server $self->hostname, $self->port || undef, $connect, $prepare;
   
   $self;
 }
-
-sub bindport { shift->{bindport} }
 
 1;

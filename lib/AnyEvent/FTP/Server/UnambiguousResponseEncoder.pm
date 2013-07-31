@@ -3,18 +3,13 @@ package AnyEvent::FTP::Server::UnambiguousResponseEncoder;
 use strict;
 use warnings;
 use v5.10;
-use Role::Tiny::With;
+use Moo;
+use warnings NONFATAL => 'all';
 
 # ABSTRACT: Server response encoder that encodes responses so they cannot be confused
 # VERSION
 
 with 'AnyEvent::FTP::Server::Role::ResponseEncoder';
-
-sub new
-{
-  my($class) = @_;
-  bless {}, $class;
-}
 
 sub encode
 {
