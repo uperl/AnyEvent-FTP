@@ -114,6 +114,9 @@ if($stderr)
   open STDERR, '>>', $stderr;
 }
 
+$random_auth = 1
+  if ! defined($auth) && ! defined($pam);
+
 if(defined $auth)
 {
   my($user,$pass) = split /:/, $auth;
