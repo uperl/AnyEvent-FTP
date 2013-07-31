@@ -647,6 +647,7 @@ sub cmd_list
   return $self->_not_logged_in($con) unless $self->authenticated;
   
   my $dir = $req->args || '.';
+  $dir = '.' if $dir eq '-l';
   
   unless(defined $self->data)
   {
@@ -847,3 +848,4 @@ sub cmd_stou
 =back
 
 =cut
+

@@ -20,7 +20,9 @@ use Pod::Usage qw( pod2usage );
           [ --inet ] \
           [ --stderr path ] \
           [ --pam service ] \
-          [ --chroot ]
+          [ --chroot ] \
+          [ --pam service | --random_auth | --auth user:pass ] \
+          [ --verbose ]
  % aeftpd --version
  % aeftpd --help
 
@@ -30,11 +32,11 @@ This program starts an FTP daemon using the perl library L<AnyEvent::FTP::Server
 
 =head1 OPTIONS
 
-=head2 --port port
+=head2 --port I<port>
 
 The TCP port to listen to.
 
-=head2 --hostname hostname
+=head2 --hostname I<hostname>
 
 The hostname or IP address to listen on.
 
@@ -48,7 +50,7 @@ installed.
 
  ftp stream tcp nowait root /usr/sbin/tcpd aeftpd --inet --stderr /tmp/aeftp.log --pam login
 
-=head2 --stderr path
+=head2 --stderr I<path>
 
 Redirect stderr from the daemon to the file specified by the given path
 
@@ -57,6 +59,18 @@ Redirect stderr from the daemon to the file specified by the given path
 Use C<chroot> to restrict the user to only his home directory once he has logged
 in.  This option requires the C<chroot> function, which is supported by Perl on
 most UNIX and UNIX like operating systems.
+
+=head2 --random_auth
+
+Generate a random username and password for authentication.
+
+=head2 --auth I<user>:I<pass>
+
+Allow authentication with the given username and password.
+
+=head2 --verbose
+
+Print all FTP commands and their responses to stderr.
 
 =head2 --version
 
@@ -74,16 +88,22 @@ my $inet = 0;
 my $stderr;
 my $pam;
 my $chroot = 0;
+my $verbose = 0;
+my $random_auth;
+my $auth;
 
 GetOptions(
-  'port=i'     => \$port,
-  'hostname=s' => \$host,
-  'inet'       => \$inet,
-  'stderr=s'   => \$stderr,
-  'pam=s'      => \$pam,
-  'chroot'     => \$chroot,
-  'help|h'     => sub { pod2usage({ -verbose => 2}) },
-  'version'    => sub { say 'aeftp/AnyEvent::FTP version ', ($AnyEvent::FTP::Server::VERSION // 'dev'); exit 1 },
+  'port=i'      => \$port,
+  'hostname=s'  => \$host,
+  'inet'        => \$inet,
+  'stderr=s'    => \$stderr,
+  'pam=s'       => \$pam,
+  'chroot'      => \$chroot,
+  'random_auth' => \$random_auth,
+  'verbose'     => \$verbose,
+  'auth=s'      => \$auth,
+  'help|h'      => sub { pod2usage({ -verbose => 2}) },
+  'version'     => sub { say 'aeftp/AnyEvent::FTP version ', ($AnyEvent::FTP::Server::VERSION // 'dev'); exit 1 },
 ) || pod2usage(1);
 
 $0 = 'aeftpd';
@@ -95,11 +115,29 @@ if($stderr)
   open STDERR, '>>', $stderr;
 }
 
+if(defined $auth)
+{
+  my($user,$pass) = split /:/, $auth;
+  $auth = {
+    user => $user,
+    pass => $pass,
+  };
+}
+elsif(defined $random_auth)
+{
+  $auth = {
+    user => (join '', map { chr(ord('a') + int rand(26)) } (1..10)),
+    pass => (join '', map { chr(ord('a') + int rand(26)) } (1..10)),
+  };
+}
+
 unless($inet)
 {
   my $uri = URI->new('ftp:');
   $uri->host($host // 'localhost');
   $uri->port($port);
+  $uri->userinfo(join ':', $auth->{user}, $auth->{pass})
+    if defined $auth;
   say $uri;
 }
 
@@ -109,7 +147,42 @@ my $server = AnyEvent::FTP::Server->new(
   inet     => $inet,
 );
 
-if($pam)
+if($verbose)
+{
+  $server->on_connect(sub {
+    my $con = shift;
+
+    $con->on_request(sub {
+      my $raw = shift;
+      say STDERR "CLIENT: $raw";
+    });
+  
+    $con->on_response(sub {
+      my $raw = shift;
+      $raw =~ s/\015?\012$//g;
+      say STDERR "SERVER: $raw";
+    });
+    
+    $con->on_close(sub {
+      say STDERR "DISCONNECT";
+    });
+    
+    say STDERR "CONNECT";
+  });
+}
+
+if($auth)
+{
+  $server->on_connect(sub {
+    my $con = shift;
+    $con->context->authenticator(sub {
+      my($name, $pass) = @_;
+      return $name eq $auth->{user}
+      &&     $pass eq $auth->{pass};
+    });
+  });
+}
+elsif($pam)
 {
   eval { require Authen::Simple::PAM };
   if($@)
@@ -136,14 +209,14 @@ if($pam)
       my($name, $pass) = @_;
       
       $name = 'ftp' if $name eq 'anonymous';
-      
+     
       my $user;
       if(defined $user_class)
       {
         $user = eval { $user_class->new($name) };
         return 0 if $@;
       }
-      
+
       return 0 if $name ne 'ftp' && ! $pam->authenticate( $name, $pass );
       
       if(defined $user)
@@ -151,30 +224,11 @@ if($pam)
         $user->jail if $chroot || $name eq 'ftp';
         $user->drop_privileges;
       }
-      
-      1;
     });
+    
     $con->context->bad_authentication_delay(0);
-
-    if($stderr)
-    {
-      say STDERR "CONNECT";
-    
-      $con->on_request(sub {
-        my $raw = shift;
-        say STDERR "CLIENT: $raw";
-      });
-    
-      $con->on_response(sub {
-        my $raw = shift;
-        $raw =~ s/\015?\012$//g;
-        say STDERR "SERVER: $raw";
-      });
-    
-      $con->on_close(sub {
-        say STDERR "DISCONNECT";
-      });
-    }
+      
+    1;
     
   });
 }
