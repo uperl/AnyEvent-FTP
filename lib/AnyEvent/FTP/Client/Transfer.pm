@@ -95,15 +95,6 @@ Emitted when the data connection closes.
 
 __PACKAGE__->define_events(qw( open close eof ));
 
-sub BUILDARGS
-{
-  my $class = shift;
-  my $args = ref $_[0] eq 'HASH' ? ({ %{$_[0]} }) : ({@_});
-  my $command = $args->{command};
-  $args->{remote_name} = $command->[1];
-  $args;
-}
-
 has cv => (
   is      => 'ro',
   lazy    => 1,
@@ -116,7 +107,9 @@ has client => (
 );
 
 has remote_name => (
-  is => 'rw',
+  is      => 'rw',
+  lazy    => 1,
+  default => sub { shift->command->[1] },
 );
 
 has local => (
