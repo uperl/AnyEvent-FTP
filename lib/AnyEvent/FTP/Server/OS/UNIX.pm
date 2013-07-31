@@ -3,6 +3,8 @@ package AnyEvent::FTP::Server::OS::UNIX;
 use strict;
 use warnings;
 use v5.10;
+use Moo;
+use warnings NONFATAL => 'all';
 
 # ABSTRACT: UNIX implementations for AnyEvent::FTP
 # VERSION
@@ -23,37 +25,72 @@ UNIX and UNIX like operating systems.
 
 =cut
 
-sub new
+sub BUILDARGS
 {
   my($class, $query) = @_;
   my($name, $pw, $uid, $gid, $quota, $comment, $gcos, $dir, $shell, $expire) = getpwnam $query;
-  
   die "user not found" unless $name;
   
-  my @groups;
-
-  setgrent;
-  
-  my @grent;
-  while(@grent = getgrent)
-  {
-    my($group,$pw,$gid,$members) = @grent;
-    
-    foreach my $member (split /\s+/, $members)
-    {
-      push @groups, $gid if $member eq $name;
-    }
+  return {
+    name  => $name,
+    uid   => $uid,
+    gid   => $gid,
+    home  => $dir,
+    shell => $shell,
   }
-  
-  return bless {
-    name   => $name,
-    uid    => $uid,
-    gid    => $gid,
-    home   => $dir,
-    shell  => $shell,
-    groups => \@groups,
-  }, $class;
 }
+
+=head1 ATTRIBUTES
+
+=head2 name
+
+The user's username
+
+=head2 uid
+
+The user's UID
+
+=head2 gid
+
+The user's GID
+
+=head2 home
+
+The user's home directory
+
+=head2 shell
+
+The user's shell
+
+=cut
+
+has $_ => ( is => 'ro', required => 1 ) for (qw( name uid gid home shell ));
+
+=head2 groups
+
+List of groupds (as GIDs) that the user also belongs to.
+
+=cut
+
+has groups => (
+  is      => 'ro',
+  lazy    => 1,
+  default => sub {
+    my $name = shift->name;
+    my @groups;
+    setgrent;
+    my @grent;
+    while(@grent = getgrent)
+    {
+      my($group,$pw,$gid,$members) = @grent;
+      foreach my $member (split /\s+/, $members)
+      {
+        push @groups, $gid if $member eq $name;
+      }
+    }
+    \@groups;
+  },
+);
 
 =head1 METHODS
 
@@ -66,7 +103,7 @@ C<chroot> to the users' home directory.  Requires root and the chroot function.
 sub jail
 {
   my($self) = @_;
-  chroot $self->{home};
+  chroot $self->home;
   return $self;
 }
 
@@ -80,11 +117,11 @@ sub drop_privileges
 {
   my($self) = @_;
   
-  $) = join ' ', $self->{gid}, $self->{gid}, @{ $self->{groups} };
-  $> = $self->{uid};
+  $) = join ' ', $self->gid, $self->gid, @{ $self->groups };
+  $> = $self->uid;
   
-  $( = $self->{gid};
-  $< = $self->{uid};
+  $( = $self->gid;
+  $< = $self->uid;
 
   return $self;
 }
