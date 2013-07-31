@@ -24,7 +24,11 @@ eval {
   $client->type('I')->recv;
   $client->cwd($config->{dir})->recv;
   our $detect;
-  die "not ProFTPd" unless $detect->{pr};
+  unless($detect->{pr})
+  {
+    $client->quit->recv;
+    die "not ProFTPd" unless $detect->{pr};
+  }
 };
 plan skip_all => 'requires Proftpd to test against' if $@;
 plan tests => 6;
