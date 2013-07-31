@@ -23,6 +23,9 @@ pod_spelling_system:
     - CHECKMETHOD
     - CHECKSUM
     - cb
+    - callbacks
+    - callback
+    - pl
 
 pod_coverage:
   # format is "Class#method" or "Class", regex allowed
