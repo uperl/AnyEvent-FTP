@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use v5.10;
 use Test::More tests => 6;
+BEGIN { eval 'use EV' }
 use AnyEvent::FTP::Client;
 use FindBin ();
 require "$FindBin::Bin/lib.pl";
@@ -34,15 +35,17 @@ do {
 
 SKIP: {
   our $detect;
-  skip 'pure-FTPd does not return [45]50 on bogus file', 2 if $detect->{pu};
+  skip 'pure-FTPd does not return 502 on bogus help', 2 if $detect->{pu};
   skip 'vsftp does not return 502 on bogus help', 2 if $detect->{vs};
   skip 'Net::FTPServer does not return 502 on bogus help', 2 if $detect->{pl};
+  skip 'ncftpd does not return 502 on bogus help', 2 if $detect->{nc};
+  skip 'bftp does not respond to help bogus', 2 if $detect->{xb};
   eval { $client->help('bogus')->recv };
   my $res = $@;
   isa_ok $res, 'AnyEvent::FTP::Response';
   my $code = eval { $res->code };
   diag $@ if $@;
-  is $code, 502, 'code = ' . $code;
+  like $code, qr{^50[12]$}, 'code = ' . $code;
 };
 
 $client->quit->recv;

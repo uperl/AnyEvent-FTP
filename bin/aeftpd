@@ -1,0 +1,126 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use v5.10;
+use AnyEvent;
+use AnyEvent::FTP::Server;
+use Getopt::Long qw( GetOptions );
+use URI;
+
+# PODNAME: aeftpd
+# ABSTRACT: FTP Server
+# VERSION
+
+my $port;
+my $host;
+my $inet = 0;
+my $stderr;
+my $pam;
+my $chroot = 0;
+
+GetOptions(
+  'port=i'     => \$port,
+  'hostname=s' => \$host,
+  'inet'       => \$inet,
+  'stderr=s'   => \$stderr,
+  'pam=s'      => \$pam,
+  'chroot'     => \$chroot,
+);
+
+$0 = 'aeftpd';
+
+$port //= ($> && $^O !~ /^(cygwin|MSWin32)$/) ? 8021 : 21;
+
+if($stderr)
+{
+  open STDERR, '>>', $stderr;
+}
+
+unless($inet)
+{
+  my $uri = URI->new('ftp:');
+  $uri->host($host // 'localhost');
+  $uri->port($port);
+  say $uri;
+}
+
+my $server = AnyEvent::FTP::Server->new(
+  hostname => $host,
+  port     => $port,
+  inet     => $inet,
+);
+
+if($pam)
+{
+  eval { require Authen::Simple::PAM };
+  if($@)
+  {
+    say STDERR "PAM authentication requires Authen::Simple::PAM to be installed";
+    exit 2;
+  }
+  
+  $pam = Authen::Simple::PAM->new(
+    service => $pam,
+  );
+  
+  $server->on_connect(sub {
+    my $con = shift;
+    
+    my $user_class;
+    if($inet && $< == 0 && $^O !~ /^(cygwin|MSWin32)$/)
+    {
+      $user_class = 'AnyEvent::FTP::Server::OS::UNIX';
+      eval "use $user_class"; die $@ if $@;
+    }
+    
+    $con->context->authenticator(sub {
+      my($name, $pass) = @_;
+      
+      $name = 'ftp' if $name eq 'anonymous';
+      
+      my $user;
+      if(defined $user_class)
+      {
+        $user = eval { $user_class->new($name) };
+        return 0 if $@;
+      }
+      
+      return 0 if $name ne 'ftp' && ! $pam->authenticate( $name, $pass );
+      
+      if(defined $user)
+      {
+        $user->jail if $chroot || $name eq 'ftp';
+        $user->drop_privileges;
+      }
+      
+      1;
+    });
+    $con->context->bad_authentication_delay(0);
+
+    if($stderr)
+    {
+      say STDERR "CONNECT";
+    
+      $con->on_request(sub {
+        my $raw = shift;
+        say STDERR "CLIENT: $raw";
+      });
+    
+      $con->on_response(sub {
+        my $raw = shift;
+        $raw =~ s/\015?\012$//g;
+        say STDERR "SERVER: $raw";
+      });
+    
+      $con->on_close(sub {
+        say STDERR "DISCONNECT";
+      });
+    }
+    
+  });
+}
+
+$server->start;
+
+AnyEvent->condvar->recv;

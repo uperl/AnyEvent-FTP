@@ -1,16 +1,19 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 22;
+use Test::More;
+BEGIN { eval 'use EV' }
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
 use FindBin ();
 require "$FindBin::Bin/lib.pl";
 
+plan skip_all => 'requires client and server on localhost' if $ENV{AEF_REMOTE};
+plan tests => 22;
+
 our $config;
 $config->{dir} = tempdir( CLEANUP => 1 );
-
 
 foreach my $name (qw( foo bar baz ))
 {

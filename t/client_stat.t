@@ -1,7 +1,8 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 6;
+use Test::More;
+BEGIN { eval 'use EV' }
 use AnyEvent::FTP::Client;
 use FindBin ();
 require "$FindBin::Bin/lib.pl";
@@ -10,9 +11,13 @@ my $client = AnyEvent::FTP::Client->new;
 
 prep_client( $client );
 our $config;
+our $detect;
 
 $client->connect($config->{host}, $config->{port})->recv;
 $client->login($config->{user}, $config->{pass})->recv;
+
+plan skip_all => 'ncftp return code broken' if $detect->{nc};
+plan tests => 6;
 
 do {
   my $res = eval { $client->stat->recv };
@@ -33,10 +38,11 @@ do {
 };
 
 SKIP: {
-  our $detect;
   skip 'wu-ftpd does not return [45]50 on bogus file', 2 if $detect->{wu};
   skip 'pure-FTPd does not return [45]50 on bogus file', 2 if $detect->{pu};
   skip 'vsftp does not return [45]50 on bogus file', 2 if $detect->{vs};
+  skip 'IIS does not return [45]50 on bogus file', 2 if $detect->{ms};
+  skip 'bftp does not return [45]50 on bogus file', 2 if $detect->{xb};
   eval { $client->stat('bogus')->recv };
   my $res = $@;
   isa_ok $res, 'AnyEvent::FTP::Response';

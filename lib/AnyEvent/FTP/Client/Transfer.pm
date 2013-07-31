@@ -1,0 +1,166 @@
+package AnyEvent::FTP::Client::Transfer;
+
+use strict;
+use warnings;
+use v5.10;
+use AnyEvent;
+use AnyEvent::Handle;
+use Role::Tiny::With;
+
+# ABSTRACT: Transfer class for asynchronous ftp client
+# VERSION
+
+=head1 SYNOPSIS
+
+ use AnyEvent::FTP::Client;
+ my $client = AnyEvent::FTP::Client;
+ $client->connect('ftp://ftp.cpan.org')->cb(sub {
+ 
+   # $upload_transfer and $download_transfer are instances of
+   # AnyEvent::FTP::Client::Transfer
+   my $upload_transfer = $client->stor('remote_filename.txt', 'content');
+   
+   my $buffer;
+   my $download_transfer = $client->retr('remote_filename.txt', \$buffer);
+ 
+ });
+
+=head1 DESCRIPTION
+
+This class represents a file transfer with a remote server.  Transfers
+may be initiated between a remote file name and a local object.  The 
+local object may be a regular scalar, reference to a scalar or a file
+handle, for details, see the C<stor>, C<stou>, C<appe> and C<retr> 
+methods in L<AnyEvent::FTP::Client>.
+
+This documentation covers what you can do with the transfer object once it
+has been initiated.
+
+=cut
+
+# TODO: implement ABOR
+
+=head1 ROLES
+
+This class consumes these roles:
+
+=over 4
+
+=item *
+
+L<AnyEvent::FTP::Role::Event>
+
+=back
+
+=cut
+
+with 'AnyEvent::FTP::Role::Event';
+
+=head1 EVENTS
+
+This class provides these events:
+
+=head2 open
+
+Emitted when the data connection is opened, and passes in as its first argument 
+the L<AnyEvent::Handle> instance used to transfer the file.
+
+ $xfer->on_open(sub {
+   my($handle) = @_;
+   # $handle isa AnyEvent::Handle
+ });
+
+=head2 close
+
+Emitted when the transfer is complete, either due to a successful transfer or
+the server returned a failure status.  Passes in the final 
+L<AnyEvent::FTP::Client::Response> message associated with the transfer.
+
+ $xfer->on_close(sub {
+   my($res) = @_;
+   # $res isa AnyEvent::FTP::Client::Response
+ });
+
+=head2 eof
+
+Emitted when the data connection closes.
+
+ $xfer->on_eof(sub {
+   # no args passed in
+ });
+
+=cut
+
+__PACKAGE__->define_events(qw( open close eof ));
+
+sub new
+{
+  my($class) = shift;
+  my $args   = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
+  bless {
+    cv          => $args->{cv} // AnyEvent->condvar,
+    client      => $args->{client},
+    remote_name => $args->{command}->[1],
+  }, $class;
+}
+
+=head1 METHODS
+
+=head2 cb
+
+Register a callback with the transfer to be executed when the transfer 
+successfully completes, or fails. Works exactly like the L<AnyEvent> condition 
+variable C<cb> method.
+
+=head2 ready
+
+Returns true if the transfer has completed (either successfully or not).  If true, then it is safe to call
+C<recv> to retrieve the response (Some event loops do not support calling C<recv> before there is a message
+waiting).
+
+=head2 recv
+
+Retrieve the L<AnyEvent::FTP::Client::Response> object.
+
+=cut
+
+sub cb { shift->{cv}->cb(@_) }
+sub ready { shift->{cv}->ready }
+sub recv { shift->{cv}->recv }
+
+sub handle
+{
+  my($self, $fh) = @_;
+  
+  my $handle;
+  $handle = AnyEvent::Handle->new(
+    fh => $fh,
+    on_error => sub {
+      my($hdl, $fatal, $msg) = @_;
+      $self->emit('eof');
+      $_[0]->destroy;
+    },
+    on_eof => sub {
+      $self->emit('eof');
+      $handle->destroy;
+    },
+    # this avoids deep recursion exception error (usually
+    # a warning) in example fput.pl when the buffer is 
+    # small (1024 on my debian VM)
+    autocork  => 1,
+  );
+  
+  $self->emit(open => $handle);
+  
+  $handle;
+}
+
+=head2 remote_name
+
+For C<STOU> transfers ONLY, this returns the remote file name.
+
+=cut
+
+sub remote_name { shift->{remote_name} }
+
+1;

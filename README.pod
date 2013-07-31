@@ -8,9 +8,65 @@ AnyEvent::FTP - Simple asynchronous ftp client and server
 
 version 0.01
 
+=head1 SYNOPSIS
+
+ # for the client
+ use AnyEvent::FTP::Client;
+ 
+ # for the server
+ use AnyEvent::FTP::Server;
+
+=head1 DESCRIPTION
+
+This distribution provides client and server implementations for 
+File Transfer Protocol (FTP) in an AnyEvent environment.  For the
+specific interfaces, see L<AnyEvent::FTP::Client> and L<AnyEvent::FTP::Server>
+for details.
+
+Before each release, L<AnyEvent::FTP::Client> is tested against these FTP servers
+using the C<t/client_*.t> tests that come with this distribution:
+
+=over 4
+
+=item Proftpd
+
+=item wu-ftpd
+
+=item L<Net::FTPServer>
+
+=item vsftpd
+
+=item Pure-FTPd
+
+=item bftpd
+
+=item L<AnyEvent::FTP::Server>
+
+=back
+
+The client code is also tested less frequently against these FTP servers:
+
+=over 4
+
+=item NcFTPd
+
+=item VMS ftp
+
+=item Microsoft IIS
+
+=back
+
 =head1 SEE ALSO
 
 =over 4
+
+=item *
+
+L<AnyEvent::FTP::Client>
+
+=item *
+
+L<AnyEvent::FTP::Server>
 
 =item *
 

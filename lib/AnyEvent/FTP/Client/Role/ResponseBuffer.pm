@@ -1,13 +1,20 @@
-package AnyEvent::FTP::Role::ResponseBuffer;
+package AnyEvent::FTP::Client::Role::ResponseBuffer;
 
 use strict;
 use warnings;
 use v5.10;
-use Role::Tiny;
-use AnyEvent::FTP::Response;
+use Moo::Role;
+use warnings NONFATAL => 'all';
+use AnyEvent::FTP::Client::Response;
 
 # ABSTRACT: Response buffer role for asynchronous ftp client
 # VERSION
+
+=head1 DESCRIPTION
+
+Used internally by L<AnyEvent::FTP::Client>.
+
+=cut
 
 sub on_next_response
 {
@@ -25,13 +32,15 @@ sub process_message_line
 {
   my($self, $line) = @_;
 
+  $line =~ s/\015?\012//g;
+
   if($line =~ s/^(\d\d\d)([- ])//)
   {
     $self->{response_buffer}->{code} //= $1;
     push @{ $self->{response_buffer}->{message} }, $line;
     if($2 eq ' ')
     {
-      my $response = AnyEvent::FTP::Response->new(
+      my $response = AnyEvent::FTP::Client::Response->new(
         $self->{response_buffer}->{code},
         $self->{response_buffer}->{message},
       );

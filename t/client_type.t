@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use v5.10;
 use Test::More tests => 7;
+BEGIN { eval 'use EV' }
 use AnyEvent::FTP::Client;
 use FindBin ();
 require "$FindBin::Bin/lib.pl";
@@ -37,7 +38,7 @@ do {
   eval { $client->type('X')->recv };
   my $error = $@;
   isa_ok $error, 'AnyEvent::FTP::Response';
-  like eval { $error->code }, qr{^50[04]$}, 'code = ' . eval { $error->code };
+  like eval { $error->code }, qr{^50[104]$}, 'code = ' . eval { $error->code };
   diag $@ if $@;
 };
 

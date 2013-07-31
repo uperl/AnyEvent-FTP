@@ -6,13 +6,31 @@ use AnyEvent::FTP::Client;
 use Term::Prompt qw( prompt );
 use Getopt::Long qw( GetOptions );
 
+my $debug = 0;
 my $method = 'nlst';
 
 GetOptions(
+  'd' => \$debug,
   'l' => sub { $method = 'list' },
 );
 
 my $ftp = AnyEvent::FTP::Client->new;
+
+if($debug)
+{
+  $ftp->on_send(sub {
+    my($cmd, $arguments) = @_;
+    $arguments //= '';
+    $arguments = 'XXXX' if $cmd eq 'PASS';
+    say "CLIENT: $cmd $arguments";
+  });
+
+  $ftp->on_each_response(sub {
+    my $res = shift;
+    say sprintf "SERVER: [ %d ] %s", $res->code, $_ for @{ $res->message };
+  });
+
+}
 
 my $uri = shift;
 

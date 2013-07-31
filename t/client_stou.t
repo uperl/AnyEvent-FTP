@@ -2,11 +2,14 @@ use strict;
 use warnings;
 use v5.10;
 use Test::More;
+BEGIN { eval 'use EV' }
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
 use FindBin ();
 require "$FindBin::Bin/lib.pl";
+
+plan skip_all => 'requires client and server on localhost' if $ENV{AEF_REMOTE};
 
 our $config;
 $config->{dir} = tempdir( CLEANUP => 1 );
@@ -17,10 +20,11 @@ my $plan = sub {
   our $detect;
   plan skip_all => 'wu-ftpd does not support STOU'
     if $detect->{wu};
+  plan skip_all => 'bftp does not support STOU'
+    if $detect->{xb};
   plan skip_all => 'vsftpd does not support STOU without an argument'
     if $detect->{vs};
-  plan tests => 12;
-  
+  plan tests => 12;  
 };
   
 foreach my $passive (0,1)
@@ -41,7 +45,7 @@ foreach my $passive (0,1)
     my $data = 'some data';
     my $xfer = eval { $client->stou(undef, \$data) };
     diag $@ if $@;
-    isa_ok $xfer, 'AnyEvent::FTP::Transfer';
+    isa_ok $xfer, 'AnyEvent::FTP::Client::Transfer';
     my $ret = eval { $xfer->recv; };
     diag $@ if $@;
     isa_ok $ret, 'AnyEvent::FTP::Response';

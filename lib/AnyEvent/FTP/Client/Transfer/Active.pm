@@ -1,9 +1,10 @@
-package AnyEvent::FTP::Transfer::Active;
+package AnyEvent::FTP::Client::Transfer::Active;
 
 use strict;
 use warnings;
 use v5.10;
-use base qw( AnyEvent::FTP::Transfer );
+use base qw( AnyEvent::FTP::Client::Transfer );
+use AnyEvent;
 use AnyEvent::Socket qw( tcp_server );
 
 # ABSTRACT: Active transfer class for asynchronous ftp client
@@ -11,7 +12,7 @@ use AnyEvent::Socket qw( tcp_server );
 
 # args:
 #  - command
-#  - destination
+#  - local
 #  - restart
 sub new
 {
@@ -20,7 +21,7 @@ sub new
   $args->{restart} //= 0;
   my $self = $class->SUPER::new($args);
   
-  my $destination = $self->convert_destination($args->{destination});
+  my $local = $self->convert_local($args->{local});
   
   my $count = 0;
   my $guard;
@@ -32,18 +33,21 @@ sub new
     
     undef $guard; # close to additional connections.
 
-    $self->xfer($fh,$destination);
+    $self->xfer($fh,$local);
   }, sub {
   
     my($fh, $host, $port) = @_;
     my $ip_and_port = join(',', split(/\./, $self->{client}->{my_ip}), $port >> 8, $port & 0xff);
 
-    $self->{client}->push_command(
-      [ PORT => $ip_and_port ],
-      ($args->{restart} > 0 ? ([ REST => $args->{restart} ]) : ()),
-      $args->{command},
-      $self->{cv},
-    );
+    my $w;
+    $w = AnyEvent->timer(after => 0, cb => sub {
+      $self->push_command(
+        [ PORT => $ip_and_port ],
+        ($args->{restart} > 0 ? ([ REST => $args->{restart} ]) : ()),
+        $args->{command},
+      );
+      undef $w;
+    });
   };
   
   $self->{cv}->cb(sub {
@@ -54,25 +58,25 @@ sub new
   $self;
 }
 
-package AnyEvent::FTP::Transfer::Active::Fetch;
+package AnyEvent::FTP::Client::Transfer::Active::Fetch;
 
-use base qw( AnyEvent::FTP::Transfer::Active );
+use base qw( AnyEvent::FTP::Client::Transfer::Active );
 use Role::Tiny::With;
 
-with 'AnyEvent::FTP::Role::FetchTransfer';
+with 'AnyEvent::FTP::Client::Role::FetchTransfer';
 
-package AnyEvent::FTP::Transfer::Active::Store;
+package AnyEvent::FTP::Client::Transfer::Active::Store;
 
-use base qw( AnyEvent::FTP::Transfer::Active );
+use base qw( AnyEvent::FTP::Client::Transfer::Active );
 use Role::Tiny::With;
 
-with 'AnyEvent::FTP::Role::StoreTransfer';
+with 'AnyEvent::FTP::Client::Role::StoreTransfer';
 
-package AnyEvent::FTP::Transfer::Active::List;
+package AnyEvent::FTP::Client::Transfer::Active::List;
 
-use base qw( AnyEvent::FTP::Transfer::Active );
+use base qw( AnyEvent::FTP::Client::Transfer::Active );
 use Role::Tiny::With;
 
-with 'AnyEvent::FTP::Role::ListTransfer';
+with 'AnyEvent::FTP::Client::Role::ListTransfer';
 
 1;

@@ -1,17 +1,22 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 12;
+use Test::More;
+BEGIN { eval 'use EV' }
 use AnyEvent::FTP::Client;
 use FindBin ();
 use URI;
 require "$FindBin::Bin/lib.pl";
+
+plan skip_all => 'requires client and server on localhost' if $ENV{AEF_REMOTE};
+plan tests => 12;
 
 my $client = eval { AnyEvent::FTP::Client->new };
 diag $@ if $@;
 isa_ok $client, 'AnyEvent::FTP::Client';
 
 our $config;
+our $detect;
 
 prep_client( $client );
 
@@ -44,7 +49,8 @@ do {
 $uri->user('bogus');
 $uri->password('bogus');
 
-do {
+SKIP: {
+  skip 'bftp quit broken', 2 if $detect->{xb};
   eval { $client->connect($uri->as_string)->recv };
   my $error = $@;
   isa_ok $error, 'AnyEvent::FTP::Response';
@@ -56,7 +62,8 @@ $uri->user($config->{user});
 $uri->password($config->{pass});
 $uri->path('/bogus/bogus/bogus');
 
-do {
+SKIP: {
+  skip 'bftp quit broken', 2 if $detect->{xb};
   eval { $client->connect($uri->as_string)->recv };
   my $error = $@;
   isa_ok $error, 'AnyEvent::FTP::Response';

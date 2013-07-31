@@ -1,12 +1,16 @@
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 48;
+use Test::More;
+BEGIN { eval 'use EV' }
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
 use FindBin ();
 require "$FindBin::Bin/lib.pl";
+
+plan skip_all => 'requires client and server on localhost' if $ENV{AEF_REMOTE};
+plan tests => 48;
 
 our $config;
 $config->{dir} = tempdir( CLEANUP => 1 );
@@ -50,7 +54,7 @@ foreach my $passive (0,1)
   do {
     my $data = 'some data';
     my $xfer = eval { $client->stor('foo.txt') };
-    isa_ok $xfer, 'AnyEvent::FTP::Transfer';
+    isa_ok $xfer, 'AnyEvent::FTP::Client::Transfer';
 
     my $called_open = 0;
     my $called_close = 0;
@@ -92,7 +96,7 @@ foreach my $passive (0,1)
     my $data = 'some data';
     my $xfer = eval { $client->stor('foo.txt', \$data) };
     diag $@ if $@;
-    isa_ok $xfer, 'AnyEvent::FTP::Transfer';
+    isa_ok $xfer, 'AnyEvent::FTP::Client::Transfer';
     my $ret = eval { $xfer->recv; };
     diag $@ if $@;
     isa_ok $ret, 'AnyEvent::FTP::Response';
