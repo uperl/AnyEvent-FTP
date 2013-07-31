@@ -127,7 +127,7 @@ GetOptions(
 
 $0 = 'aeftpd';
 
-$port //= ($> && $^O !~ /^(cygwin|MSWin32)$/) ? 8021 : 21;
+$port //= ($> && $^O !~ /^(cygwin|MSWin32)$/) ? undef : 21;
 
 if($stderr)
 {
@@ -158,21 +158,23 @@ elsif(defined $cred)
   };
 }
 
-unless($inet)
-{
-  my $uri = URI->new('ftp:');
-  $uri->host($host // 'localhost');
-  $uri->port($port);
-  $uri->userinfo(join ':', $cred->{user}, $cred->{pass})
-    if defined $cred;
-  say $uri;
-}
-
 my $server = AnyEvent::FTP::Server->new(
   hostname => $host,
   port     => $port,
   inet     => $inet,
 );
+
+unless($inet)
+{
+  $server->on_bind(sub {
+    my $uri = URI->new('ftp:');
+    $uri->host($host // 'localhost');
+    $uri->port(shift);
+    $uri->userinfo(join ':', $cred->{user}, $cred->{pass})
+      if defined $cred;
+    say $uri;
+  });
+}
 
 if($verbose)
 {
