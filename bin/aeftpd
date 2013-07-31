@@ -63,7 +63,7 @@ most UNIX and UNIX like operating systems.
 
 Generate a random username and password for authentication.
 
-=head2 --auth I<user>:I<pass>
+=head2 --cred I<user>:I<pass>
 
 Allow authentication with the given username and password.
 
@@ -89,7 +89,7 @@ my $pam;
 my $chroot = 0;
 my $verbose = 0;
 my $random_auth;
-my $auth;
+my $cred;
 
 GetOptions(
   'port=i'      => \$port,
@@ -100,7 +100,7 @@ GetOptions(
   'chroot'      => \$chroot,
   'random_auth' => \$random_auth,
   'verbose'     => \$verbose,
-  'auth=s'      => \$auth,
+  'cred=s'      => \$cred,
   'help|h'      => sub { pod2usage({ -verbose => 2}) },
   'version'     => sub { say 'aeftp/AnyEvent::FTP version ', ($AnyEvent::FTP::Server::VERSION // 'dev'); exit 1 },
 ) || pod2usage(1);
@@ -115,19 +115,19 @@ if($stderr)
 }
 
 $random_auth = 1
-  if ! defined($auth) && ! defined($pam);
+  if ! defined($cred) && ! defined($pam);
 
-if(defined $auth)
+if(defined $cred)
 {
-  my($user,$pass) = split /:/, $auth;
-  $auth = {
+  my($user,$pass) = split /:/, $cred;
+  $cred = {
     user => $user,
     pass => $pass,
   };
 }
 elsif(defined $random_auth)
 {
-  $auth = {
+  $cred = {
     user => (join '', map { chr(ord('a') + int rand(26)) } (1..10)),
     pass => (join '', map { chr(ord('a') + int rand(26)) } (1..10)),
   };
@@ -138,8 +138,8 @@ unless($inet)
   my $uri = URI->new('ftp:');
   $uri->host($host // 'localhost');
   $uri->port($port);
-  $uri->userinfo(join ':', $auth->{user}, $auth->{pass})
-    if defined $auth;
+  $uri->userinfo(join ':', $cred->{user}, $cred->{pass})
+    if defined $cred;
   say $uri;
 }
 
@@ -173,14 +173,14 @@ if($verbose)
   });
 }
 
-if($auth)
+if($cred)
 {
   $server->on_connect(sub {
     my $con = shift;
     $con->context->authenticator(sub {
       my($name, $pass) = @_;
-      return $name eq $auth->{user}
-      &&     $pass eq $auth->{pass};
+      return $name eq $cred->{user}
+      &&     $pass eq $cred->{pass};
     });
   });
 }
