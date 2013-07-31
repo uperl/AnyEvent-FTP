@@ -20,7 +20,7 @@ use Pod::Usage qw( pod2usage );
           [ --inet ] \
           [ --stderr path ] \
           [ --chroot ] \
-          [ --pam service | --random_auth | --auth user:pass ] \
+          [ --pam service | --cred [ user:pass | random ] ] \
           [ --verbose ]
  % aeftpd --version
  % aeftpd --help
@@ -59,13 +59,10 @@ Use C<chroot> to restrict the user to only his home directory once he has logged
 in.  This option requires the C<chroot> function, which is supported by Perl on
 most UNIX and UNIX like operating systems.
 
-=head2 --random_auth
+=head2 --cred [ I<user>:I<pass> | random ]
 
-Generate a random username and password for authentication.
-
-=head2 --cred I<user>:I<pass>
-
-Allow authentication with the given username and password.
+Allow authentication with the given username and password.  If you specify C<random>
+then a randomly generated username and password will be used.
 
 =head2 --verbose
 
@@ -88,7 +85,6 @@ my $stderr;
 my $pam;
 my $chroot = 0;
 my $verbose = 0;
-my $random_auth;
 my $cred;
 
 GetOptions(
@@ -98,7 +94,6 @@ GetOptions(
   'stderr=s'    => \$stderr,
   'pam=s'       => \$pam,
   'chroot'      => \$chroot,
-  'random_auth' => \$random_auth,
   'verbose'     => \$verbose,
   'cred=s'      => \$cred,
   'help|h'      => sub { pod2usage({ -verbose => 2}) },
@@ -114,22 +109,27 @@ if($stderr)
   open STDERR, '>>', $stderr;
 }
 
-$random_auth = 1
+$cred = 'random'
   if ! defined($cred) && ! defined($pam);
 
-if(defined $cred)
-{
-  my($user,$pass) = split /:/, $cred;
-  $cred = {
-    user => $user,
-    pass => $pass,
-  };
-}
-elsif(defined $random_auth)
+if($cred eq 'random')
 {
   $cred = {
     user => (join '', map { chr(ord('a') + int rand(26)) } (1..10)),
     pass => (join '', map { chr(ord('a') + int rand(26)) } (1..10)),
+  };
+}
+elsif(defined $cred)
+{
+  my($user,$pass) = split /:/, $cred;
+  unless(defined $pass)
+  {
+    say STDERR "password not provided for --cred option";
+    exit 2;
+  }
+  $cred = {
+    user => $user,
+    pass => $pass,
   };
 }
 
