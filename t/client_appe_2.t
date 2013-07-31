@@ -31,6 +31,7 @@ foreach my $passive (0,1)
 
   do {
     open my $fh, '>', "$local/data.$passive";
+    binmode $fh;
     print $fh "data$_\n" for 1..200;
     close $fh;
   };
@@ -44,10 +45,12 @@ foreach my $passive (0,1)
 
   my $expected = do {
     open my $fh, '>>', "$local/data.$passive";
+    binmode $fh;
     print $fh "xorxor$_\n" for 1..300;
     close $fh;
     
     open $fh, '<', "$local/data.$passive";
+    binmode $fh;
     local $/;
     my $data = <$fh>;
     close $fh;
@@ -56,6 +59,7 @@ foreach my $passive (0,1)
   
   do {
     open my $fh, '<', "$local/data.$passive";
+    binmode $fh;
     seek $fh, $client->size("data.$passive")->recv, 0;
     $client->appe("data.$passive", $fh)->recv;
     close $fh;
@@ -68,6 +72,7 @@ foreach my $passive (0,1)
   
   my $actual = do {
     open my $fh, '<', "$remote/data.$passive";
+    binmode $fh;
     local $/;
     my $data = <$fh>;
     close $fh;

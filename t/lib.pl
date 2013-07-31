@@ -104,4 +104,20 @@ sub prep_client
 
 }
 
+sub translate_dir
+{
+  my $dir = shift;
+  if($^O eq 'cygwin' && $detect->{ms})
+  {
+    $dir =~ s{^/cygdrive/(.)/}{$1:};
+    $dir =~ s{^/tmp/}{/cygwin/tmp};
+    $dir =~ s{/}{\\}g;
+    return $dir;
+  }
+  else
+  {
+    return $dir;
+  }
+}
+
 1;
