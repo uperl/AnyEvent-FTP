@@ -19,7 +19,6 @@ use Pod::Usage qw( pod2usage );
           [ --hostname hostname ] \
           [ --inet ] \
           [ --stderr path ] \
-          [ --pam service ] \
           [ --chroot ] \
           [ --pam service | --random_auth | --auth user:pass ] \
           [ --verbose ]
