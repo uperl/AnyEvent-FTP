@@ -72,7 +72,7 @@ sub test
   }
 
   local $ENV{AEF_PORT} = 'from_config';
-  system 'prove', '-br', ($ENV{AEF_JOBS} ? ('-j' => $ENV{AEF_JOBS}) : ()), 't/server';  
+  system 'prove', '-br', ($ENV{AEF_JOBS} ? ('-j' => $ENV{AEF_JOBS}, '-s') : ()), 't/server';  
   $self->log_fatal('server test failure') unless $? == 0;
 }
 

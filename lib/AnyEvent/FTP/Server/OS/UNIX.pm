@@ -68,7 +68,7 @@ has $_ => ( is => 'ro', required => 1 ) for (qw( name uid gid home shell ));
 
 =head2 groups
 
-List of groupds (as GIDs) that the user also belongs to.
+List of groups (as GIDs) that the user also belongs to.
 
 =cut
 
