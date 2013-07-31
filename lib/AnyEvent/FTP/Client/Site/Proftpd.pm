@@ -3,6 +3,10 @@ package AnyEvent::FTP::Client::Site::Proftpd;
 use strict;
 use warnings;
 use v5.10;
+use Moo;
+use warnings NONFATAL => 'all';
+
+extends 'AnyEvent::FTP::Client::Site::Base';
 
 # ABSTRACT: Site specific commands for Proftpd
 # VERSION
@@ -20,14 +24,6 @@ use v5.10;
 This class implements site specific commands for the Proftpd server.
 The implementation may be incomplete, and the documentation definitely is.
 Patches are welcome to fix this.
-
-=cut
-
-sub new
-{
-  my($class, $client) = @_;
-  bless { client => $client }, $class;
-}
 
 =head1 METHODS
 
@@ -49,10 +45,10 @@ Execute C<SITE SYMLINK> command.
 
 =cut
 
-sub utime   { shift->{client}->push_command([SITE => "UTIME $_[0] $_[1]"]   ) }
-sub mkdir   { shift->{client}->push_command([SITE => "MKDIR $_[0]"]         ) } 
-sub rmdir   { shift->{client}->push_command([SITE => "RMDIR $_[0]"]         ) } 
-sub symlink { shift->{client}->push_command([SITE => "SYMLINK $_[0] $_[1]"] ) }
+sub utime   { shift->client->push_command([SITE => "UTIME $_[0] $_[1]"]   ) }
+sub mkdir   { shift->client->push_command([SITE => "MKDIR $_[0]"]         ) } 
+sub rmdir   { shift->client->push_command([SITE => "RMDIR $_[0]"]         ) } 
+sub symlink { shift->client->push_command([SITE => "SYMLINK $_[0] $_[1]"] ) }
 
 =head2 $client-E<gt>site-E<gt>proftpd-E<gt>ratio
 
@@ -72,10 +68,10 @@ Execute C<SITE CHMOD> command.
 
 =cut
 
-sub ratio   { shift->{client}->push_command([SITE => "RATIO"]               ) }
-sub quota   { shift->{client}->push_command([SITE => "QUOTA"]               ) }
-sub help    { shift->{client}->push_command([SITE => "HELP $_[0]"]          ) }
-sub chgrp   { shift->{client}->push_command([SITE => "CHGRP $_[0] $_[1]"]   ) }
-sub chmod   { shift->{client}->push_command([SITE => "CHMOD $_[0] $_[1]"]   ) }
+sub ratio   { shift->client->push_command([SITE => "RATIO"]               ) }
+sub quota   { shift->client->push_command([SITE => "QUOTA"]               ) }
+sub help    { shift->client->push_command([SITE => "HELP $_[0]"]          ) }
+sub chgrp   { shift->client->push_command([SITE => "CHGRP $_[0] $_[1]"]   ) }
+sub chmod   { shift->client->push_command([SITE => "CHMOD $_[0] $_[1]"]   ) }
 
 1;

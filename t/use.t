@@ -1,10 +1,11 @@
 use strict;
 use warnings;
-use Test::More tests => 30;
+use Test::More tests => 31;
 
 use_ok 'AnyEvent::FTP';
 use_ok 'AnyEvent::FTP::Client';
 use_ok 'AnyEvent::FTP::Client::Site';
+use_ok 'AnyEvent::FTP::Client::Site::Base';
 use_ok 'AnyEvent::FTP::Client::Site::Proftpd';
 use_ok 'AnyEvent::FTP::Client::Site::Microsoft';
 use_ok 'AnyEvent::FTP::Client::Site::NetFtpServer';

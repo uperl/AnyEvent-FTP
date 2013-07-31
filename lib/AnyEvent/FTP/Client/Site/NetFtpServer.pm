@@ -3,6 +3,10 @@ package AnyEvent::FTP::Client::Site::NetFtpServer;
 use strict;
 use warnings;
 use v5.10;
+use Moo;
+use warnings NONFATAL => 'all';
+
+extends 'AnyEvent::FTP::Client::Site::Base';
 
 # ABSTRACT: Site specific commands for Net::FTPServer
 # VERSION
@@ -24,14 +28,6 @@ use v5.10;
 
 This class provides the C<SITE> specific commands for L<Net::FTPServer>.
 
-=cut
-
-sub new
-{
-  my($class, $client) = @_;
-  bless { client => $client }, $class;
-}
-
 =head1 METHODS
 
 =head2 $client-E<gt>site-E<gt>net_ftp_server-E<gt>version
@@ -41,7 +37,7 @@ Get the L<Net::FTPServer> version.
 =cut
 
 # TODO add a test for this
-sub version { shift->{client}->push_command([SITE => 'VERSION'] ) }
+sub version { shift->client->push_command([SITE => 'VERSION'] ) }
 
 =head1 CAVEATS
 
