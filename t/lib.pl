@@ -14,12 +14,14 @@ our $detect;
 
 $config->{dir} //= dir( -l file(__FILE__) ? file(readlink file(__FILE__))->parent : $FindBin::Bin )->parent->stringify;
 
+do {
+  my $file = file( __FILE__ )->parent->file("config.yml")->stringify;
+  $ENV{AEF_CONFIG} = $file if -r $file;
+};
+
 if(defined $ENV{AEF_PORT} && ! defined $ENV{AEF_CONFIG})
 {
-  my $config = file( __FILE__ )->parent->file("config.yml")->stringify;
-  $ENV{AEF_CONFIG} = $config if -r $config;
-  $ENV{AEF_CONFIG} //= file( File::HomeDir->my_home, '.ftptest', 'localhost.yml' )->stringify;
-  $ENV{AEF_PORT} = LoadFile($ENV{AEF_CONFIG})->{port} if $ENV{AEF_PORT} eq 'from_config';
+  $ENV{AEF_CONFIG} //= file( File::HomeDir->my_home, 'etc', 'localhost.yml' )->stringify;
 }
 
 if(defined $ENV{AEF_CONFIG})

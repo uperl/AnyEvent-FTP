@@ -39,6 +39,11 @@ pod_spelling_system:
     - STAT
     - STOR
     - STOU
+    - FTPd
+    - bftpd
+    - ftpd
+    - vsftpd
+    - wu
 
 pod_coverage:
   # format is "Class#method" or "Class", regex allowed

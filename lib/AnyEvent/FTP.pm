@@ -22,7 +22,7 @@ File Transfer Protocol (FTP) in an AnyEvent environment.  For the
 specific interfaces, see L<AnyEvent::FTP::Client> and L<AnyEvent::FTP::Server>
 for details.
 
-Before each release, L<AnyEvent::FTP::Client> is tested against these ftp servers
+Before each release, L<AnyEvent::FTP::Client> is tested against these FTP servers
 using the t/client_*.t tests that come with this distribution:
 
 =over 4
@@ -40,6 +40,18 @@ using the t/client_*.t tests that come with this distribution:
 =item bftpd
 
 =item L<AnyEvent::FTP::Server>
+
+=back
+
+The client code is also tested less frequently against these FTP servers:
+
+=over 4
+
+=item NcFTPd
+
+=item VMS ftp
+
+=item Microsoft IIS
 
 =back
 

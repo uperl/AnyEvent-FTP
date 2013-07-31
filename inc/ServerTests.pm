@@ -36,10 +36,35 @@ sub test
     DumpFile($new, $config);
   }
   
+  my @remotes;
+  
+  foreach my $remote_config (grep { $_->basename =~ /\.yml$/ } dir(File::HomeDir->my_home, 'etc')->children)
+  {
+    next if $remote_config->basename eq 'localhost.yml';
+    $self->zilla->log($remote_config->basename);
+    
+    my $name = $remote_config->basename;
+    $name =~ s/\.yml$//;
+    push @remotes, $name;
+    
+    my $dir = $test_root->subdir('t','server',$name);
+    $dir->mkpath(0,0700);
+
+    my $old = $test_root->file('t', 'lib.pl');
+    my $new = $dir->file('lib.pl');
+    symlink $old, $new;
+
+    $old = $remote_config;
+    $new = $dir->file('config.yml');
+    
+    my $config = LoadFile($old);
+    DumpFile($new, $config);
+    
+  }
+  
   foreach my $test_file (grep { $_->basename =~ /^client_/ } sort { $a->basename cmp $b->basename } $test_root->subdir('t')->children)
   {
-    #$self->zilla->log("test = $test_file");
-    foreach my $service (@services)
+    foreach my $service (@services, @remotes)
     {
       my $link = $test_root->file('t', 'server', $service, $test_file->basename);
       symlink $test_file, $link;
