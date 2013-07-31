@@ -170,14 +170,18 @@ sub cmd_size
   eval {
     use autodie;
     local $CWD = $self->cwd;
-    if(-e $req->args)
+    if(-d $req->args)
+    {
+      $con->send_response(550 => $req->args . ": not a regular file");
+    }
+    elsif(-e $req->args)
     {
       my $size = -s $req->args;
       $con->send_response(213 => $size);
     }
     else
     {
-      die 'fail';
+      die;
     }
   };
   if($@)
