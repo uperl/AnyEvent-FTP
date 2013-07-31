@@ -218,7 +218,7 @@ elsif($simple_auth_class)
     exit 2;
   }
   
-  my $pam = $simple_auth_class->new(
+  my $pam = "Authen::Simple::$simple_auth_class"->new(
     @simple_auth_args,
   );
   
