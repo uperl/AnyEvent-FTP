@@ -6,6 +6,9 @@ use v5.10;
 use Moo;
 use warnings NONFATAL => 'all';
 
+# ABSTRACT: base class for AnyEvent::FTP::Client::Site::* classes
+# VERSION
+
 sub BUILDARGS
 {
   my($class, $client) = @_;

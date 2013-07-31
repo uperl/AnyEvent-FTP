@@ -7,10 +7,66 @@ use AnyEvent;
 use AnyEvent::FTP::Server;
 use Getopt::Long qw( GetOptions );
 use URI;
+use Pod::Usage qw( pod2usage );
 
 # PODNAME: aeftpd
 # ABSTRACT: FTP Server
 # VERSION
+
+=head1 SYNOPSIS
+
+ % aeftpd [ --port port ] \
+          [ --hostname hostname ] \
+          [ --inet ] \
+          [ --stderr path ] \
+          [ --pam service ] \
+          [ --chroot ]
+ % aeftpd --version
+ % aeftpd --help
+
+=head1 DESCRIPTION
+
+This program starts an FTP daemon using the perl library L<AnyEvent::FTP::Server>.
+
+=head1 OPTIONS
+
+=head2 --port port
+
+The TCP port to listen to.
+
+=head2 --hostname hostname
+
+The hostname or IP address to listen on.
+
+=head2 --inet
+
+Run in inet mode.  By default C<aeftpd> runs as a single process in standalone mode.
+By using this option you can run C<aeftp> from C<inetd>, C<xinetd> or similar daemon.
+Here is a line for /etc/inetd.conf which was tested on Debian Wheezy, and may work
+for you if your operating system suppors PAM and you have L<Authen::Simple::PAM>
+installed.
+
+ ftp stream tcp nowait root /usr/sbin/tcpd aeftpd --inet --stderr /tmp/aeftp.log --pam login
+
+=head2 --stderr path
+
+Redirect stderr from the daemon to the file specified by the given path
+
+=head2 --chroot
+
+Use C<chroot> to restrict the user to only his home directory once he has logged
+in.  This option requires the C<chroot> function, which is supported by Perl on
+most UNIX and UNIX like operating systems.
+
+=head2 --version
+
+Print out the L<AnyEvent::FTP> version to stdout and exit.
+
+=head2 --help
+
+Display the usage for this command.
+
+=cut
 
 my $port;
 my $host;
@@ -26,7 +82,9 @@ GetOptions(
   'stderr=s'   => \$stderr,
   'pam=s'      => \$pam,
   'chroot'     => \$chroot,
-);
+  'help|h'     => sub { pod2usage({ -verbose => 2}) },
+  'version'    => sub { say 'aeftp/AnyEvent::FTP version ', ($AnyEvent::FTP::Server::VERSION // 'dev'); exit 1 },
+) || pod2usage(1);
 
 $0 = 'aeftpd';
 
