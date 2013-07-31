@@ -15,12 +15,15 @@ use Pod::Usage qw( pod2usage );
 
 =head1 SYNOPSIS
 
- % aeftpd [ --port port ] \
-          [ --hostname hostname ] \
-          [ --inet ] \
-          [ --stderr path ] \
-          [ --chroot ] \
-          [ --pam service | --cred [ user:pass | random ] ] \
+ % aeftpd [ --port port ] 
+          [ --hostname hostname ] 
+          [ --inet ] 
+          [ --stderr path ] 
+          [ --chroot ] 
+            --pam service | 
+            --cred user:pass |
+            --cred random |
+            --auth class [ --auth key=val ] 
           [ --verbose ]
  % aeftpd --version
  % aeftpd --help
@@ -64,6 +67,26 @@ most UNIX and UNIX like operating systems.
 Allow authentication with the given username and password.  If you specify C<random>
 then a randomly generated username and password will be used.
 
+=head2 --auth I<class>
+
+Specify a L<Authen::Simple> class to use for authentication.  You should NOT
+include the Authen::Simple prefix when specifying the class (that is use 
+C<PAM> instead of C<Authen::Simple::PAM>).
+
+=head2 --auth I<key>=I<val>
+
+Specify an argument to pass into the chosen L<Authen::Simple> object.
+
+=head2 --pam I<service>
+
+Use PAM for authentication.  This option is simply a shortcut.  This:
+
+ % aeftpd --pam login
+
+is the same as
+
+ % aeftpd --auth PAM --auth service=login
+
 =head2 --verbose
 
 Print all FTP commands and their responses to stderr.
@@ -82,20 +105,22 @@ my $port;
 my $host;
 my $inet = 0;
 my $stderr;
-my $pam;
 my $chroot = 0;
 my $verbose = 0;
 my $cred;
+my $simple_auth_class;
+my @simple_auth_args;
 
 GetOptions(
   'port=i'      => \$port,
   'hostname=s'  => \$host,
   'inet'        => \$inet,
   'stderr=s'    => \$stderr,
-  'pam=s'       => \$pam,
+  'pam=s'       => sub { $simple_auth_class = 'PAM'; push @simple_auth_args, service => $_[1] },
   'chroot'      => \$chroot,
   'verbose'     => \$verbose,
   'cred=s'      => \$cred,
+  'auth=s'      => sub { $_[1] =~ /^(.*?)=(.*)$/ ? (push @simple_auth_args, $1 => $2) : ($simple_auth_class = $_[1]) },
   'help|h'      => sub { pod2usage({ -verbose => 2}) },
   'version'     => sub { say 'aeftp/AnyEvent::FTP version ', ($AnyEvent::FTP::Server::VERSION // 'dev'); exit 1 },
 ) || pod2usage(1);
@@ -110,7 +135,7 @@ if($stderr)
 }
 
 $cred = 'random'
-  if ! defined($cred) && ! defined($pam);
+  if ! defined($cred) && ! defined($simple_auth_class);
 
 if($cred eq 'random')
 {
@@ -184,17 +209,17 @@ if($cred)
     });
   });
 }
-elsif($pam)
+elsif($simple_auth_class)
 {
-  eval { require Authen::Simple::PAM };
+  eval 'use Authen::Simple::' . $simple_auth_class;
   if($@)
   {
-    say STDERR "PAM authentication requires Authen::Simple::PAM to be installed";
+    say STDERR "install Authen::Simple::$simple_auth_class in order to use $simple_auth_class authentication";
     exit 2;
   }
   
-  $pam = Authen::Simple::PAM->new(
-    service => $pam,
+  my $pam = $simple_auth_class->new(
+    @simple_auth_args,
   );
   
   $server->on_connect(sub {
@@ -233,6 +258,11 @@ elsif($pam)
     1;
     
   });
+}
+else
+{
+  print STDERR "must specify at least one of --pam, --cred or --auth";
+  exit 2;
 }
 
 $server->start;
