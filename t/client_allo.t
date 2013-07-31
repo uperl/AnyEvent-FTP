@@ -17,6 +17,7 @@ $client->login($config->{user}, $config->{pass})->recv;
 
 our $detect;
 plan skip_all => 'wu-ftpd does not support ALLO' if $detect->{wu};
+plan skip_all => 'proftpd does not support ALLO' if $detect->{pr};
 plan tests => 4;
 
 my $res = eval { $client->allo('foo')->recv };

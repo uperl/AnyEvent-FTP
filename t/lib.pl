@@ -4,7 +4,7 @@ use v5.10;
 use YAML qw( LoadFile );
 use File::HomeDir;
 use FindBin ();
-use Path::Class qw( dir );
+use Path::Class qw( dir file );
 use Path::Class ();
 use File::Spec;
 use Test::More;
@@ -16,7 +16,9 @@ $config->{dir} //= dir( $FindBin::Bin )->parent->stringify;
 
 if(defined $ENV{AEF_PORT} && ! defined $ENV{AEF_CONFIG})
 {
-  $ENV{AEF_CONFIG} = File::Spec->catfile(File::HomeDir->my_home, '.ftptest', 'localhost.yml');
+  my $config = file( __FILE__ )->parent->file("config.yml")->stringify;
+  $ENV{AEF_CONFIG} = $config if -r $config;
+  $ENV{AEF_CONFIG} //= file( File::HomeDir->my_home, '.ftptest', 'localhost.yml' )->stringify;
 }
 
 if(defined $ENV{AEF_CONFIG})

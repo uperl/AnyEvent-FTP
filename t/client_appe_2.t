@@ -10,7 +10,7 @@ use FindBin ();
 require "$FindBin::Bin/lib.pl";
 
 plan skip_all => 'requires client and server on localhost' if $ENV{AEF_REMOTE};
-#plan tests => 12;
+plan tests => 10;
 
 our $config;
 my $remote = $config->{dir} = tempdir( CLEANUP => 1 );
@@ -79,4 +79,3 @@ foreach my $passive (0,1)
   $client->quit->recv;
 }
 
-done_testing;
