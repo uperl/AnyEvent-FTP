@@ -3,9 +3,11 @@ package AnyEvent::FTP::Client::Transfer;
 use strict;
 use warnings;
 use v5.10;
+use Moo;
+use warnings NONFATAL => 'all';
 use AnyEvent;
 use AnyEvent::Handle;
-use Role::Tiny::With;
+use Carp qw( confess );
 
 # ABSTRACT: Transfer class for asynchronous ftp client
 # VERSION
@@ -93,16 +95,44 @@ Emitted when the data connection closes.
 
 __PACKAGE__->define_events(qw( open close eof ));
 
-sub new
+sub BUILDARGS
 {
-  my($class) = shift;
-  my $args   = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
-  bless {
-    cv          => $args->{cv} // AnyEvent->condvar,
-    client      => $args->{client},
-    remote_name => $args->{command}->[1],
-  }, $class;
+  my $class = shift;
+  my $args = ref $_[0] eq 'HASH' ? ({ %{$_[0]} }) : ({@_});
+  my $command = $args->{command};
+  $args->{remote_name} = $command->[1];
+  $args;
 }
+
+has cv => (
+  is      => 'ro',
+  lazy    => 1,
+  default => sub { AnyEvent->condvar },
+);
+
+has client => (
+  is       => 'ro',
+  required => 1,
+);
+
+has remote_name => (
+  is => 'rw',
+);
+
+has local => (
+  is       => 'ro',
+  required => 1,
+);
+
+has command => (
+  is       => 'ro',
+  required => 1,
+);
+
+has restart => (
+  is      => 'ro',
+  default => sub { 0 },
+);
 
 =head1 METHODS
 
@@ -160,7 +190,5 @@ sub handle
 For C<STOU> transfers ONLY, this returns the remote file name.
 
 =cut
-
-sub remote_name { shift->{remote_name} }
 
 1;

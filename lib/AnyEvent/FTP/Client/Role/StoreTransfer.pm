@@ -75,7 +75,7 @@ sub push_command
   my $self = shift;
   $self->{client}->push_command(
     @_,
-    $self->{cv},
+    $self->cv,
   );
 }
 

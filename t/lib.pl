@@ -69,7 +69,7 @@ else
   $detect->{ae} = 1;
 }
 
-our $anyevent_test_timeout = AnyEvent->timer( after => ($detect->{ae} ? 5 : 15), cb => sub { diag "TIMEOUT: giving up"; exit } );
+#our $anyevent_test_timeout = AnyEvent->timer( after => ($detect->{ae} ? 5 : 15), cb => sub { diag "TIMEOUT: giving up"; exit } );
 
 sub prep_client
 {
