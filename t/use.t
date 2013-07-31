@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 31;
+use Test::More tests => 32;
 
 use_ok 'AnyEvent::FTP';
 use_ok 'AnyEvent::FTP::Client';
@@ -33,3 +33,4 @@ use_ok 'AnyEvent::FTP::Server::Connection';
 use_ok 'AnyEvent::FTP::Server::Context';
 use_ok 'AnyEvent::FTP::Server::Context::Full';
 use_ok 'AnyEvent::FTP::Server::OS::UNIX';
+use_ok 'Test::AnyEventFTPServer';
