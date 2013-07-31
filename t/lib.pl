@@ -10,6 +10,7 @@ use Test::More;
 
 our $config;
 our $detect;
+our $lock;
 
 $config->{dir} //= dir( -l file(__FILE__) ? file(readlink file(__FILE__))->parent : $FindBin::Bin )->parent->stringify;
 
@@ -34,6 +35,13 @@ if(defined $ENV{AEF_CONFIG})
   $config->{host} //= $ENV{AEF_HOST} // 'localhost';
   $config->{port} = getservbyname($config->{port}, "tcp")
     if defined $config->{port} && $config->{port} !~ /^\d+$/;
+  if(defined $config->{remote})
+  {
+    $ENV{AEF_REMOTE} = $config->{remote};
+    # remote server tests may not be parallel safe
+    require NX::Lock;
+    $lock = NX::Lock->new($ENV{AEF_CONFIG}, block => 1);
+  }
 }
 else
 {

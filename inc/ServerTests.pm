@@ -41,7 +41,7 @@ sub test
   foreach my $remote_config (grep { $_->basename =~ /\.yml$/ } dir(File::HomeDir->my_home, 'etc')->children)
   {
     next if $remote_config->basename eq 'localhost.yml';
-    $self->zilla->log($remote_config->basename);
+    #$self->zilla->log($remote_config->basename);
     
     my $name = $remote_config->basename;
     $name =~ s/\.yml$//;

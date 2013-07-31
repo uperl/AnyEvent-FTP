@@ -7,7 +7,6 @@ use AnyEvent::FTP::Client;
 use FindBin ();
 require "$FindBin::Bin/lib.pl";
 
-plan skip_all => 'requires client and server on localhost' if $ENV{AEF_REMOTE};
 plan tests => 1;
 
 my $client = eval { AnyEvent::FTP::Client->new };
