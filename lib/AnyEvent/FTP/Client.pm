@@ -389,6 +389,7 @@ The content of the remote file will be written into the local file handle as it 
 received
 
  open my $fh, '>', 'foo.txt';
+ binmode $fh;
  $client-E<gt>retr('foo.txt', $fh);
 
 =item the name of the local file
@@ -409,6 +410,7 @@ C<$local> argument.  Here is an example:
  # current remote directory.
  my $filename = 'foo.txt';
  open my $fh, '>>', $filename;
+ binmode $fh;
  $client->retr($filename, $fh, restart => tell $fh);
 
 =cut
@@ -450,6 +452,7 @@ The contents of the file will be retrieved from the scalar referred to by the re
 The contents of the file will be read from the file handle.
 
  open my $fh, '<', 'foo.txt';
+ binmode $fh;
  $client-E<gt>stor('foo.txt', $fh);
 
 =item the name of the local file
@@ -518,6 +521,7 @@ with C<$local> as that file handle, as in this example:
  $client->size($filename)->cb(sub {
    my $size = shift->recv;
    open my $fh, '<', $filename;
+   binmode $fh;
    seek $fh, $size, 0;
    $client->appe($filename, $fh);
  });
