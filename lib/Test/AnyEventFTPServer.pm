@@ -55,6 +55,29 @@ sub create_ftpserver_ok (;$$)
       test_uri        => $uri,
     );
     
+    if($ENV{AEF_DEBUG})
+    {
+      my $tb = Test::Builder::Module->builder;
+      $server->on_connect(sub {
+        my $con = shift;
+        $tb->note("CONNECT");
+        
+        $con->on_request(sub {
+          my $raw = shift;
+          $tb->note("CLIENT: $raw");
+        });
+        
+        $con->on_response(sub {
+          my $raw = shift;
+          $tb->note("SERVER: $raw");
+        });
+        
+        $con->on_close(sub {
+          $tb->note("DISCONNECT");
+        });
+      });
+    }
+    
     $server->on_connect(sub {
       shift->context->authenticator(sub {
         return $_[0] eq $user && $_[1] eq $pass;
