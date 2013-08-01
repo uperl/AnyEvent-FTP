@@ -145,5 +145,7 @@ sub import
   *{join '::', $caller, 'connect_ftpclient_ok'} = \&connect_ftpclient_ok;
 }
 
+BEGIN { eval 'use EV' }
+
 1;
 

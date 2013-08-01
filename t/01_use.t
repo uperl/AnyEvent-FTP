@@ -2,6 +2,8 @@ use strict;
 use warnings;
 use Test::More tests => 33;
 
+BEGIN { eval 'use EV' }
+
 use_ok 'AnyEvent::FTP';
 use_ok 'AnyEvent::FTP::Client';
 use_ok 'AnyEvent::FTP::Client::Site';
