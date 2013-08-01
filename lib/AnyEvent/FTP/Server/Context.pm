@@ -40,7 +40,14 @@ sub process_queue
 
   my($con, $req) = @{ shift @{ $self->{request_queue} } };
 
-  my $method = join '_', 'cmd', lc $req->command;
+  my $command = lc $req->command;
+
+  if($self->can('auth_command_check_hook'))
+  {
+    return unless $self->auth_command_check_hook($con, $command);
+  }
+
+  my $method = join '_', 'cmd', $command;
   
   if($self->can($method))
   {

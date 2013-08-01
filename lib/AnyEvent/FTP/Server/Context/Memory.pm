@@ -56,15 +56,6 @@ with 'AnyEvent::FTP::Server::Role::Help';
 with 'AnyEvent::FTP::Server::Role::Old';
 with 'AnyEvent::FTP::Server::Role::Type';
 
-sub _not_logged_in
-{
-  my($self, $con) = @_;
-  
-  $con->send_response(530 => 'Please login with USER and PASS');
-  $self->done;
-  return;
-}
-
 =head1 COMMANDS
 
 In addition to the commands provided by the above roles,
@@ -81,8 +72,6 @@ sub help_cwd { 'CWD <sp> pathname' }
 sub cmd_cwd
 {
   my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
   
   my $dir = $req->args;
 
@@ -105,8 +94,6 @@ sub cmd_cdup
 {
   my($self, $con, $req) = @_;
   
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   eval {
     die 'FIXME';
     $con->send_response(250 => 'CDUP command successful');
@@ -125,8 +112,6 @@ sub help_pwd { 'PWD' }
 sub cmd_pwd
 {
   my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
   
   $con->send_response(550 => 'CWD error');
   $self->done;
@@ -147,8 +132,6 @@ sub cmd_size
 {
   my($self, $con, $req) = @_;
   
-  return $self->_not_logged_in($con) unless $self->authenticated;
-
   eval {
     die 'FIXME';
     #if(-d $req->args)
@@ -182,8 +165,6 @@ sub cmd_mkd
 {
   my($self, $con, $req) = @_;
   
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   my $dir = $req->args;
   eval {
     die 'FIXME';
@@ -202,8 +183,6 @@ sub help_rmd { 'RMD <sp> pathname' }
 sub cmd_rmd
 {
   my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
   
   my $dir = $req->args;
   eval {
@@ -224,8 +203,6 @@ sub cmd_dele
 {
   my($self, $con, $req) = @_;
   
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   my $file = $req->args;
   eval {
     die 'FIXME';
@@ -244,8 +221,6 @@ sub help_rnfr { 'RNFR <sp> pathname' }
 sub cmd_rnfr
 {
   my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
   
   my $path = $req->args;
   
@@ -290,8 +265,6 @@ sub help_rnto { 'RNTO <sp> pathname' }
 sub cmd_rnto
 {
   my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
   
   my $path = $req->args;
   

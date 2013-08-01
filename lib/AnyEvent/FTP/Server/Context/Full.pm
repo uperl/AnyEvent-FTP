@@ -72,15 +72,6 @@ sub rename_from
   $self->{rename_from};
 }
 
-sub _not_logged_in
-{
-  my($self, $con) = @_;
-  
-  $con->send_response(530 => 'Please login with USER and PASS');
-  $self->done;
-  return;
-}
-
 =head1 COMMANDS
 
 In addition to the commands provided by the above roles,
@@ -97,8 +88,6 @@ sub help_cwd { 'CWD <sp> pathname' }
 sub cmd_cwd
 {
   my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
   
   my $dir = $req->args;
 
@@ -124,8 +113,6 @@ sub cmd_cdup
 {
   my($self, $con, $req) = @_;
   
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   eval {
     use autodie;
     local $CWD = $self->cwd;
@@ -148,8 +135,6 @@ sub cmd_pwd
 {
   my($self, $con, $req) = @_;
   
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   my $cwd = $self->cwd;
   $con->send_response(257 => "\"$cwd\" is the current directory");
   $self->done;
@@ -165,8 +150,6 @@ sub cmd_size
 {
   my($self, $con, $req) = @_;
   
-  return $self->_not_logged_in($con) unless $self->authenticated;
-
   eval {
     use autodie;
     local $CWD = $self->cwd;
@@ -201,8 +184,6 @@ sub cmd_mkd
 {
   my($self, $con, $req) = @_;
   
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   my $dir = $req->args;
   eval {
     use autodie;
@@ -223,8 +204,6 @@ sub help_rmd { 'RMD <sp> pathname' }
 sub cmd_rmd
 {
   my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
   
   my $dir = $req->args;
   eval {
@@ -247,8 +226,6 @@ sub cmd_dele
 {
   my($self, $con, $req) = @_;
   
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   my $file = $req->args;
   eval {
     use autodie;
@@ -269,8 +246,6 @@ sub help_rnfr { 'RNFR <sp> pathname' }
 sub cmd_rnfr
 {
   my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
   
   my $path = $req->args;
   
@@ -314,8 +289,6 @@ sub help_rnto { 'RNTO <sp> pathname' }
 sub cmd_rnto
 {
   my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
   
   my $path = $req->args;
   
@@ -422,8 +395,6 @@ sub cmd_pasv
 {
   my($self, $con, $req) = @_;
   
-  return $self->_not_logged_in($con) unless $self->authenticated;
-
   my $count = 0;
 
   tcp_server undef, undef, sub {
@@ -472,8 +443,6 @@ sub help_port { 'PORT <sp> h1,h2,h3,h4,p1,p2' }
 sub cmd_port
 {
   my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
   
   if($req->args =~ /(\d+,\d+,\d+,\d+),(\d+),(\d+)/)
   {
@@ -527,8 +496,6 @@ sub cmd_rest
 {
   my($self, $con, $req) = @_;
   
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   if($req->args =~ /^\s*(\d+)\s*$/)
   {
     my $offset = $1;
@@ -551,8 +518,6 @@ sub help_retr { 'RETR <sp> pathname' }
 sub cmd_retr
 {
   my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
   
   my $fn = $req->args;
   
@@ -608,8 +573,6 @@ sub cmd_nlst
 {
   my($self, $con, $req) = @_;
   
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   my $dir = $req->args || '.';
   
   unless(defined $self->data)
@@ -654,8 +617,6 @@ sub cmd_list
 {
   my($self, $con, $req) = @_;
   
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   my $dir = $req->args || '.';
   $dir = '.' if $dir eq '-l';
   
@@ -697,8 +658,6 @@ sub cmd_stor
 {
   my($self, $con, $req) = @_;
 
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   my $fn = $req->args;
   
   unless(defined $self->data)
@@ -749,8 +708,6 @@ sub cmd_appe
 {
   my($self, $con, $req) = @_;
 
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   my $fn = $req->args;
   
   unless(defined $self->data)
@@ -801,8 +758,6 @@ sub cmd_stou
 {
   my($self, $con, $req) = @_;
 
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   my $fn = $req->args;
   
   unless(defined $self->data)

@@ -74,6 +74,7 @@ pod_coverage:
     # server context requires coverage of commands,
     # not methods
     - AnyEvent::FTP::Server::Context::Full
+    - AnyEvent::FTP::Server::Role::Auth
     - AnyEvent::FTP::Server::Role::Help
     - AnyEvent::FTP::Server::Role::Old
     

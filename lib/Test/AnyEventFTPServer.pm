@@ -74,6 +74,11 @@ has res => (
   is => 'rw',
 );
 
+has auto_login => (
+  is      => 'rw',
+  default => sub { 1 },
+);
+
 has _client => (
   is      => 'ro',
   lazy    => 1,
@@ -86,7 +91,16 @@ has _client => (
       after => 5,
       cb    => sub { $cv->croak("timeout connecting with ftp client") },
     );
-    $client->connect($self->test_uri)->cb(sub { $cv->send });
+    if($self->auto_login)
+    {
+      $client->connect($self->test_uri)
+             ->cb(sub { $cv->send });
+    }
+    else
+    {
+      $client->connect($self->test_uri->host, $self->test_uri->port)
+             ->cb(sub { $cv->send });
+    }
     $cv->recv;
     $client;
   },
@@ -199,7 +213,16 @@ sub connect_ftpclient_ok
       after => 5,
       cb    => sub { $cv->croak("timeout connecting with ftp client") },
     );
-    $client->connect($self->test_uri)->cb(sub { $cv->send });
+    if($self->auto_login)
+    {
+      $client->connect($self->test_uri)
+             ->cb(sub { $cv->send });
+    }
+    else
+    {
+      $client->connect($self->tesT_uri->host, $self->test_uri->port)
+             ->cb(sub { $cv->send });
+    }
     $cv->recv;
   };
   my $error = $@;
