@@ -1,7 +1,9 @@
 use strict;
 use warnings;
-use Test::More tests => 12;
+use Test::More tests => 14;
 use Test::AnyEventFTPServer;
+
+global_timeout_ok;
 
 foreach my $type (qw( Full Memory ))
 {
@@ -14,3 +16,5 @@ foreach my $type (qw( Full Memory ))
   
   $server->help_coverage_ok('AnyEvent::FTP::Server::Role::Old');
 }
+
+pass 'good';

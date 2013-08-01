@@ -1,7 +1,9 @@
 use strict;
 use warnings;
-use Test::More tests => 10;
+use Test::More tests => 11;
 use Test::AnyEventFTPServer;
+
+global_timeout_ok;
 
 foreach my $type (qw( Full Memory ))
 {

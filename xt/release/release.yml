@@ -54,6 +54,7 @@ pod_spelling_system:
     - cred
     - inet
     - pam
+    - RETR
 
 pod_coverage:
   # format is "Class#method" or "Class", regex allowed

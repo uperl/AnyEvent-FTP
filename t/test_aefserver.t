@@ -1,7 +1,9 @@
 use strict;
 use warnings;
-use Test::More tests => 8;
+use Test::More tests => 18;
 use Test::AnyEventFTPServer;
+
+global_timeout_ok;
 
 my $server = create_ftpserver_ok;
 isa_ok $server, 'AnyEvent::FTP::Server';
@@ -17,3 +19,16 @@ $response = $client->quit->recv;
 is $response->code, 221, "quit response code = 221";
 
 $server->help_coverage_ok;
+
+$server->command_ok('bogus')
+       ->code_is(500)
+       ->code_like(qr{5..})
+       ->message_like(qr{not understood});
+
+$server->command_ok('HELP')
+       ->code_is(214)
+       ->code_like(qr{.1.})
+       ->message_like(qr{The following commands are recognized});
+
+isa_ok $server->res, 'AnyEvent::FTP::Client::Response';
+
