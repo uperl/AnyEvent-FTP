@@ -48,7 +48,7 @@ The hostname or IP address to listen on.
 Run in inet mode.  By default C<aeftpd> runs as a single process in standalone mode.
 By using this option you can run C<aeftp> from C<inetd>, C<xinetd> or similar daemon.
 Here is a line for /etc/inetd.conf which was tested on Debian Wheezy, and may work
-for you if your operating system suppors PAM and you have L<Authen::Simple::PAM>
+for you if your operating system supports PAM and you have L<Authen::Simple::PAM>
 installed.
 
  ftp stream tcp nowait root /usr/sbin/tcpd aeftpd --inet --stderr /tmp/aeftp.log --pam login

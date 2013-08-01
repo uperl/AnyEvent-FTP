@@ -44,7 +44,7 @@ Then connect to that server and test the C<HELP> command:
 =head1 DESCRIPTION
 
 This role provides a standard FTP C<HELP> command.  It finds any FTP commands (C<cmd_*>) you
-have defined in your context class and the assoicated usage functions (C<help_*>) and implements
+have defined in your context class and the associated usage functions (C<help_*>) and implements
 the C<HELP> command for you.
 
 =cut
