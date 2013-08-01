@@ -36,12 +36,9 @@ This is an L<AnyEvent::Handle>.
 
 =cut
 
-sub data
-{
-  my($self, $value) = @_;
-  $self->{data} = $value if defined $value;
-  $self->{data};
-}
+has data => (
+  is => 'rw',
+);
 
 =head2 $context-E<gt>restart_offset
 
@@ -50,12 +47,9 @@ This should be a positive integer.
 
 =cut
 
-sub restart_offset
-{
-  my($self, $value) = @_;
-  $self->{restart_offset} = $value if defined $value;
-  $self->{restart_offset};
-}
+has restart_offset => (
+  is => 'rw',
+);
 
 =head1 METHODS
 
@@ -68,8 +62,8 @@ Clears the C<data> and C<restart_offset> attributes.
 sub clear_data
 {
   my($self) = @_;
-  delete $self->{data};
-  delete $self->{restart_offset};
+  $self->data(undef);
+  $self->restart_offset(undef);
 }
 
 =head1 COMMANDS
