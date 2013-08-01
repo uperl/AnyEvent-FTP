@@ -14,9 +14,30 @@ extends 'AnyEvent::FTP::Server';
 # ABSTRACT: Test (non-blocking) ftp clients against a real FTP server
 # VERSION
 
+=head1 SYNOPSIS
+
+ use Test::More test => 3;
+ use Test::AnyEventFTPServer;
+ 
+ my $server = create_ftpserver_ok;
+ my $client = $server->connect_ftpclient_ok;
+ $server->help_coverage_ok;
+
+=head1 DESCRIPTION
+
+This module makes it easy to test ftp clients against a real 
+L<AnyEvent::FTP> FTP server.  The FTP server is non-blocking in
+and does not C<fork>, so if you are testing a FTP client that
+blocks then you will need to do it in a separate process.
+L<AnyEvent::FTP::Client> is a client that doesn't block and so
+is safe to use in testing against the server.
+
 =head1 ATTRIBUTES
 
 =head2 $test_server-E<gt>test_uri
+
+The full URL (including host, port, username and password) of the
+test ftp server.  This is returned as L<URI>.
 
 =cut
 
@@ -28,6 +49,12 @@ has test_uri => (
 =head1 METHODS
 
 =head2 create_ftpserver_ok ( [ $default_context, [ $message ] ] )
+
+Create the FTP server with a random username and password
+for logging in.  You can get the username/password from the
+C<test_uri> attribute, or connect to the server using
+L<AnyEvent::FTP::Client> automatically with the C<connect_ftpclient_ok>
+method below.
 
 =cut
 
@@ -109,6 +136,9 @@ sub create_ftpserver_ok (;$$)
 
 =head2 $test_server-E<gt>connect_ftpclient_ok( [ $message ] )
 
+Connect to the FTP server, return the L<AnyEvent::FTP::Client>
+object which can be used for testing.
+
 =cut
 
 sub connect_ftpclient_ok
@@ -138,6 +168,11 @@ sub connect_ftpclient_ok
 }
 
 =head2 $test_server-E<gt>help_coverage_ok( [ $context_class, [ $message ] )
+
+Test that there is a C<help_*> method for each C<cmd_*> method in the
+given context class (the server's default context class is used if
+it isn't provided).  This can also be used to test help coverage of
+context roles.
 
 =cut
 
@@ -191,8 +226,6 @@ sub import
   my $caller = caller;
   no strict 'refs';
   *{join '::', $caller, 'create_ftpserver_ok'} = \&create_ftpserver_ok;
-  *{join '::', $caller, 'connect_ftpclient_ok'} = \&connect_ftpclient_ok;
-  *{join '::', $caller, 'help_coverage_ok'} = \&help_coverage_ok;
 }
 
 BEGIN { eval 'use EV' }
