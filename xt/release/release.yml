@@ -65,6 +65,7 @@ pod_coverage:
     # not methods
     - AnyEvent::FTP::Server::Context::Full
     - AnyEvent::FTP::Server::Role::Help
+    - AnyEvent::FTP::Server::Role::Old
     
     # The ::Site:: module documentation actually cover these methods,
     # but Test::Pod::Coverage doesn't like the multipe arrow thing that is
