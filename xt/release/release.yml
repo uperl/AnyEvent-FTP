@@ -55,6 +55,8 @@ pod_spelling_system:
     - inet
     - pam
     - RETR
+    - VMS
+    - authenticator
 
 pod_coverage:
   # format is "Class#method" or "Class", regex allowed
@@ -73,10 +75,9 @@ pod_coverage:
     
     # server context requires coverage of commands,
     # not methods
-    - AnyEvent::FTP::Server::Context::Full
-    - AnyEvent::FTP::Server::Role::Auth
-    - AnyEvent::FTP::Server::Role::Help
-    - AnyEvent::FTP::Server::Role::Old
+    - AnyEvent::FTP::Server::Context::Memory#(cmd_|help_).*
+    - AnyEvent::FTP::Server::Context::Full#(cmd_|help_).*
+    - AnyEvent::FTP::Server::Role::(Auth|Help|Old|Type)#(cmd_|help_).*
     
     # The ::Site:: module documentation actually cover these methods,
     # but Test::Pod::Coverage doesn't like the multipe arrow thing that is

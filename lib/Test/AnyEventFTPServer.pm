@@ -74,6 +74,15 @@ has res => (
   is => 'rw',
 );
 
+=head2 $test_server-E<gt>auto_login
+
+If true (the default) automatically login using the correct credentials.
+Normally if you are testing file transfers you want to keep this to the
+default value, if you are testing the authentication of a server context
+then you want to set this to false.
+
+=cut
+
 has auto_login => (
   is      => 'rw',
   default => sub { 1 },

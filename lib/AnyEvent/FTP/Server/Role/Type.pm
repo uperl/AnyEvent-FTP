@@ -16,6 +16,16 @@ sub type
   $self->{type} // 'A';
 }
 
+=head1 COMMANDS
+
+=over 4
+
+=item TYPE
+
+=back
+
+=cut
+
 sub help_type { 'TYPE <sp> type-code (A, I)' }
 
 sub cmd_type
