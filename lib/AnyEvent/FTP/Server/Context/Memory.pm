@@ -55,6 +55,7 @@ with 'AnyEvent::FTP::Server::Role::Auth';
 with 'AnyEvent::FTP::Server::Role::Help';
 with 'AnyEvent::FTP::Server::Role::Old';
 with 'AnyEvent::FTP::Server::Role::Type';
+with 'AnyEvent::FTP::Server::Role::TransferPrep';
 
 =head1 COMMANDS
 
