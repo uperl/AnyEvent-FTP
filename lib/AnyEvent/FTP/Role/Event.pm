@@ -91,7 +91,11 @@ It will pass to that callback the given C<@arguments>.
 sub emit
 {
   my($self, $name, @args) = @_;
-  $_->(@args) for @{ $self->{event}->{$name} };
+  for(@{ $self->{event}->{$name} })
+  {
+    eval { $_->(@args) };
+    warn $@ if $@;
+  }
 }
 
 1;

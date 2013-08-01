@@ -64,6 +64,7 @@ pod_coverage:
     # server context requires coverage of commands,
     # not methods
     - AnyEvent::FTP::Server::Context::Full
+    - AnyEvent::FTP::Server::Role::Help
     
     # The ::Site:: module documentation actually cover these methods,
     # but Test::Pod::Coverage doesn't like the multipe arrow thing that is

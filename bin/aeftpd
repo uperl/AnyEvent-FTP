@@ -19,6 +19,7 @@ use Pod::Usage qw( pod2usage );
           [ --hostname hostname ] 
           [ --inet ] 
           [ --stderr path ] 
+          [ --context context ]
           [ --chroot ] 
             --pam service | 
             --cred user:pass |
@@ -91,6 +92,10 @@ is the same as
 
 Print all FTP commands and their responses to stderr.
 
+=head2 --context I<context>
+
+Set the default context.  The default is Full.
+
 =head2 --version
 
 Print out the L<AnyEvent::FTP> version to stdout and exit.
@@ -110,6 +115,7 @@ my $verbose = 0;
 my $cred;
 my $simple_auth_class;
 my @simple_auth_args;
+my $default_context = 'Full';
 
 GetOptions(
   'port=i'      => \$port,
@@ -120,6 +126,7 @@ GetOptions(
   'chroot'      => \$chroot,
   'verbose'     => \$verbose,
   'cred=s'      => \$cred,
+  'context=s'   => \$default_context,
   'auth=s'      => sub { $_[1] =~ /^(.*?)=(.*)$/ ? (push @simple_auth_args, $1 => $2) : ($simple_auth_class = $_[1]) },
   'help|h'      => sub { pod2usage({ -verbose => 2}) },
   'version'     => sub { say 'aeftp/AnyEvent::FTP version ', ($AnyEvent::FTP::Server::VERSION // 'dev'); exit 1 },
@@ -158,10 +165,14 @@ elsif(defined $cred)
   };
 }
 
+$default_context = "AnyEvent::FTP::Server::Context::$default_context"
+  unless $default_context =~ /::/;
+
 my $server = AnyEvent::FTP::Server->new(
-  hostname => $host,
-  port     => $port,
-  inet     => $inet,
+  hostname        => $host,
+  port            => $port,
+  inet            => $inet,
+  default_context => $default_context,
 );
 
 unless($inet)
