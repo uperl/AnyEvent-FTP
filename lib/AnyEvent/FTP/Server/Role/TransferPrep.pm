@@ -14,9 +14,25 @@ use AnyEvent::Handle;
 
 =head1 SYNOPSIS
 
+ package AnyEvent::FTP::Server::Context::MyContext;
+ 
+ use Moo;
+ extends 'AnyEvent::FTP::Server::Context';
+ with 'AnyEvent::FTP::Server::Role::TransferPrep';
+
 =head1 DESCRIPTION
 
+This role provides the FTP transfer preperation commands C<PORT>, C<PASV> and C<REST>
+to your FTP server context.  It isn't really useful by itself, and needs a transfer
+role, like L<AnyEvent::FTP::Server::Role::TransferFetch> or
+L<AnyEvent::FTP::Server::Role::TransferPut>.
+
 =head1 ATTRIBUTES
+
+=head2 $context-E<gt>data
+
+The data connection prepared from the FTP C<PASV> or C<PORT> command.
+This is an L<AnyEvent::Handle>.
 
 =cut
 
@@ -27,12 +43,27 @@ sub data
   $self->{data};
 }
 
+=head2 $context-E<gt>restart_offset
+
+The offset specified in the last FTP C<REST> command.
+This should be a positive integer.
+
+=cut
+
 sub restart_offset
 {
   my($self, $value) = @_;
   $self->{restart_offset} = $value if defined $value;
   $self->{restart_offset};
 }
+
+=head1 METHODS
+
+=head2 $context-E<gt>clear_data
+
+Clears the C<data> and C<restart_offset> attributes.
+
+=cut
 
 sub clear_data
 {
