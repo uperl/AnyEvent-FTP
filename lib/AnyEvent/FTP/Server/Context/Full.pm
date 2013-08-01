@@ -416,7 +416,7 @@ sub clear_data
 
 =cut
 
-# FIXME: help_pasv
+sub help_pasv { 'PASV (returns address/port)' }
 
 sub cmd_pasv
 {
@@ -467,7 +467,7 @@ sub cmd_pasv
 
 =cut
 
-# FIXME: help_port
+sub help_port { 'PORT <sp> h1,h2,h3,h4,p1,p2' }
 
 sub cmd_port
 {
@@ -521,7 +521,7 @@ sub cmd_port
 
 =cut
 
-# FIXME: help_rest
+sub help_rest { 'REST <sp> byte-count' }
 
 sub cmd_rest
 {
@@ -541,6 +541,12 @@ sub cmd_rest
   }
   $self->done;
 }
+
+=item RETR
+
+=cut
+
+sub help_retr { 'RETR <sp> pathname' }
 
 sub cmd_retr
 {
@@ -596,7 +602,7 @@ sub cmd_retr
 
 =cut
 
-# FIXME: help_nlst
+sub help_nlst { 'NLST [<sp> (pathname)]' }
 
 sub cmd_nlst
 {
@@ -642,7 +648,7 @@ sub cmd_nlst
 
 =cut
 
-# FIXME: help_list
+sub help_list { 'LIST [<sp> pathname]' }
 
 sub cmd_list
 {
@@ -685,7 +691,7 @@ sub cmd_list
 
 =cut
 
-# FIXME: help_stor
+sub help_stor { 'STOR <sp> pathname' }
 
 sub cmd_stor
 {
@@ -737,7 +743,7 @@ sub cmd_stor
 
 =cut
 
-# FIXME: help_appe
+sub help_appe { 'APPE <sp> pathname' }
 
 sub cmd_appe
 {
@@ -789,7 +795,7 @@ sub cmd_appe
 
 =cut
 
-# FIXME: help_stou
+sub help_stou { 'STOU (store unique filename)' }
 
 sub cmd_stou
 {

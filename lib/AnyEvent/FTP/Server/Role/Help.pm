@@ -88,7 +88,7 @@ sub cmd_help
     }
     else
     {
-      $con->send_response(214 => uc($topic) . " is a command");
+      $con->send_response(502 => uc($topic) . " is a command without help");
     }
   }
   else

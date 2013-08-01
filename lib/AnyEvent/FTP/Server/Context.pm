@@ -68,6 +68,8 @@ sub invalid_syntax
   $self->done;
 }
 
+sub help_quit { "QUIT" }
+
 sub cmd_quit
 {
   my($self, $con, $req) = @_;

@@ -79,7 +79,7 @@ pod_coverage:
     # The ::Site:: module documentation actually cover these methods,
     # but Test::Pod::Coverage doesn't like the multipe arrow thing that is
     # going on there, but I think it be more clear
-    - AnyEvent::FTP::Client::Site::Base#dclient
+    - AnyEvent::FTP::Client::Site::Base#client
     - AnyEvent::FTP::Client::Site::Microsoft#dirstyle
     - AnyEvent::FTP::Client::Site::NetFtpServer#version
     - AnyEvent::FTP::Client::Site::Proftpd#(chgrp|chmod|help|quota|ratio|rmdir|symlink|utime|mkdir)

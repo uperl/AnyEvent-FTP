@@ -137,12 +137,62 @@ sub connect_ftpclient_ok
   $client;
 }
 
+=head2 $test_server-E<gt>help_coverage_ok( [ $context_class, [ $message ] )
+
+=cut
+
+sub help_coverage_ok
+{
+  my($self, $class, $message) = @_;
+  
+  $class //= $self->default_context;
+  
+  my @missing;
+
+  my $client;  
+  eval {
+    require AnyEvent::FTP::Client;
+    $client = AnyEvent::FTP::Client->new;
+    my $cv = AnyEvent->condvar;
+    my $timer = AnyEvent->timer(
+      after => 5,
+      cb    => sub { $cv->croak("timeout connecting with ftp client") },
+    );
+    $client->connect($self->test_uri)->cb(sub { $cv->send });
+    $cv->recv;
+  };
+  my $error = $@;
+  
+  my $count = 0;
+  unless($error)
+  {
+    foreach my $cmd (map { uc $_ } grep s/^cmd_//,  eval qq{ use $class; keys \%${class}::;})
+    {
+      if((eval { $client->help($cmd)->recv } || $@)->code != 214)
+      { push @missing, $cmd }
+      $count++;
+    }
+  }
+
+  $message //= "help coverage for $class";
+
+  my $tb = Test::Builder::Module->builder;
+  $tb->ok($error eq '' && @missing == 0, $message);
+  $tb->diag($error) if $error;
+  $tb->diag("commands missing help: @missing") if @missing; 
+  $tb->diag("didn't find ANY commands for class: $class")
+    if $count == 0;
+
+  return $self;
+}
+
 sub import
 {
   my $caller = caller;
   no strict 'refs';
   *{join '::', $caller, 'create_ftpserver_ok'} = \&create_ftpserver_ok;
   *{join '::', $caller, 'connect_ftpclient_ok'} = \&connect_ftpclient_ok;
+  *{join '::', $caller, 'help_coverage_ok'} = \&help_coverage_ok;
 }
 
 BEGIN { eval 'use EV' }
