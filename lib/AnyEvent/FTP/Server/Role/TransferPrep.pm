@@ -22,7 +22,7 @@ use AnyEvent::Handle;
 
 =head1 DESCRIPTION
 
-This role provides the FTP transfer preperation commands C<PORT>, C<PASV> and C<REST>
+This role provides the FTP transfer preparation commands C<PORT>, C<PASV> and C<REST>
 to your FTP server context.  It isn't really useful by itself, and needs a transfer
 role, like L<AnyEvent::FTP::Server::Role::TransferFetch> or
 L<AnyEvent::FTP::Server::Role::TransferPut>.
