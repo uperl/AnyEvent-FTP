@@ -4,13 +4,13 @@ use Test::More;
 use Test::AnyEventFTPServer;
 use File::Temp qw( tempdir );
 
-my $tmp = tempdir( CLEANUP => 1 );
-
-mkdir "$tmp/a";
-mkdir "$tmp/b";
-
-foreach my $type (qw( FS ))
+foreach my $type (qw( FS Full ))
 {
+  my $tmp = tempdir( CLEANUP => 1 );
+
+  mkdir "$tmp/a";
+  mkdir "$tmp/b";
+
   my $t = create_ftpserver_ok($type);
 
   my $context;
