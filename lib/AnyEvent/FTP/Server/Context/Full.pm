@@ -27,6 +27,12 @@ extends 'AnyEvent::FTP::Server::Context::FS';
 This class provides a context for L<AnyEvent::FTP::Server> which uses the
 actual filesystem to provide storage.
 
+=head1 SUPER CLASS
+
+This class inherits from
+
+L<AnyEvent::FTP::Server::Context::FS>
+
 =head1 ROLES
 
 This class consumes these roles:
