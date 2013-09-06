@@ -1,6 +1,6 @@
-# NAME
+# AnyEvent::FTP [![Build Status](https://secure.travis-ci.org/plicease/AnyEvent-FTP.png)](http://travis-ci.org/plicease/AnyEvent-FTP)
 
-AnyEvent::FTP - Simple asynchronous ftp client and server
+Simple asynchronous ftp client and server
 
 # VERSION
 
