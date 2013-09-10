@@ -2,16 +2,11 @@
 
 Simple asynchronous ftp client and server
 
-# VERSION
-
-version 0.01
-
 # SYNOPSIS
 
     # for the client
     use AnyEvent::FTP::Client;
     
-
     # for the server
     use AnyEvent::FTP::Server;
 
