@@ -1,5 +1,7 @@
 package AnyEvent::FTP::Client::Role::StoreTransfer;
 
+use strict;
+use warnings;
 use v5.10;
 use Moo::Role;
 use warnings NONFATAL => 'all';
@@ -73,7 +75,7 @@ sub push_command
   my $self = shift;
   $self->{client}->push_command(
     @_,
-    $self->{cv},
+    $self->cv,
   );
 }
 

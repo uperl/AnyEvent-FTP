@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use v5.10;
 use Test::More tests => 6;
+BEGIN { eval 'use EV' }
 use AnyEvent::FTP::Client;
 use FindBin ();
 require "$FindBin::Bin/lib.pl";
@@ -31,3 +32,5 @@ eval { $client->login('bogus', 'bogus')->recv };
 my $error = $@;
 isa_ok $error, 'AnyEvent::FTP::Response';
 is $error->code, 530, 'code = 530';
+
+eval { $client->quit->recv };

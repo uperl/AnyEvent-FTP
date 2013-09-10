@@ -3,8 +3,8 @@ package AnyEvent::FTP::Server::Connection;
 use strict;
 use warnings;
 use v5.10;
-use Role::Tiny::With;
-use Carp qw( croak );
+use Moo;
+use warnings NONFATAL => 'all';
 use AnyEvent::FTP::Request;
 
 # ABSTRACT: FTP Server connection class
@@ -14,23 +14,24 @@ with 'AnyEvent::FTP::Role::Event';
 
 __PACKAGE__->define_events(qw( request response close ));
 
-sub new
-{
-  my $class = shift;
-  my $args  = ref $_[0] eq 'HASH' ? (\%{$_[0]}) : ({@_});
+has context => (
+  is       => 'ro',
+  required => 1,
+);
 
-  croak 'AnyEvent::FTP::Server::Connection requires a context'
-    unless defined $args->{context};
+has response_encoder => (
+  is => 'ro',
+  lazy => 1,
+  default => sub {
+    require AnyEvent::FTP::Server::UnambiguousResponseEncoder;
+    AnyEvent::FTP::Server::UnambiguousResponseEncoder->new;
+  },
+);
 
-  my $self = bless {
-    context          => $args->{context},
-    response_encoder => $args->{response_encoder} // do {
-      require AnyEvent::FTP::Server::UnambiguousResponseEncoder;
-      AnyEvent::FTP::Server::UnambiguousResponseEncoder->new;
-    },
-    ip               => $args->{ip},
-  }, $class;
-}
+has ip => (
+  is       => 'ro',
+  required => 1,
+);
 
 sub process_request
 {
@@ -67,9 +68,5 @@ sub close
   my($self) = shift;
   $self->emit('close');
 }
-
-sub ip               { shift->{ip}               }
-sub context          { shift->{context}          }
-sub response_encoder { shift->{response_encoder} }
 
 1;

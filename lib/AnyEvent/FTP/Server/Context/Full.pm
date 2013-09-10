@@ -3,411 +3,66 @@ package AnyEvent::FTP::Server::Context::Full;
 use strict;
 use warnings;
 use v5.10;
-use base qw( AnyEvent::FTP::Server::Context );
-use Role::Tiny::With;
+use Moo;
+use warnings NONFATAL => 'all';
 use File::chdir;
 use File::Spec;
+use File::Temp qw( tempfile );
+
+extends 'AnyEvent::FTP::Server::Context::FS';
 
 # ABSTRACT: FTP Server client context class with full read/write access
 # VERSION
 
-with 'AnyEvent::FTP::Server::Role::Auth';
-with 'AnyEvent::FTP::Server::Role::Help';
-with 'AnyEvent::FTP::Server::Role::Old';
-with 'AnyEvent::FTP::Server::Role::Type';
+=head1 SYNOPSIS
 
-sub cwd
-{
-  my($self, $value) = @_;
-  $self->{cwd} = $value if defined $value;
-  $self->{cwd} //= '/';
-}
+ use AnyEvent::FTP::Server;
+ 
+ my $server = AnyEvent::FTP::Server->new(
+   default_context => 'AnyEvent::FTP::Server::Context::Full',
+ );
 
-sub rename_from
-{
-  my($self, $value) = @_;
-  $self->{rename_from} = $value if defined $value;
-  $self->{rename_from};
-}
+=head1 DESCRIPTION
 
-sub _not_logged_in
-{
-  my($self, $con) = @_;
-  
-  $con->send_response(530 => 'Please login with USER and PASS');
-  $self->done;
-  return;
-}
+This class provides a context for L<AnyEvent::FTP::Server> which uses the
+actual filesystem to provide storage.
 
-sub help_cwd { 'CWD <sp> pathname' }
+=head1 SUPER CLASS
 
-sub cmd_cwd
-{
-  my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
-  my $dir = $req->args;
+This class inherits from
 
-  eval {
-    use autodie;
-    local $CWD = $self->cwd;
-    $CWD = $dir;
-    $self->cwd($CWD);
-    $con->send_response(250 => 'CWD command successful');
-  };
-  $con->send_response(550 => 'CWD error') if $@;
-  
-  $self->done;
-}
+L<AnyEvent::FTP::Server::Context::FS>
 
-sub help_cdup { 'CDUP' }
+=head1 ROLES
 
-sub cmd_cdup
-{
-  my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
-  eval {
-    use autodie;
-    local $CWD = $self->cwd;
-    $CWD = File::Spec->updir;
-    $self->cwd($CWD);
-    $con->send_response(250 => 'CDUP command successful');
-  };
-  $con->send_response(550 => 'CDUP error') if $@;
-  
-  $self->done;
-}
+This class consumes these roles:
 
-sub help_pwd { 'PWD' }
+=over 4
 
-sub cmd_pwd
-{
-  my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
-  my $cwd = $self->cwd;
-  $con->send_response(257 => "\"$cwd\" is the current directory");
-  $self->done;
-}
+L<AnyEvent::FTP::Server::Role::TransferPrep>
 
-sub help_mkd { 'MKD <sp> pathname' }
+=back
 
-sub cmd_mkd
-{
-  my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
-  my $dir = $req->args;
-  eval {
-    use autodie;
-    local $CWD = $self->cwd;
-    mkdir $dir;
-    $con->send_response(257 => "Directory created");
-  };
-  $con->send_response(550 => "MKD error") if $@;
-  $self->done;
-}
+=cut
 
-sub help_rmd { 'RMD <sp> pathname' }
+with 'AnyEvent::FTP::Server::Role::TransferPrep';
 
-sub cmd_rmd
-{
-  my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
-  my $dir = $req->args;
-  eval {
-    use autodie;
-    local $CWD = $self->cwd;
-    rmdir $dir;
-    $con->send_response(250 => "Directory removed");
-  };
-  $con->send_response(550 => "RMD error") if $@;
-  $self->done;
-}
+=head1 COMMANDS
 
-sub help_dele { 'DELE <sp> pathname' }
+In addition to the commands provided by the above roles,
+this context provides these FTP commands:
 
-sub cmd_dele
-{
-  my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
-  my $file = $req->args;
-  eval {
-    use autodie;
-    local $CWD = $self->cwd;
-    unlink $file;
-    $con->send_response(250 => "File removed");
-  };
-  $con->send_response(550 => "DELE error") if $@;
-  $self->done;
-}
+=over 4
 
-sub help_rnfr { 'RNFR <sp> pathname' }
+=item RETR
 
-sub cmd_rnfr
-{
-  my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
-  my $path = $req->args;
-  
-  if($path)
-  {
-    eval {
-      local $CWD = $self->cwd;
-      if(!-e $path)
-      {
-        $con->send_response(550 => 'No such file or directory');
-      }
-      elsif(-w $path)
-      {
-        $self->rename_from($path);
-        $con->send_response(350 => 'File or directory exists, ready for destination name');
-      }
-      else
-      {
-        $con->send_response(550 => 'Permission denied');
-      }
-    };
-    if(my $error = $@)
-    {
-      warn $error;
-      $con->send_response(550 => 'Rename failed');
-    }
-  }
-  else
-  {
-    $con->send_response(501 => 'Invalid number of arguments');
-  }
-  $self->done;
-}
+=cut
 
-sub help_rnto { 'RNTO <sp> pathname' }
-
-sub cmd_rnto
-{
-  my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
-  my $path = $req->args;
-  
-  if(! defined $self->rename_from)
-  {
-    $con->send_response(503 => 'Bad sequence of commands');
-  }
-  elsif(!$path)
-  {
-    $con->send_response(501 => 'Invalid number of arguments');
-  }
-  else
-  {
-    eval {
-      local $CWD = $self->cwd;
-      if(! -e $path)
-      {        
-        rename $self->rename_from, $path;
-        $con->send_response(250 => 'Rename successful');
-      }
-      else
-      {
-        $con->send_response(550 => 'File already exists');
-      }
-    };
-    if(my $error = $@)
-    {
-      warn $error;
-      $con->send_response(550 => 'Rename failed');
-    }
-  }
-  $self->done;
-}
-
-sub help_stat { 'STAT [<sp> pathname]' }
-
-sub cmd_stat
-{
-  my($self, $con, $req) = @_;
-  
-  my $path = $req->args;
-  
-  if($path)
-  {
-    if(-d $path)
-    {
-      $con->send_response(211 => "it's a directory");
-    }
-    elsif(-f $path)
-    {
-      $con->send_response(211 => "it's a file");
-    }
-    else
-    {
-      $con->send_response(450 => 'No such file or directory');
-    }
-  }
-  else
-  {
-    $con->send_response(211 => "it's all good.");
-  }
-  $self->done;
-}
-
-#################################################
-
-use AnyEvent;
-use AnyEvent::Socket qw( tcp_server tcp_connect );
-use AnyEvent::Handle;
-use File::Spec;
-
-sub data
-{
-  my($self, $value) = @_;
-  $self->{data} = $value if defined $value;
-  $self->{data};
-}
-
-sub restart_offset
-{
-  my($self, $value) = @_;
-  $self->{restart_offset} = $value if defined $value;
-  $self->{restart_offset};
-}
-
-sub clear_data
-{
-  my($self) = @_;
-  delete $self->{data};
-  delete $self->{restart_offset};
-}
-
-sub cmd_pasv
-{
-  my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
-
-  my $count = 0;
-
-  tcp_server undef, undef, sub {
-    my($fh, $host, $port) = @_;
-    return close $fh if ++$count > 1;
-
-    my $handle;
-    $handle = AnyEvent::Handle->new(
-      fh => $fh,
-      on_error => sub {
-        $_[0]->destroy;
-        undef $handle;
-      },
-      on_eof => sub {
-        $handle->destroy;
-        undef $handle;
-      },
-      autocork => 1,
-    );
-    
-    $self->data($handle);
-    # FIXME this should be with the 227 message below.
-    $self->done;
-    
-  }, sub {
-    my($fh, $host, $port) = @_;
-    my $ip_and_port = join(',', split(/\./, $con->ip), $port >> 8, $port & 0xff);
-
-    my $w;
-    $w = AnyEvent->timer(after => 0, cb => sub {
-      $con->send_response(227 => "Entering Passive Mode ($ip_and_port)");
-      undef $w;
-    });
-    
-  };
-  
-  return;
-}
-
-sub cmd_port
-{
-  my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
-  if($req->args =~ /(\d+,\d+,\d+,\d+),(\d+),(\d+)/)
-  {
-    my $ip = join '.', split /,/, $1;
-    my $port = $2*256 + $3;
-    
-    tcp_connect $ip, $port, sub {
-      my($fh) = @_;
-      unless($fh)
-      {
-        $con->send_response(500 => "Illegal PORT command");
-        $self->done;
-        return;
-      }
-      
-      my $handle;
-      $handle = AnyEvent::Handle->new(
-        fh => $fh,
-        on_error => sub {
-          $_[0]->destroy;
-          undef $handle;
-        },
-        on_eof => sub {
-          $handle->destroy;
-          undef $handle;
-        },
-      );
-      
-      $self->data($handle);
-      $con->send_response(200 => "Port command successful");
-      $self->done;
-      
-    };
-    
-  }
-  else
-  {
-    $con->send_response(500 => "Illegal PORT command");
-    $self->done;
-    return;
-  }
-}
-
-sub cmd_rest
-{
-  my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
-  if($req->args =~ /^\s*(\d+)\s*$/)
-  {
-    my $offset = $1;
-    $con->send_response(350 => "Restarting at $offset.  Send STORE or RETRIEVE to initiate transfer");
-    $self->restart_offset($offset);
-  }
-  else
-  {
-    $con->send_response(501 => "REST requires a value greater than or equal to 0");
-  }
-  $self->done;
-}
+sub help_retr { 'RETR <sp> pathname' }
 
 sub cmd_retr
 {
   my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
   
   my $fn = $req->args;
   
@@ -453,11 +108,15 @@ sub cmd_retr
   $self->done;
 }
 
+=item NLST
+
+=cut
+
+sub help_nlst { 'NLST [<sp> (pathname)]' }
+
 sub cmd_nlst
 {
   my($self, $con, $req) = @_;
-  
-  return $self->_not_logged_in($con) unless $self->authenticated;
   
   my $dir = $req->args || '.';
   
@@ -493,13 +152,18 @@ sub cmd_nlst
   $self->done;
 }
 
+=item LIST
+
+=cut
+
+sub help_list { 'LIST [<sp> pathname]' }
+
 sub cmd_list
 {
   my($self, $con, $req) = @_;
   
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   my $dir = $req->args || '.';
+  $dir = '.' if $dir eq '-l';
   
   unless(defined $self->data)
   {
@@ -529,12 +193,16 @@ sub cmd_list
   $self->done;
 }
 
+=item STOR
+
+=cut
+
+sub help_stor { 'STOR <sp> pathname' }
+
 sub cmd_stor
 {
   my($self, $con, $req) = @_;
 
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   my $fn = $req->args;
   
   unless(defined $self->data)
@@ -575,12 +243,16 @@ sub cmd_stor
   };
 }
 
+=item APPE
+
+=cut
+
+sub help_appe { 'APPE <sp> pathname' }
+
 sub cmd_appe
 {
   my($self, $con, $req) = @_;
 
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   my $fn = $req->args;
   
   unless(defined $self->data)
@@ -621,14 +293,16 @@ sub cmd_appe
   };
 }
 
-use File::Temp qw( tempfile );
+=item STOU
+
+=cut
+
+sub help_stou { 'STOU (store unique filename)' }
 
 sub cmd_stou
 {
   my($self, $con, $req) = @_;
 
-  return $self->_not_logged_in($con) unless $self->authenticated;
-  
   my $fn = $req->args;
   
   unless(defined $self->data)
@@ -680,3 +354,8 @@ sub cmd_stou
 }
 
 1;
+
+=back
+
+=cut
+

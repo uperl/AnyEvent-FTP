@@ -24,7 +24,7 @@ my $cx = eval { Context->new };
 diag $@ if $@;
 isa_ok $cx, 'Context';
 
-my $con = eval { AnyEvent::FTP::Server::Connection->new( context => $cx ) };
+my $con = eval { AnyEvent::FTP::Server::Connection->new( context => $cx, ip => '1.2.3.4' ) };
 diag $@ if $@;
 isa_ok $con, 'AnyEvent::FTP::Server::Connection';
 

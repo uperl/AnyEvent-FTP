@@ -1,5 +1,7 @@
 package AnyEvent::FTP::Server::Role::Type;
 
+use strict;
+use warnings;
 use v5.10;
 use Moo::Role;
 use warnings NONFATAL => 'all';
@@ -7,12 +9,40 @@ use warnings NONFATAL => 'all';
 # ABSTRACT: Type role for FTP server
 # VERSION
 
-sub type
-{
-  my($self, $value) = @_;
-  $self->{type} = $value if defined $value;
-  $self->{type} // 'A';
-}
+=head1 SYNOPSIS
+
+ package AnyEvent::FTP::Server::Context::MyContext;
+ 
+ use Moo;
+ extends 'AnyEvent::FTP::Server::Context';
+ with 'AnyEvent::FTP::Server::Role::Type';
+
+=head1 DESCRIPTION
+
+This role provides an interface for the FTP C<TYPE> command.
+
+=head1 ATTRIBUTES
+
+=head2 $context-E<gt>type
+
+The current transfer type 'A' for ASCII and I for binary.
+
+=cut
+
+has type => (
+  is      => 'rw',
+  default => sub { 'A' },
+);
+
+=head1 COMMANDS
+
+=over 4
+
+=item TYPE
+
+=back
+
+=cut
 
 sub help_type { 'TYPE <sp> type-code (A, I)' }
 

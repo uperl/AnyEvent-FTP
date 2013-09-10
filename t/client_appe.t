@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use v5.10;
 use Test::More;
+BEGIN { eval 'use EV' }
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 use File::Spec;
@@ -24,7 +25,7 @@ foreach my $passive (0,1)
   $client->connect($config->{host}, $config->{port})->recv;
   $client->login($config->{user}, $config->{pass})->recv;
   $client->type('I')->recv;
-  $client->cwd($config->{dir})->recv;
+  $client->cwd(translate_dir($config->{dir}))->recv;
 
   my $fn = File::Spec->catfile($config->{dir}, 'foo.txt');
 

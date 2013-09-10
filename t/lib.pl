@@ -1,33 +1,47 @@
 use strict;
 use warnings;
 use v5.10;
-use YAML::XS qw( LoadFile );
 use File::HomeDir;
 use FindBin ();
-use Path::Class qw( dir );
+use Path::Class qw( dir file );
 use Path::Class ();
 use File::Spec;
+use Test::More;
 
 our $config;
 our $detect;
+our $lock;
 
-$config->{dir} //= dir( $FindBin::Bin )->parent->stringify;
+$config->{dir} //= dir( -l file(__FILE__) ? file(readlink file(__FILE__))->parent : $FindBin::Bin )->parent->stringify;
+
+do {
+  my $file = file( __FILE__ )->parent->file("config.yml")->stringify;
+  $ENV{AEF_CONFIG} = $file if -r $file;
+};
 
 if(defined $ENV{AEF_PORT} && ! defined $ENV{AEF_CONFIG})
 {
-  $ENV{AEF_CONFIG} = File::Spec->catfile(File::HomeDir->my_home, '.ftptest', 'localhost.yml');
+  $ENV{AEF_CONFIG} //= file( File::HomeDir->my_home, 'etc', 'localhost.yml' )->stringify;
 }
 
 if(defined $ENV{AEF_CONFIG})
 {
   my $save = $config->{dir};
-  $config = LoadFile($ENV{AEF_CONFIG});
+  require YAML;
+  $config = YAML::LoadFile($ENV{AEF_CONFIG});
   $config->{dir} = $save if defined $save;
   $config->{dir} = Path::Class::Dir->new($config->{dir})->resolve;
   $config->{port} //= $ENV{AEF_PORT} if defined $ENV{AEF_PORT};
   $config->{host} //= $ENV{AEF_HOST} // 'localhost';
   $config->{port} = getservbyname($config->{port}, "tcp")
     if defined $config->{port} && $config->{port} !~ /^\d+$/;
+  if(defined $config->{remote})
+  {
+    $ENV{AEF_REMOTE} = $config->{remote};
+    # remote server tests may not be parallel safe
+    require NX::Lock;
+    $lock = NX::Lock->new($ENV{AEF_CONFIG}, block => 1);
+  }
 }
 else
 {
@@ -96,6 +110,22 @@ sub prep_client
     $detect->{xb} = 1 if $res->message->[0] =~ /^bftpd /;
   });
 
+}
+
+sub translate_dir
+{
+  my $dir = shift;
+  if($^O eq 'cygwin' && $detect->{ms})
+  {
+    $dir =~ s{^/cygdrive/(.)/}{$1:};
+    $dir =~ s{^/tmp/}{/cygwin/tmp};
+    $dir =~ s{/}{\\}g;
+    return $dir;
+  }
+  else
+  {
+    return $dir;
+  }
 }
 
 1;

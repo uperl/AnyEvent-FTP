@@ -1,10 +1,13 @@
 use strict;
 use warnings;
-use Test::More tests => 30;
+use Test::More tests => 35;
+
+BEGIN { eval 'use EV' }
 
 use_ok 'AnyEvent::FTP';
 use_ok 'AnyEvent::FTP::Client';
 use_ok 'AnyEvent::FTP::Client::Site';
+use_ok 'AnyEvent::FTP::Client::Site::Base';
 use_ok 'AnyEvent::FTP::Client::Site::Proftpd';
 use_ok 'AnyEvent::FTP::Client::Site::Microsoft';
 use_ok 'AnyEvent::FTP::Client::Site::NetFtpServer';
@@ -27,8 +30,12 @@ use_ok 'AnyEvent::FTP::Server::Role::Help';
 use_ok 'AnyEvent::FTP::Server::Role::Old';
 use_ok 'AnyEvent::FTP::Server::Role::Type';
 use_ok 'AnyEvent::FTP::Server::Role::ResponseEncoder';
+use_ok 'AnyEvent::FTP::Server::Role::TransferPrep';
 use_ok 'AnyEvent::FTP::Server::UnambiguousResponseEncoder';
 use_ok 'AnyEvent::FTP::Server::Connection';
 use_ok 'AnyEvent::FTP::Server::Context';
+use_ok 'AnyEvent::FTP::Server::Context::FS';
 use_ok 'AnyEvent::FTP::Server::Context::Full';
-use_ok 'AnyEvent::FTP::UNIX';
+use_ok 'AnyEvent::FTP::Server::Context::Memory';
+use_ok 'AnyEvent::FTP::Server::OS::UNIX';
+use_ok 'Test::AnyEventFTPServer';

@@ -7,7 +7,7 @@ use File::HomeDir;
 use Path::Class qw( dir );
 use File::Spec;
 use FindBin ();
-use YAML::XS qw( LoadFile );
+use YAML qw( LoadFile );
 
 my @services = do {
   open my $fh, '<', '/etc/services';

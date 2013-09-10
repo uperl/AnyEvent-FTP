@@ -2,8 +2,42 @@
 
 Simple asynchronous ftp client and server
 
+# SYNOPSIS
+
+    # for the client
+    use AnyEvent::FTP::Client;
+    
+    # for the server
+    use AnyEvent::FTP::Server;
+
+# DESCRIPTION
+
+This distribution provides client and server implementations for 
+File Transfer Protocol (FTP) in an AnyEvent environment.  For the
+specific interfaces, see [AnyEvent::FTP::Client](http://search.cpan.org/perldoc?AnyEvent::FTP::Client) and [AnyEvent::FTP::Server](http://search.cpan.org/perldoc?AnyEvent::FTP::Server)
+for details.
+
+Before each release, [AnyEvent::FTP::Client](http://search.cpan.org/perldoc?AnyEvent::FTP::Client) is tested against these FTP servers
+using the `t/client_*.t` tests that come with this distribution:
+
+- Proftpd
+- wu-ftpd
+- [Net::FTPServer](http://search.cpan.org/perldoc?Net::FTPServer)
+- vsftpd
+- Pure-FTPd
+- bftpd
+- [AnyEvent::FTP::Server](http://search.cpan.org/perldoc?AnyEvent::FTP::Server)
+
+The client code is also tested less frequently against these FTP servers:
+
+- NcFTPd
+- VMS ftp
+- Microsoft IIS
+
 # SEE ALSO
 
+- [AnyEvent::FTP::Client](http://search.cpan.org/perldoc?AnyEvent::FTP::Client)
+- [AnyEvent::FTP::Server](http://search.cpan.org/perldoc?AnyEvent::FTP::Server)
 - [Net::FTP](http://search.cpan.org/perldoc?Net::FTP)
 - [Net::FTPServer](http://search.cpan.org/perldoc?Net::FTPServer)
 - [AnyEvent](http://search.cpan.org/perldoc?AnyEvent)

@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use v5.10;
 use Test::More;
+BEGIN { eval 'use EV' }
 use AnyEvent::FTP::Client;
 use FindBin ();
 use URI;
