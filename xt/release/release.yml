@@ -57,6 +57,7 @@ pod_spelling_system:
     - RETR
     - VMS
     - authenticator
+    - TCP
 
 pod_coverage:
   # format is "Class#method" or "Class", regex allowed
