@@ -14,19 +14,19 @@ Simple asynchronous ftp client and server
 
 This distribution provides client and server implementations for 
 File Transfer Protocol (FTP) in an AnyEvent environment.  For the
-specific interfaces, see [AnyEvent::FTP::Client](http://search.cpan.org/perldoc?AnyEvent::FTP::Client) and [AnyEvent::FTP::Server](http://search.cpan.org/perldoc?AnyEvent::FTP::Server)
+specific interfaces, see [AnyEvent::FTP::Client](https://metacpan.org/pod/AnyEvent::FTP::Client) and [AnyEvent::FTP::Server](https://metacpan.org/pod/AnyEvent::FTP::Server)
 for details.
 
-Before each release, [AnyEvent::FTP::Client](http://search.cpan.org/perldoc?AnyEvent::FTP::Client) is tested against these FTP servers
+Before each release, [AnyEvent::FTP::Client](https://metacpan.org/pod/AnyEvent::FTP::Client) is tested against these FTP servers
 using the `t/client_*.t` tests that come with this distribution:
 
 - Proftpd
 - wu-ftpd
-- [Net::FTPServer](http://search.cpan.org/perldoc?Net::FTPServer)
+- [Net::FTPServer](https://metacpan.org/pod/Net::FTPServer)
 - vsftpd
 - Pure-FTPd
 - bftpd
-- [AnyEvent::FTP::Server](http://search.cpan.org/perldoc?AnyEvent::FTP::Server)
+- [AnyEvent::FTP::Server](https://metacpan.org/pod/AnyEvent::FTP::Server)
 
 The client code is also tested less frequently against these FTP servers:
 
@@ -36,11 +36,11 @@ The client code is also tested less frequently against these FTP servers:
 
 # SEE ALSO
 
-- [AnyEvent::FTP::Client](http://search.cpan.org/perldoc?AnyEvent::FTP::Client)
-- [AnyEvent::FTP::Server](http://search.cpan.org/perldoc?AnyEvent::FTP::Server)
-- [Net::FTP](http://search.cpan.org/perldoc?Net::FTP)
-- [Net::FTPServer](http://search.cpan.org/perldoc?Net::FTPServer)
-- [AnyEvent](http://search.cpan.org/perldoc?AnyEvent)
+- [AnyEvent::FTP::Client](https://metacpan.org/pod/AnyEvent::FTP::Client)
+- [AnyEvent::FTP::Server](https://metacpan.org/pod/AnyEvent::FTP::Server)
+- [Net::FTP](https://metacpan.org/pod/Net::FTP)
+- [Net::FTPServer](https://metacpan.org/pod/Net::FTPServer)
+- [AnyEvent](https://metacpan.org/pod/AnyEvent)
 - [RFC 959 FILE TRANSFER PROTOCOL](http://tools.ietf.org/html/rfc959)
 - [RFC 2228 FTP Security Extensions](http://tools.ietf.org/html/rfc2228)
 - [RFC 2640 Internationalization of the File Transfer Protocol](http://tools.ietf.org/html/rfc2640)
@@ -48,7 +48,7 @@ The client code is also tested less frequently against these FTP servers:
 - [RFC 3659 Extensions to FTP](http://tools.ietf.org/html/rfc3659)
 - [RFC 5797 FTP Command and Extension Registry](http://tools.ietf.org/html/rfc5797)
 - [http://cr.yp.to/ftp.html](http://cr.yp.to/ftp.html)
-- [http://en.wikipedia.org/wiki/List\_of\_FTP\_server\_return\_codes](http://en.wikipedia.org/wiki/List\_of\_FTP\_server\_return\_codes)
+- [http://en.wikipedia.org/wiki/List_of_FTP_server_return_codes](http://en.wikipedia.org/wiki/List_of_FTP_server_return_codes)
 
 # AUTHOR
 
