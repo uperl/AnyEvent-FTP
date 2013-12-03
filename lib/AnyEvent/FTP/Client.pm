@@ -200,7 +200,7 @@ will be an instance of L<AnyEvent::FTP::Client::Response>.
 As an example, here is a fairly thorough handling of a response to the standard FTP C<HELP>
 command:
 
- $client-E<gt>help->cb(sub {
+ $client->help->cb(sub {
    my $res = eval { shift->recv };
    if(my $error = $@)
    {
