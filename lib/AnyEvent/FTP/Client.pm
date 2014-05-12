@@ -381,7 +381,7 @@ C<$local> may be one of
 The contents of the file will be stored in the scalar referred to by the reference.
 
  my $local;
- $client-E<gt>retr('foo.txt', \$local);
+ $client->retr('foo.txt', \$local);
 
 =item file handle
 
@@ -390,7 +390,7 @@ received
 
  open my $fh, '>', 'foo.txt';
  binmode $fh;
- $client-E<gt>retr('foo.txt', $fh);
+ $client->retr('foo.txt', $fh);
 
 =item the name of the local file
 
@@ -398,7 +398,7 @@ If C<$local> is just a regular non reference scalar, then it will be treated as 
 local filename, which will be created and written to as data is received from the
 server.
 
- $client-E<gt>retr('foo.txt', 'foo.txt');
+ $client->retr('foo.txt', 'foo.txt');
  
 =back
 
@@ -445,7 +445,7 @@ C<$local> may be one of
 The contents of the file will be retrieved from the scalar referred to by the reference.
 
  my $local = 'some data for foo.txt';
- $client-E<gt>stor('foo.txt', \$local);
+ $client->stor('foo.txt', \$local);
 
 =item file handle
 
@@ -453,7 +453,7 @@ The contents of the file will be read from the file handle.
 
  open my $fh, '<', 'foo.txt';
  binmode $fh;
- $client-E<gt>stor('foo.txt', $fh);
+ $client->stor('foo.txt', $fh);
 
 =item the name of the local file
 
@@ -461,7 +461,7 @@ If C<$local> is just a regular non reference scalar, then it will be treated as 
 local filename, which will be opened and read from in order to create the file on
 the server.
 
- $client-E<gt>stor('foo.txt', 'foo.txt');
+ $client->stor('foo.txt', 'foo.txt');
  
 =back
 
