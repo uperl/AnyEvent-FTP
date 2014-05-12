@@ -70,3 +70,30 @@ sub close
 }
 
 1;
+
+=head1 METHODS
+
+=head2 $conn-E<gt>close()
+
+Emits a close signal.
+
+=head2 my $context_obj = $conn-E<gt>context()
+
+Required to be specified by the constructor and readonly - this is the
+context object.
+
+=head2 my $ip = $conn-E<gt>ip();
+
+Required to be specified by the constructor and readonly - this is the
+IP address.
+
+=head2 $conn-E<gt>process_request($line)
+
+Process a single request. Returns the connection object ($conn).
+
+=head2 $conn-E<gt>send_response([ $res | $code, $message ])
+
+Sends the response. Returns the connection object ($conn).
+
+=cut
+

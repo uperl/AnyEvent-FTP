@@ -4,6 +4,7 @@ pod_spelling_system:
   # (regardless of what spell check thinks)
   stopwords:
     - AnyEvent
+    - BUILDARGS
     - IIS
     - PASV
     - URI
@@ -33,6 +34,7 @@ pod_spelling_system:
     - MKD
     - NLST
     - PWD
+    - Readonly
     - RMD
     - RNFR
     - RNTO
@@ -54,6 +56,7 @@ pod_spelling_system:
     - cred
     - inet
     - pam
+    - readonly
     - RETR
     - VMS
     - authenticator

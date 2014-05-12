@@ -111,6 +111,10 @@ sub jail
 
 Drop super user privileges
 
+=head2 BUILDARGS
+
+For internal use.
+
 =cut
 
 sub drop_privileges

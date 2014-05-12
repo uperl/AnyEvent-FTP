@@ -94,3 +94,39 @@ sub done
 }
 
 1;
+
+=head1 METHODS
+
+=head2 $ctx-E<gt>cmd_quit($con, $req)
+
+Sends a quit command through $con ($req is unused.). Returns the $ctx object.
+
+=head2 $ctx-E<gt>done()
+
+B<TODO>: document. Returns the $ctx object.
+
+=head2 my $quit_str = $ctx-E<gt>help_quit()
+
+Returns the string "QUIT".
+
+=head2 $ctx-E<gt>invalid_command($con, $req)
+
+Sends an invalid command due to the request $req through $con.
+
+=head2 $ctx-E<gt>invalid_syntax($con, $raw)
+
+Sends a command not understood response through $con.
+
+=head2 $ctx-E<gt>process_queue()
+
+Processes the request queue.
+
+=head2 $ctx-E<gt>push_request($con, $req)
+
+Pushes the request to the queue.
+
+=head2 my $bool = $ctx-E<gt>ready([$new_ready])
+
+Gets or sets the "is ready" status, which is a boolean.
+
+=cut

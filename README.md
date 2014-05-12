@@ -48,7 +48,7 @@ The client code is also tested less frequently against these FTP servers:
 - [RFC 3659 Extensions to FTP](http://tools.ietf.org/html/rfc3659)
 - [RFC 5797 FTP Command and Extension Registry](http://tools.ietf.org/html/rfc5797)
 - [http://cr.yp.to/ftp.html](http://cr.yp.to/ftp.html)
-- [http://en.wikipedia.org/wiki/List_of_FTP_server_return_codes](http://en.wikipedia.org/wiki/List_of_FTP_server_return_codes)
+- [http://en.wikipedia.org/wiki/List\_of\_FTP\_server\_return\_codes](http://en.wikipedia.org/wiki/List_of_FTP_server_return_codes)
 
 # AUTHOR
 
