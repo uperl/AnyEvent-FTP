@@ -137,7 +137,7 @@ Gets or sets the "is ready" status, which is a boolean.
 =head2 $ctx-E<gt>ascii_layer
 
 The L<PerlIO> layer to apply for writing (C<STOR>, C<STOU>, C<APPE>) and
-rreading (C<RETR>) when operating under ASCII file transfer mode.  By
+reading (C<RETR>) when operating under ASCII file transfer mode.  By
 default a layer that takes C<CRLF> and emits native line endings is used
 for writing and a takes native line endings and emits C<CRLF> when reading
 is used.
