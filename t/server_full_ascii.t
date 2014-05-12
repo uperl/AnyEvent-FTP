@@ -77,7 +77,7 @@ subtest 'store native (default)' => sub {
   is $client->retr($xfer->remote_name, \$test1)->recv->code, 226, 'retr okay';
   is $test1, $payload_crlf, "payload response matches what we sent (stou)";
   
-  open my $fh, '<', $xfer->remote_name;
+  open $fh, '<', $xfer->remote_name;
   $test1 = do { local $/; <$fh> };
   close $fh;
   is $test1, "one\ntwo\nthree\n", "stored as native";
