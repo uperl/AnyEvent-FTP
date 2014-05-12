@@ -68,6 +68,7 @@ pod_coverage:
   private:
     - .*#new
     - .*#BUILD
+    - .*#BUILDARGS
     - AnyEvent::FTP::Client::Role::RequestBuffer
     - AnyEvent::FTP::Client::Role::ResponseBuffer
     - AnyEvent::FTP::Client::Transfer#(handle|client|command|local|restart)

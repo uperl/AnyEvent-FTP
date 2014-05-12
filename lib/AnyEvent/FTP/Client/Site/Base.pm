@@ -19,11 +19,4 @@ has client => ( is => 'ro', required => 1 );
 
 1;
 
-=head1 METHODS
-
-=head2 BUILDARGS
-
-For internal use.
-
-=cut
 
