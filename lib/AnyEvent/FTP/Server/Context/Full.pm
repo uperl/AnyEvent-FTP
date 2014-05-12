@@ -58,6 +58,11 @@ this context provides these FTP commands:
 
 =cut
 
+sub _layer
+{
+  $_[0]->type eq 'A' ? $_[0]->ascii_layer : ':raw';
+}
+
 sub help_retr { 'RETR <sp> pathname' }
 
 sub cmd_retr
@@ -83,7 +88,7 @@ sub cmd_retr
       my $size = -s $fn;
       $con->send_response(150 => "Opening $type mode data connection for $fn ($size bytes)");
       open my $fh, '<', $fn;
-      binmode $fh;
+      binmode $fh, $self->_layer;
       seek $fh, $self->restart_offset, 0 if $self->restart_offset;
       $self->data->push_write(do { local $/; <$fh> });
       close $fh;
@@ -219,7 +224,7 @@ sub cmd_stor
     $con->send_response(150 => "Opening $type mode data connection for $fn");
 
     open my $fh, '>', $fn;
-    binmode $fh;
+    binmode $fh, $self->_layer;
     $self->data->on_read(sub {
       $self->data->push_read(sub {
         print $fh $_[0]{rbuf};
@@ -269,7 +274,7 @@ sub cmd_appe
     $con->send_response(150 => "Opening $type mode data connection for $fn");
 
     open my $fh, '>>', $fn;
-    binmode $fh;
+    binmode $fh, $self->_layer;
     $self->data->on_read(sub {
       $self->data->push_read(sub {
         print $fh $_[0]{rbuf};
@@ -329,7 +334,7 @@ sub cmd_stou
     my $type = $self->type eq 'A' ? 'ASCII' : 'Binary';
     $con->send_response(150 => "FILE: $fn");
 
-    binmode $fh;
+    binmode $fh, $self->_layer;
     $self->data->on_read(sub {
       $self->data->push_read(sub {
         print $fh $_[0]{rbuf};
