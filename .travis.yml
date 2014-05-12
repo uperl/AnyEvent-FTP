@@ -1,6 +1,6 @@
 language: perl
 install:
-  - cpanm -n AnyEvent Moo URI File::HomeDir File::chdir YAML
+  - cpanm -n AnyEvent Moo URI File::HomeDir File::chdir YAML PerlIO::eol
 script: HARNESS_IS_VERBOSE=1 prove -lvr t 
 perl:
   - "5.19"
