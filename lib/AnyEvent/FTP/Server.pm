@@ -197,7 +197,9 @@ on.
 
 =head2 my $bool = $server-E<gt>inet()
 
-Readonly (assignable via the constructor). Whether or not to B<FILL IN>.
+Readonly (assignable via the constructor). If true, then assume a TCP
+connection has been established by inet. The default (false) is to start
+a standalone server.
 
 =head2 my $port = $server-E<gt>port()
 
