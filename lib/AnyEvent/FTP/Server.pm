@@ -77,11 +77,13 @@ sub _start_inet
     fh => *STDIN,
       on_error => sub {
         my($hdl, $fatal, $msg) = @_;
+        $con->close;
         $_[0]->destroy;
         undef $handle;
         undef $con;
       },
       on_eof   => sub {
+        $con->close;
         $handle->destroy;
         undef $handle;
         undef $con;
@@ -141,11 +143,13 @@ sub _start_standalone
       fh       => $fh,
       on_error => sub {
         my($hdl, $fatal, $msg) = @_;
+        $con->close;
         $_[0]->destroy;
         undef $handle;
         undef $con;
       },
       on_eof   => sub {
+        $con->close;
         $handle->destroy;
         undef $handle;
         undef $con;
