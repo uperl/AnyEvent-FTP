@@ -210,7 +210,7 @@ Call this method to start the service.
 
 =head2 my $welcome_message_array_ref = $server-E<gt>welcome();
 
-The welcome messages as key value pairs. Read only and can be overrided by
+The welcome messages as key value pairs. Read only and can be overridden by
 the constructor.
 
 =cut
