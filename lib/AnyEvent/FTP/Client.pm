@@ -702,7 +702,7 @@ Specify the transfer mode.  This is not used by modern FTP servers.  See RFC959 
 =head2 $client-E<gt>stat( [ $path ] )
 
 Get information about a file or directory on the remote server.  The actual format is totally
-server dependant.
+server dependent.
 
 =head2 $client-E<gt>user( $username )
 
