@@ -179,4 +179,40 @@ sub _start_standalone
   $self;
 }
 
+=head1 METHODS
+
+=head2 $server-E<gt>bindport([$port])
+
+Retrieves or sets the TCP port to bind to.
+
+=head2 my $context = $server-E<gt>default_context()
+
+Readonly: the default context class (can be set as a parameter in the
+constructor).
+
+=head2 $server-E<gt>hostname()
+
+Readonly, and should be assigned at the constructor. The hostname to listen
+on.
+
+=head2 my $bool = $server-E<gt>inet()
+
+Readonly (assignable via the constructor). Whether or not to B<FILL IN>.
+
+=head2 my $port = $server-E<gt>port()
+
+The port to listen to. Default is 21 - a different port can be assigned
+at the constructor.
+
+=head2 $server-E<gt>start()
+
+Call this method to start the service.
+
+=head2 my $welcome_message_array_ref = $server-E<gt>welcome();
+
+The welcome messages as key value pairs. Read only and can be overrided by
+the constructor.
+
+=cut
+
 1;
