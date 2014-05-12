@@ -41,7 +41,6 @@ sub BUILD
     }
   };
 
-  $DB::single = 1;
   $self->push_command(
     [ 'PASV', undef, $data_connection ],
     ($self->restart > 0 ? ([ REST => $self->restart ]) : ()),

@@ -37,7 +37,6 @@ sub BUILD
 
     my $w;
     $w = AnyEvent->timer(after => 0, cb => sub {
-      $DB::single = 1;
       $self->push_command(
         [ PORT => $ip_and_port ],
         ($self->restart > 0 ? ([ REST => $self->restart ]) : ()),
