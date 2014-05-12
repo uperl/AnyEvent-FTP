@@ -25,7 +25,15 @@ $uri->host($config->{host});
 $uri->port($config->{port});
 $uri->user($config->{user});
 $uri->password($config->{pass});
-$uri->path($config->{dir});
+$uri->path(do {
+  my $dir = $config->{dir};
+  if($^O eq 'MSWin32')
+  {
+    (undef,$dir,undef) = File::Spec->splitpath($dir,1);
+    $dir =~ s{\\}{/}g;
+  }
+  $dir;
+});
 isa_ok $uri, 'URI';
 
 do {
@@ -33,7 +41,7 @@ do {
   diag $@ if $@;
   isa_ok $res, 'AnyEvent::FTP::Response';
   is $res->code, 250, 'code = 250';
-  is $client->pwd->recv, $config->{dir}, "dir = " . $config->{dir};
+  is $client->pwd->recv, net_pwd($config->{dir}), "dir = " . net_pwd($config->{dir});
   $client->quit->recv;
 };
 
@@ -42,7 +50,7 @@ do {
   diag $@ if $@;
   isa_ok $res, 'AnyEvent::FTP::Response';
   is $res->code, 250, 'code = 250';
-  is $client->pwd->recv, $config->{dir}, "dir = " . $config->{dir};
+  is $client->pwd->recv, net_pwd($config->{dir}), "dir = " . net_pwd($config->{dir});
   $client->quit->recv;
 };
 

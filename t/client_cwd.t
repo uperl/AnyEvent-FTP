@@ -29,7 +29,7 @@ do {
 
 do {
   my $res = eval { $client->pwd->recv };
-  is $res, $config->{dir}, "dir = " . $config->{dir};
+  is $res, net_pwd($config->{dir}), "dir = " . net_pwd($config->{dir});
 };
 
 do {
@@ -41,7 +41,7 @@ do {
   diag $@ if $@;
   isa_ok $res, 'AnyEvent::FTP::Response';
   is $res->code, 250, 'code = 250';
-  is $client->pwd->recv, $config->{dir}, "dir = " . $config->{dir};
+  is $client->pwd->recv, net_pwd($config->{dir}), "dir = " . net_pwd($config->{dir});
 
 };
 

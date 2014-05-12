@@ -150,6 +150,11 @@ sub cmd_pwd
   my($self, $con, $req) = @_;
   
   my $cwd = $self->cwd;
+  if($^O eq 'MSWin32')
+  {
+    (undef,$cwd) = File::Spec->splitpath($cwd,1);
+    $cwd =~ s{\\}{/}g;
+  }
   $con->send_response(257 => "\"$cwd\" is the current directory");
   $self->done;
 }

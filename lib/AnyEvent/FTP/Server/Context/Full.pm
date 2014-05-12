@@ -134,7 +134,7 @@ sub cmd_nlst
     my $dh;
     opendir $dh, $dir;
     my @list = 
-      map { $req->args ? File::Spec->catfile($dir, $_) : $_ } 
+      map { $req->args ? join('/', $dir, $_) : $_ } 
       sort 
       grep !/^\.\.?$/, 
       readdir $dh;

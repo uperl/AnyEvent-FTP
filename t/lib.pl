@@ -1,3 +1,5 @@
+package main;
+
 use strict;
 use warnings;
 use v5.10;
@@ -126,6 +128,19 @@ sub translate_dir
   {
     return $dir;
   }
+}
+
+sub net_pwd
+{
+  my($pwd) = @_;
+  
+  if($^O eq 'MSWin32')
+  {
+    (undef,$pwd) = File::Spec->splitpath($pwd,1);
+    $pwd =~ s{\\}{/}g;
+  }
+  
+  $pwd;
 }
 
 1;

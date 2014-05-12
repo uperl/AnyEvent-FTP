@@ -29,7 +29,7 @@ foreach my $passive (0,1)
   
   do {
     my $dir = $client->pwd->recv;
-    is $dir, $ENV{AEF_REMOTE}, "dir = $ENV{AEF_REMOTE}";
+    is $dir, net_pwd($ENV{AEF_REMOTE}), "dir = " .net_pwd($ENV{AEF_REMOTE});
   };
 
   my $dirname = join '', map { chr(ord('a') + int(rand(23))) } (1..10);

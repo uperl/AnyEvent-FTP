@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use File::Spec;
 use Test::More;
 use Test::AnyEventFTPServer;
 use File::Temp qw( tempdir );
@@ -7,7 +8,16 @@ use File::Temp qw( tempdir );
 foreach my $type (qw( FS Full ))
 {
   my $tmp = tempdir( CLEANUP => 1 );
+  my $tmp_unmodified = $tmp;
 
+  if($^O eq 'MSWin32')
+  {
+    chdir $tmp;
+    note "changing to $tmp";
+    (undef, $tmp) = File::Spec->splitpath($tmp,1);
+    $tmp =~ s{\\}{/}g;
+  }
+  
   mkdir "$tmp/a";
   mkdir "$tmp/b";
 
@@ -30,13 +40,13 @@ foreach my $type (qw( FS Full ))
     ->code_is(250)
     ->message_like(qr{CWD command successful});
 
-  is $context->cwd, "$tmp/a", "cwd = $tmp/a";
+  is $context->cwd, File::Spec->catdir($tmp_unmodified, 'a'), "cwd = $tmp_unmodified/a";
 
   $t->command_ok('CDUP')
     ->code_is(250)
     ->message_like(qr{CDUP command successful});
 
-  is $context->cwd, "$tmp", "cwd = $tmp";
+  is $context->cwd, "$tmp_unmodified", "cwd = $tmp_unmodified";
   
   $t->command_ok('PWD')
     ->code_is(257)
@@ -132,6 +142,12 @@ foreach my $type (qw( FS Full ))
   $t->command_ok("STAT", "$tmp/a")
     ->code_is(211)
     ->message_like(qr{dir});
+}
+
+if($^O eq 'MSWin32')
+{
+  note "changing to " . File::Spec->rootdir;
+  chdir(File::Spec->rootdir);
 }
 
 done_testing;
