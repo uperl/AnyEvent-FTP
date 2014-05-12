@@ -144,7 +144,7 @@ if($stderr)
 $cred = 'random'
   if ! defined($cred) && ! defined($simple_auth_class);
 
-if($cred eq 'random')
+if(defined $cred && $cred eq 'random')
 {
   $cred = {
     user => (join '', map { chr(ord('a') + int rand(26)) } (1..10)),
