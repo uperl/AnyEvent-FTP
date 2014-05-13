@@ -101,7 +101,10 @@ sub cmd_pasv
     );
     
     $self->data($handle);
-    # FIXME this should be with the 227 message below.
+    # TODO this should be with the 227 message below.
+    # demoting this to a TODO (was a F-I-X-M-E)
+    # since I can't remember why I thought it needed
+    # doing. plicease 12-05-2014
     $self->done;
     
   }, sub {
