@@ -61,6 +61,7 @@ pod_spelling_system:
     - VMS
     - authenticator
     - TCP
+    - FSRW
 
 pod_coverage:
   # format is "Class#method" or "Class", regex allowed
@@ -80,7 +81,7 @@ pod_coverage:
     
     # server context requires coverage of commands,
     # not methods
-    - AnyEvent::FTP::Server::Context::(FS|Memory|Full)#(cmd_|help_).*
+    - AnyEvent::FTP::Server::Context::(FS(|RW|RO)|Memory)#(cmd_|help_).*
     - AnyEvent::FTP::Server::Role::(TransferPrep|Auth|Help|Old|Type)#(cmd_|help_).*
     
     # The ::Site:: module documentation actually cover these methods,

@@ -30,7 +30,7 @@ has port => (
 
 has default_context => (
   is      => 'ro',
-  default => sub { 'AnyEvent::FTP::Server::Context::Full' },
+  default => sub { 'AnyEvent::FTP::Server::Context::FSRW' },
 );
 
 has welcome => (

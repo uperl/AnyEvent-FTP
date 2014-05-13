@@ -19,7 +19,7 @@ if($^O eq 'MSWin32')
   $tmp =~ s{\\}{/}g;
 }
 
-my $t = create_ftpserver_ok('Full');
+my $t = create_ftpserver_ok('FSRW');
 
 my $ctx;
 my $client;

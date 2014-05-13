@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 35;
+use Test::More tests => 36;
 
 BEGIN { eval 'use EV' }
 
@@ -35,7 +35,8 @@ use_ok 'AnyEvent::FTP::Server::UnambiguousResponseEncoder';
 use_ok 'AnyEvent::FTP::Server::Connection';
 use_ok 'AnyEvent::FTP::Server::Context';
 use_ok 'AnyEvent::FTP::Server::Context::FS';
-use_ok 'AnyEvent::FTP::Server::Context::Full';
+use_ok 'AnyEvent::FTP::Server::Context::FSRO';
+use_ok 'AnyEvent::FTP::Server::Context::FSRW';
 use_ok 'AnyEvent::FTP::Server::Context::Memory';
 use_ok 'AnyEvent::FTP::Server::OS::UNIX';
 use_ok 'Test::AnyEventFTPServer';

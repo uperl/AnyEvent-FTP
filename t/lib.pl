@@ -51,7 +51,7 @@ else
   my $server = AnyEvent::FTP::Server->new(
     host => 'localhost',
     port => 0,
-    default_context => 'AnyEvent::FTP::Server::Context::Full',
+    default_context => 'AnyEvent::FTP::Server::Context::FSRW',
   );
   
   $config->{host} = 'localhost';

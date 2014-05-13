@@ -5,7 +5,7 @@ use Test::More;
 use Test::AnyEventFTPServer;
 use File::Temp qw( tempdir );
 
-foreach my $type (qw( FS Full ))
+foreach my $type (qw( FS FSRW ))
 {
   my $tmp = tempdir( CLEANUP => 1 );
   my $tmp_unmodified = $tmp;

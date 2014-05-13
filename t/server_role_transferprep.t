@@ -5,7 +5,7 @@ use Test::More;
 
 global_timeout_ok(30);
 
-foreach my $type (qw( Full Memory ))
+foreach my $type (qw( FSRW Memory ))
 {
   my $t = create_ftpserver_ok($type);
 

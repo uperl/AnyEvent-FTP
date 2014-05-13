@@ -4,7 +4,7 @@ use v5.10;
 use Test::AnyEventFTPServer;
 use Test::More;
 
-my $t = create_ftpserver_ok('Full');
+my $t = create_ftpserver_ok('FSRW');
 $t->auto_login(0);
 
 my @cmd = qw( CWD CDUP PWD SIZE MKD RMD DELE RNFR RNTO STAT PASV PORT REST RETR NLST LIST STOR 

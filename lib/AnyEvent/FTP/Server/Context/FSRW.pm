@@ -1,4 +1,4 @@
-package AnyEvent::FTP::Server::Context::Full;
+package AnyEvent::FTP::Server::Context::FSRW;
 
 use strict;
 use warnings;
@@ -19,7 +19,7 @@ extends 'AnyEvent::FTP::Server::Context::FS';
  use AnyEvent::FTP::Server;
  
  my $server = AnyEvent::FTP::Server->new(
-   default_context => 'AnyEvent::FTP::Server::Context::Full',
+   default_context => 'AnyEvent::FTP::Server::Context::FSRW',
  );
 
 =head1 DESCRIPTION
@@ -50,7 +50,7 @@ with 'AnyEvent::FTP::Server::Role::TransferPrep';
 =head1 COMMANDS
 
 In addition to the commands provided by the above roles,
-this context provides these FTP commands:
+and super class, this context provides these FTP commands:
 
 =over 4
 

@@ -94,7 +94,7 @@ Print all FTP commands and their responses to stderr.
 
 =head2 --context I<context>
 
-Set the default context.  The default is Full.
+Set the default context.  The default is FSRW.
 
 =head2 --version
 
@@ -115,7 +115,7 @@ my $verbose = 0;
 my $cred;
 my $simple_auth_class;
 my @simple_auth_args;
-my $default_context = 'Full';
+my $default_context = 'FSRW';
 
 GetOptions(
   'port=i'      => \$port,

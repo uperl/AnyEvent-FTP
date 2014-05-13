@@ -5,7 +5,7 @@ use Test::AnyEventFTPServer;
 
 global_timeout_ok;
 
-foreach my $type (qw( Full Memory ))
+foreach my $type (qw( FSRW Memory ))
 {
   my $server = create_ftpserver_ok($type);
   my $client = $server->connect_ftpclient_ok;
