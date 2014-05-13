@@ -83,7 +83,7 @@ sub cmd_retr
     
     if(-r $fn)
     {
-      # FIXME: this blocks
+      # TODO: re-write so that this does not blocks
       my $type = $self->type eq 'A' ? 'ASCII' : 'Binary';
       my $size = -s $fn;
       $con->send_response(150 => "Opening $type mode data connection for $fn ($size bytes)");
@@ -107,7 +107,10 @@ sub cmd_retr
   if(my $error = $@)
   {
     warn $error;
-    $con->send_response(500 => 'FIXME');
+    if(eval { $error->can('errno') })
+    { $con->send_response(550 => $error->errno) }
+    else
+    { $con->send_response(550 => 'Internal error') }
   };
   $self->clear_data;
   $self->done;
@@ -151,7 +154,10 @@ sub cmd_nlst
   if(my $error = $@)
   {
     warn $error;
-    $con->send_response(500 => 'FIXME');
+    if(eval { $error->can('errno') })
+    { $con->send_response(550 => $error->errno) }
+    else
+    { $con->send_response(550 => 'Internal error') }
   };
   $self->clear_data;
   $self->done;
@@ -192,7 +198,10 @@ sub cmd_list
   if(my $error = $@)
   {
     warn $error;
-    $con->send_response(500 => 'FIXME');
+    if(eval { $error->can('errno') })
+    { $con->send_response(550 => $error->errno) }
+    else
+    { $con->send_response(550 => 'Internal error') }
   };
   $self->clear_data;
   $self->done;
@@ -242,7 +251,10 @@ sub cmd_stor
   if(my $error = $@)
   {
     warn $error;
-    $con->send_response(500 => 'FIXME');
+    if(eval { $error->can('errno') })
+    { $con->send_response(550 => $error->errno) }
+    else
+    { $con->send_response(550 => 'Internal error') }
     $self->clear_data;
     $self->done;
   };
@@ -292,7 +304,10 @@ sub cmd_appe
   if(my $error = $@)
   {
     warn $error;
-    $con->send_response(500 => 'FIXME');
+    if(eval { $error->can('errno') })
+    { $con->send_response(550 => $error->errno) }
+    else
+    { $con->send_response(550 => 'Internal error') }
     $self->clear_data;
     $self->done;
   };
@@ -352,7 +367,10 @@ sub cmd_stou
   if(my $error = $@)
   {
     warn $error;
-    $con->send_response(500 => 'FIXME');
+    if(eval { $error->can('errno') })
+    { $con->send_response(550 => $error->errno) }
+    else
+    { $con->send_response(550 => 'Internal error') }
     $self->clear_data;
     $self->done;
   };
