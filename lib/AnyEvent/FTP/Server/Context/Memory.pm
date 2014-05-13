@@ -457,31 +457,24 @@ sub help_stat { 'STAT [<sp> pathname]' }
 sub cmd_stat
 {
   my($self, $con, $req) = @_;
-  
-  my $path = $req->args;
-  
-  $con->send_response(450 => 'No such file or directory');
-  # FIXME
 
-  #if($path)
-  #{
-  #  if(-d $path)
-  #  {
-  #    $con->send_response(211 => "it's a directory");
-  #  }
-  #  elsif(-f $path)
-  #  {
-  #    $con->send_response(211 => "it's a file");
-  #  }
-  #  else
-  #  {
-  #    $con->send_response(450 => 'No such file or directory');
-  #  }
-  #}
-  #else
-  #{
-  #  $con->send_response(211 => "it's all good.");
-  #}
+  my $file = $self->find($req->args);
+  
+  if(defined $file)
+  {
+    if(ref($file) eq 'HASH')
+    {
+      $con->send_response(211 => "It's a directory");
+    }
+    else
+    {
+      $con->send_response(211 => "It's a file");
+    }
+  }
+  else
+  {
+    $con->send_response(450 => 'No such file or directory');
+  }
   $self->done;
 }
 
