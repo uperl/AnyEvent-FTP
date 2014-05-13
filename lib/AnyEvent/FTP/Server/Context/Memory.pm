@@ -147,6 +147,19 @@ sub find
   { return }
 }
 
+=head2 $context-E<gt>rename_from
+
+The filename specified by the last FTP C<RNFR> command.
+
+=cut
+
+sub rename_from
+{
+  my($self, $value) = @_;
+  $self->{rename_from} = $value if defined $value;
+  $self->{rename_from};
+}
+
 =head1 COMMANDS
 
 In addition to the commands provided by the above roles,
@@ -372,37 +385,25 @@ sub cmd_rnfr
 {
   my($self, $con, $req) = @_;
   
-  my $path = $req->args;
-  
-  if($path)
+  my $path = Path::Class::File->new_foreign('Unix', $req->args);
+  my $dir = $self->find($path->parent);
+  if(ref($dir) eq 'HASH')
   {
-    eval {
-      die 'FIXME';
-      #local $CWD = $self->cwd;
-      #if(!-e $path)
-      #{
-      #  $con->send_response(550 => 'No such file or directory');
-      #}
-      #elsif(-w $path)
-      #{
-      #  $self->rename_from($path);
-      #  $con->send_response(350 => 'File or directory exists, ready for destination name');
-      #}
-      #else
-      #{
-      #  $con->send_response(550 => 'Permission denied');
-      #}
-    };
-    if(my $error = $@)
+    if(exists $dir->{$path->basename})
     {
-      warn $error;
-      $con->send_response(550 => 'Rename failed');
+      $self->rename_from([$dir,$path->basename]);
+      $con->send_response(350 => 'File or directory exists, ready for destination name');
+    }
+    else
+    {
+      $con->send_response(550 => 'No such file or directory');
     }
   }
   else
   {
-    $con->send_response(501 => 'Invalid number of arguments');
+    $con->send_response(550 => 'No such file or directory');
   }
+  
   $self->done;
 }
 
@@ -416,40 +417,34 @@ sub cmd_rnto
 {
   my($self, $con, $req) = @_;
   
-  my $path = $req->args;
+  my $from = $self->rename_from;
+
+  unless(defined $from)
+  {
+    $con->send_response(503 => 'Bad sequence of commands');
+    $self->done;
+    return;
+  }
   
-  $con->send_response(550 => 'Rename failed');
-  
-  # FIXME
-  #
-  #if(! defined $self->rename_from)
-  #{
-  #  $con->send_response(503 => 'Bad sequence of commands');
-  #}
-  #elsif(!$path)
-  #{
-  #  $con->send_response(501 => 'Invalid number of arguments');
-  #}
-  #else
-  #{
-  #  eval {
-  #    local $CWD = $self->cwd;
-  #    if(! -e $path)
-  #    {        
-  #      rename $self->rename_from, $path;
-  #      $con->send_response(250 => 'Rename successful');
-  #    }
-  #    else
-  #    {
-  #      $con->send_response(550 => 'File already exists');
-  #    }
-  #  };
-  #  if(my $error = $@)
-  #  {
-  #    warn $error;
-  #    $con->send_response(550 => 'Rename failed');
-  #  }
-  #}
+  my $path = Path::Class::File->new_foreign('Unix', $req->args);
+  my $dir = $self->find($path->parent);
+
+  if(ref($dir) eq 'HASH')
+  {
+    if(exists $dir->{$path->basename})
+    {
+      $con->send_response(550 => 'File already exists');
+    }
+    else
+    {
+      $dir->{$path->basename} = delete $from->[0]->{$from->[1]};
+      $con->send_response(250 => 'Rename successful');
+    }
+  }
+  else
+  {
+    $con->send_response(550 => 'Rename failed');
+  }
   $self->done;
 }
 
