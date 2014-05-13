@@ -285,7 +285,7 @@ sub help_coverage_ok
   $tb->diag("didn't find ANY commands for class: $class")
     if $count == 0;
 
-  return $self;
+  $self;
 }
 
 =head2 $test_command->command_ok( $command, $arguments, [ $message ] )
@@ -327,7 +327,7 @@ sub command_ok
   $tb->ok($error eq '', $message);
   $tb->diag($error) if $error;
   
-  return $self;
+  $self;
 }
 
 =head2 $test_server->code_is($code, [ $message ])
@@ -349,7 +349,7 @@ sub code_is
   $tb->diag("actual code returned is $actual")
     unless $actual == $code;
   
-  return $self;  
+  $self;  
 }
 
 =head2 $test_server->code_like($regex, [ $message ])
@@ -371,13 +371,13 @@ sub code_like
   $tb->diag("code $actual does not match $regex")
     unless $actual =~ $regex;
   
-  return $self;  
+  $self;  
 }
 
 =head2 $test_server->message_like($regex, [ $message ])
 
 Verifies that the message portion of the response of the last command executed matches
-the given regular expression..
+the given regular expression.
 
 =cut
 
@@ -404,7 +404,44 @@ sub message_like
     $tb->diag("does not match $regex");
   }
   
-  return $self;
+  $self;
+}
+
+=head2 $test_server->message_is($string, [ $message ])
+
+Verifies that the message portion of the response of the last command executed matches
+the given string.
+
+If the response message has multiple lines, then only one of the lines needs to match
+the given string.
+
+=cut
+
+sub message_is
+{
+  my($self, $string, $message) = @_;
+  
+  $message //= "response message matches";
+  
+  my $ok = 0;
+  
+  my @message = @{ (eval { $self->res->message }) // [] };
+  
+  foreach my $line (@message)
+  {
+    $ok = 1 if $line eq $string;
+  }
+  
+  my $tb = Test::Builder::Module->builder;
+  $tb->ok($ok, $message);
+  unless($ok)
+  {
+    $tb->diag("message: ");
+    $tb->diag("  $_") for @message;
+    $tb->diag("does not match $string");
+  }
+  
+  $self;
 }
 
 =head2 global_timeout_ok( [ $timeout, [ $message ] ] )

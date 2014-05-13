@@ -5,6 +5,9 @@ use warnings;
 use v5.10;
 use Moo;
 use warnings NONFATAL => 'all';
+use Path::Class::File;
+use Path::Class::Dir;
+use List::MoreUtils qw( first_index );
 
 extends 'AnyEvent::FTP::Server::Context';
 
@@ -57,6 +60,93 @@ with 'AnyEvent::FTP::Server::Role::Old';
 with 'AnyEvent::FTP::Server::Role::Type';
 with 'AnyEvent::FTP::Server::Role::TransferPrep';
 
+=head1 ATTRIBUTES
+
+=head2 store
+
+Has containing the directory tree for the context.
+
+=cut
+
+sub store
+{
+  # The store for this class is global.
+  # if you wanted each connection or user
+  # to have their own store you could subclass
+  # and redefine the store method as apropriate
+  state $store = {};
+  $store;
+}
+
+=head2 cwd
+
+The current working directory for the context.  This
+will be an L<Path::Class::Dir>.
+
+=cut
+
+has cwd => (
+  is      => 'rw',
+  default => sub {
+    Path::Class::Dir->new_foreign('Unix', '/');
+  },
+);
+
+=head2 find
+
+Returns the hash (for directory) or scalar (for file) of
+a file in the filesystem.
+
+=cut
+
+sub find
+{
+  my($self, $path) = @_;
+  $path = Path::Class::Dir->new_foreign('Unix', $path) unless ref $path;
+  $path = Path::Class::Dir->new_foreign('Unix', $self->cwd, $path)
+    unless $path->is_absolute;
+  
+  my $store = $self->store;
+
+  return $store if $path eq '/';
+  
+  my @list = $path->components;
+  
+  while(1)
+  {
+    my $i = first_index { $_ eq '..' } @list;
+    last if $i == -1;
+    if($i > 1)
+    {
+      splice @list, $i-1, 2;
+    }
+    else
+    {
+      splice @list, $i, 1;
+    }
+  }
+  
+  shift @list; # shift off the root
+  my $top = pop @list;
+  
+  foreach my $part (@list)
+  {
+    if(exists($store->{$part}) && ref($store->{$part}) eq 'HASH')
+    {
+      $store = $store->{$part};
+    }
+    else
+    {
+      return;
+    }
+  }
+  
+  if(exists $store->{$top})
+  { return $store->{$top} }
+  else
+  { return }
+}
+
 =head1 COMMANDS
 
 In addition to the commands provided by the above roles,
@@ -74,14 +164,38 @@ sub cmd_cwd
 {
   my($self, $con, $req) = @_;
   
-  my $dir = $req->args;
+  my $dir = Path::Class::Dir->new_foreign('Unix', $req->args)->cleanup;
+  $dir = $dir->absolute($self->cwd) unless $dir->is_absolute;
 
-  eval {
-    die 'FIXME';
-    $con->send_response(250 => 'CWD command successful');
-  };
-  $con->send_response(550 => 'CWD error') if $@;
+  my @list = grep !/^\.$/, $dir->components;
+
+  while(1)
+  {
+    my $i = first_index { $_ eq '..' } @list;
+    last if $i == -1;
+    if($i > 1)
+    {
+      splice @list, $i-1, 2;
+    }
+    else
+    {
+      splice @list, $i, 1;
+    }
+  }
+
   
+  $dir = Path::Class::Dir->new_foreign('Unix', @list);
+  
+  if(ref($self->find($dir)) eq 'HASH')
+  {
+    $self->cwd($dir);
+    $con->send_response(250 => 'CWD command successful');
+  }
+  else
+  {
+    $con->send_response(550 => 'CWD error');
+  }
+
   $self->done;
 }
 
@@ -94,12 +208,18 @@ sub help_cdup { 'CDUP' }
 sub cmd_cdup
 {
   my($self, $con, $req) = @_;
-  
-  eval {
-    die 'FIXME';
+
+  my $dir = $self->cwd->parent;
+
+  if(ref($self->find($dir)) eq 'HASH')
+  {
+    $self->cwd($dir);
     $con->send_response(250 => 'CDUP command successful');
-  };
-  $con->send_response(550 => 'CDUP error') if $@;
+  }
+  else
+  {
+    $con->send_response(550 => 'CDUP error');
+  }
   
   $self->done;
 }
@@ -114,13 +234,9 @@ sub cmd_pwd
 {
   my($self, $con, $req) = @_;
   
-  $con->send_response(550 => 'CWD error');
+  my $cwd = $self->cwd;
+  $con->send_response(257 => "\"$cwd\" is the current directory");
   $self->done;
-  # FIXME
-  
-  #my $cwd = $self->cwd;
-  #$con->send_response(257 => "\"$cwd\" is the current directory");
-  #$self->done;
 }
 
 =item SIZE
@@ -133,26 +249,21 @@ sub cmd_size
 {
   my($self, $con, $req) = @_;
   
-  eval {
-    die 'FIXME';
-    #if(-d $req->args)
-    #{
-    #  $con->send_response(550 => $req->args . ": not a regular file");
-    #}
-    #elsif(-e $req->args)
-    #{
-    #  my $size = -s $req->args;
-    #  $con->send_response(213 => $size);
-    #}
-    #else
-    #{
-    #  die;
-    #}
-  };
-  if($@)
+  my $file = $self->find(Path::Class::File->new_foreign('Unix', $req->args));
+  
+  if(defined($file) && !ref($file))
+  {
+    $con->send_response(213 => length $file);
+  }
+  elsif(defined $file)
+  {
+    $con->send_response(550 => $req->args . ": not a regular file");
+  }
+  else
   {
     $con->send_response(550 => $req->args . ": No such file or directory");
   }
+  
   $self->done;
 }
 
@@ -166,12 +277,24 @@ sub cmd_mkd
 {
   my($self, $con, $req) = @_;
   
-  my $dir = $req->args;
-  eval {
-    die 'FIXME';
-    $con->send_response(257 => "Directory created");
-  };
-  $con->send_response(550 => "MKD error") if $@;
+  my $path = Path::Class::Dir->new_foreign('Unix', $req->args);
+  my $file = $self->find($path->parent);
+  if($path->basename ne '' && defined($file) && ref($file) eq 'HASH')
+  {
+    if(exists $file->{$path->basename})
+    {
+      $con->send_response(521 => "\"$path\" directory exists");
+    }
+    else
+    {
+      $file->{$path->basename} = {};
+      $con->send_response(257 => "\"$path\" new directory created");
+    }
+  }
+  else
+  {
+    $con->send_response(550 => "MKD error");
+  }
   $self->done;
 }
 
@@ -185,13 +308,27 @@ sub cmd_rmd
 {
   my($self, $con, $req) = @_;
   
-  my $dir = $req->args;
-  eval {
-    die 'FIXME';
-    $con->send_response(250 => "Directory removed");
-  };
-  $con->send_response(550 => "RMD error") if $@;
+  # TODO: be more picky about rmd and file or dele a directory
+  my $path = Path::Class::Dir->new_foreign('Unix', $req->args);
+  my $file = $self->find($path->parent);
+  if(defined($file) && ref($file) eq 'HASH')
+  {
+    if(exists $file->{$path->basename})
+    {
+      delete $file->{$path->basename};
+      $con->send_response(250 => "RMD command successful");
+    }
+    else
+    {
+      $con->send_response(550 => "$path: No such file or directory");
+    }
+  }
+  else
+  {
+    $con->send_response(550 => "$path: No such file or directory");
+  }
   $self->done;
+
 }
 
 =item DELE
@@ -204,12 +341,24 @@ sub cmd_dele
 {
   my($self, $con, $req) = @_;
   
-  my $file = $req->args;
-  eval {
-    die 'FIXME';
-    $con->send_response(250 => "File removed");
-  };
-  $con->send_response(550 => "DELE error") if $@;
+  my $path = Path::Class::File->new_foreign('Unix', $req->args);
+  my $file = $self->find($path->parent);
+  if(defined($file) && ref($file) eq 'HASH')
+  {
+    if(exists $file->{$path->basename})
+    {
+      delete $file->{$path->basename};
+      $con->send_response(250 => "File removed");
+    }
+    else
+    {
+      $con->send_response(550 => "$path: No such file or directory");
+    }
+  }
+  else
+  {
+    $con->send_response(550 => "$path: No such file or directory");
+  }
   $self->done;
 }
 
@@ -347,3 +496,9 @@ sub cmd_stat
 
 =cut
 
+# FIXME: cmd_retr
+# FIXME: cmd_nlst
+# FIXME: cmd_list
+# FIXME: cmd_stor
+# FIXME: cmd_appe
+# FIXME: cmd_stou
