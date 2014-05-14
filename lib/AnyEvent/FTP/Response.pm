@@ -3,7 +3,9 @@ package AnyEvent::FTP::Response;
 use strict;
 use warnings;
 use v5.10;
-use overload '""' => sub { shift->as_string };
+use overload
+  '""' => sub { shift->as_string },
+  fallback => 1;
 
 # ABSTRACT: Response class for asynchronous ftp client
 # VERSION

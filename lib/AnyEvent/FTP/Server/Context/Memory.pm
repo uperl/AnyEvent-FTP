@@ -478,6 +478,63 @@ sub cmd_stat
   $self->done;
 }
 
+=item NLST
+
+=cut
+
+sub help_nlst { 'NLST [<sp> (pathname)]' }
+
+sub cmd_nlst
+{
+  my($self, $con, $req) = @_;
+  
+  my $dir = $req->args;
+  
+  unless(defined $self->data)
+  {
+    $con->send_response(425 => 'Unable to build data connection');
+    return;
+  }
+  
+  eval {
+    $con->send_response(150 => "Opening ASCII mode data connection for file list");
+    my @list;
+    if($dir)
+    {
+      my $h = $self->find($dir);
+      if(ref($h) eq 'HASH')
+      {
+        $dir = Path::Class::Dir->new_foreign('Unix', $dir);
+        @list = map { $dir->file($_) } sort keys %$h;
+      }
+      else
+      {
+        $dir = Path::Class::File->new_foreign('Unix', $dir);
+        @list = "$dir";
+      }
+    }
+    else
+    {
+      my $h = $self->find($self->cwd);
+      die 'unable to find cwd' unless defined $h;
+      @list = sort keys %$h;
+    }
+    $self->data->push_write(join '', map { $_ . "\015\012" } @list);
+    $self->data->push_shutdown;
+    $con->send_response(226 => 'Transfer complete');
+  };
+  if(my $error = $@)
+  {
+    warn $error;
+    if(eval { $error->can('errno') })
+    { $con->send_response(550 => $error->errno) }
+    else
+    { $con->send_response(550 => 'Internal error') }
+  };
+  $self->clear_data;
+  $self->done;
+}
+
 1;
 
 =back
@@ -485,7 +542,6 @@ sub cmd_stat
 =cut
 
 # FIXME: cmd_retr
-# FIXME: cmd_nlst
 # FIXME: cmd_list
 # FIXME: cmd_stor
 # FIXME: cmd_appe

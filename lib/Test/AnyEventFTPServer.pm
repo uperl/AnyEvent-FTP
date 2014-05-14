@@ -8,6 +8,7 @@ use warnings NONFATAL => 'all';
 use URI;
 use AnyEvent;
 use Test::Builder::Module;
+use Path::Class qw( tempdir );
 
 extends 'AnyEvent::FTP::Server';
 
@@ -72,6 +73,18 @@ server after calling the C<command_ok> method.
 
 has res => (
   is => 'rw',
+);
+
+=head2 $test_server-E<gt>content
+
+The last content retrieved from a C<list_ok>, C<nlst_ok> or C<transfer_ok>
+test.
+
+=cut
+
+has content => (
+  is      => 'rw',
+  default => '',
 );
 
 =head2 $test_server-E<gt>auto_login
@@ -439,6 +452,133 @@ sub message_is
     $tb->diag("message: ");
     $tb->diag("  $_") for @message;
     $tb->diag("does not match $string");
+  }
+  
+  $self;
+}
+
+=head2 $test_server->list_ok( [ $location, [ $message ] ] )
+
+Execute a the C<LIST> command on the given C<$location>
+and wait for the results.  You can see the result using
+the C<content> attribute or test it with the C<content_is> 
+method.
+
+=cut
+
+sub list_ok
+{
+  my($self, $location, $message) = @_;
+  
+  $message //= defined $location ? "list: $location" : 'list';
+  
+  my $client = eval { $self->_client };
+  my $error = $@;
+  
+  $self->content('');
+  
+  unless($error)
+  {
+    my $list = eval { $client->list($location)->recv };
+    $error = $@;
+    $self->content(join "\n", @$list, '') unless $error;
+  }
+  
+  my $tb = Test::Builder::Module->builder;
+  $tb->ok($error eq '', $message);
+  $tb->diag($error) if $error;
+  
+  $self;
+}
+
+=head2 $test_server->nlst_ok( $location, $message )
+
+Execute a the C<NLST> command on the given C<$location>
+and wait for the results.  You can see the result using
+the C<content> attribute or test it with the C<content_is> 
+method.
+
+=cut
+
+sub nlst_ok
+{
+  my($self, $location, $message) = @_;
+  
+  $message //= defined $location ? "nlst: $location" : 'nlst';
+  
+  my $client = eval { $self->_client };
+  my $error = $@;
+  
+  $self->content('');
+  
+  unless($error)
+  {
+    my $list = eval { $client->nlst($location)->recv };
+    $error = $@;
+    $self->content(join "\n", @$list, '') unless $error;
+  }
+  
+  my $tb = Test::Builder::Module->builder;
+  $tb->ok($error eq '', $message);
+  $tb->diag($error) if $error;
+  
+  $self;
+}
+
+=head2 $test_server->content_is( $string, [ $message ] )
+
+Test that the given C<$string> matches the content
+returned by the last C<list_ok> or C<nlst_ok> method.
+
+=cut
+
+sub _display_content
+{
+  my $tb = shift;
+  state $temp;
+  state $counter = 0;
+  
+  unless(defined $temp)
+  {
+    $temp = tempdir(CLEANUP => 1);
+  }
+  
+  my $file = $temp->file(sprintf("data.%d", $counter++));
+  $file->spew($_[0]);
+  
+  if(-T $file)
+  {
+    $tb->diag("  $_") for split /\n/, $_[0];
+  }
+  else
+  {
+    if(eval { require App::xd })
+    {
+      $tb->diag("  $_") for split /\n/, `xd $file`;
+    }
+    else
+    {
+      $tb->diag("  binary content");
+    }
+  }
+  
+  $file->remove;
+}
+
+sub content_is
+{
+  my($self, $string, $message) = @_;
+  
+  my $ok = $self->content eq $string;
+  
+  my $tb = Test::Builder::Module->builder;
+  $tb->ok($ok);
+  unless($ok)
+  {
+    $tb->diag("content:");
+    _display_content($tb, $self->content);
+    $tb->diag("expected:");
+    _display_content($tb, $string);
   }
   
   $self;
