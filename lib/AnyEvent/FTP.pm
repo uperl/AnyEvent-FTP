@@ -49,11 +49,13 @@ The client code is also tested less frequently against these FTP servers:
 
 =item NcFTPd
 
-=item VMS ftp
-
 =item Microsoft IIS
 
 =back
+
+It used to also be tested against the VMS ftp server, so it at least one
+point was verified to work with it, but I no longer have access to that
+server.
 
 =head1 SEE ALSO
 

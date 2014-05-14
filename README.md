@@ -31,8 +31,11 @@ using the `t/client_*.t` tests that come with this distribution:
 The client code is also tested less frequently against these FTP servers:
 
 - NcFTPd
-- VMS ftp
 - Microsoft IIS
+
+It used to also be tested against the VMS ftp server, so it at least one
+point was verified to work with it, but I no longer have access to that
+server.
 
 # SEE ALSO
 
