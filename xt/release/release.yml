@@ -62,6 +62,8 @@ pod_spelling_system:
     - authenticator
     - TCP
     - FSRW
+    - vett
+    - customizations
 
 pod_coverage:
   # format is "Class#method" or "Class", regex allowed

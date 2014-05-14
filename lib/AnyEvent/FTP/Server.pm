@@ -13,34 +13,108 @@ use Socket qw( unpack_sockaddr_in inet_ntoa );
 # ABSTRACT: Simple asynchronous ftp server
 # VERSION
 
+=head1 SYNOPSIS
+
+ use AnyEvent;
+ use AnyEvent::FTP::Server;
+ 
+ my $server = AnyEvent::FTP::Server->new;
+ $server->start;
+ AnyEvent->condvar->recv;
+
+=head1 DESCRIPTION
+
+B<CAUTION> L<AnyEvent::FTP::Server> hasn't been audited by anyone, including
+its author, in order to ensure that it is secure.  It is intended to be used
+primarily in testing the companion client L<AnyEvent::FTP::Client>.  It can 
+also be used to write your own context or personality (to use the L<Net::FTPServer>
+terminology) that use alternate back ends (say a database or memory store)
+that could theoretically be made to be secure, but you will need to carefully
+vett both the L<AnyEvent::FTP::Server> code as well as your own customizations
+before you deploy on the Internet or on an untrusted network.
+
+This class is used for L<AnyEvent::FTP> server instances.
+Each time a client connects to the server a L<AnyEvent::FTP::Server::Connection>
+instance is created to manage the TCP connection.  Each connection
+also has a L<AnyEvent::FTP::Server::Context> which defines the behavior or
+personality of the server, and each context instance keeps track of the 
+current directory, user authentication and authorization status of each
+connected client.
+
+=cut
+
 $AnyEvent::FTP::Server::VERSION //= 'dev';
 
 with 'AnyEvent::FTP::Role::Event';
 
 __PACKAGE__->define_events(qw( bind connect ));
 
+=head1 ATTRIBUTES
+
+=head2 $server-E<gt>hostname
+
+Readonly, and should be assigned at the constructor. The hostname to listen
+on.
+
+=cut
+
 has hostname => (
   is       => 'ro',
 );
+
+=head2 $server-E<gt>port
+
+The port to listen to. Default is 21 - a different port can be assigned
+at the constructor.
+
+=cut
 
 has port => (
   is      => 'ro',
   default => sub { 21 },
 );
 
+=head2 $server-E<gt>default_context
+
+Readonly: the default context class (can be set as a parameter in the
+constructor).
+
+=cut
+
 has default_context => (
   is      => 'ro',
   default => sub { 'AnyEvent::FTP::Server::Context::FSRW' },
 );
+
+=head2 $server-E<gt>welcome
+
+The welcome messages as key value pairs. Read only and can be overridden by
+the constructor.
+
+=cut
 
 has welcome => (
   is      => 'ro',
   default => sub { [ 220 => "aeftpd $AnyEvent::FTP::Server::VERSION" ] },
 );
 
+=head2 $server-E<gt>bindport([$port])
+
+Retrieves or sets the TCP port to bind to.
+
+=cut
+
 has bindport => (
   is => 'rw',
 );
+
+=head2 my $bool = $server-E<gt>inet
+
+Readonly (assignable via the constructor). If true, then assume a TCP
+connection has been established by inet. The default (false) is to start
+a standalone server.
+
+=cut
 
 has inet => (
   is      => 'ro',
@@ -52,6 +126,14 @@ sub BUILD
   eval 'use ' . shift->default_context;
   die $@ if $@;
 }
+
+=head1 METHODS
+
+=head2 $server-E<gt>start()
+
+Call this method to start the service.
+
+=cut
 
 sub start
 {
@@ -183,42 +265,10 @@ sub _start_standalone
   $self;
 }
 
-=head1 METHODS
+1;
 
-=head2 $server-E<gt>bindport([$port])
+=head1 SEE ALSO
 
-Retrieves or sets the TCP port to bind to.
-
-=head2 my $context = $server-E<gt>default_context()
-
-Readonly: the default context class (can be set as a parameter in the
-constructor).
-
-=head2 $server-E<gt>hostname()
-
-Readonly, and should be assigned at the constructor. The hostname to listen
-on.
-
-=head2 my $bool = $server-E<gt>inet()
-
-Readonly (assignable via the constructor). If true, then assume a TCP
-connection has been established by inet. The default (false) is to start
-a standalone server.
-
-=head2 my $port = $server-E<gt>port()
-
-The port to listen to. Default is 21 - a different port can be assigned
-at the constructor.
-
-=head2 $server-E<gt>start()
-
-Call this method to start the service.
-
-=head2 my $welcome_message_array_ref = $server-E<gt>welcome();
-
-The welcome messages as key value pairs. Read only and can be overridden by
-the constructor.
+L<Net::FTPServer>
 
 =cut
-
-1;
