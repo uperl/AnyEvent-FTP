@@ -23,7 +23,7 @@ $t->command_ok(RMD => '/')
 $t->command_ok(RMD => 'foo')
   ->code_is(550);
 
-TODO: { local $TODO = "FIXME";
+TODO: { local $TODO = "shouldn't be able to RMD a file";
 
 $t->command_ok(RMD => 'bar')
   ->code_is(550);

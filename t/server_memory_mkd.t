@@ -26,7 +26,7 @@ $t->command_ok(MKD => '../.././foo')
 $t->command_ok(MKD => '/')
   ->code_is(550);
 
-TODO: { local $TODO = 'FIXME';
+TODO: { local $TODO = "shouldn't be able to MKD on root";
 
 $t->command_ok(MKD => '../../')
   ->code_is(550);

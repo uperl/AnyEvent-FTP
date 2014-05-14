@@ -65,7 +65,7 @@ $t->command_ok(RNFR => "dir/foo.txt")
   ->code_is(350)
   ->message_is('File or directory exists, ready for destination name');
 
-TODO: { local $TODO = "FIXME";
+TODO: { local $TODO = "shouldn't be able to rename to root";
 
 $t->command_ok(RNTO => "/")
   ->code_is(550);

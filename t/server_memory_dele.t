@@ -23,7 +23,7 @@ $t->command_ok(DELE => '/')
 $t->command_ok(DELE => 'bar')
   ->code_is(550);
 
-TODO: { local $TODO = "FIXME";
+TODO: { local $TODO = "shouldn't be able to do a DELE on a directory";
 
 $t->command_ok(DELE => 'foo')
   ->code_is(550);
