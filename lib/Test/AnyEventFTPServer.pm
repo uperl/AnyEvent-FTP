@@ -552,9 +552,9 @@ sub _display_content
   }
   else
   {
-    if(eval { require App::xd })
+    if(eval { require Data::HexDump })
     {
-      $tb->diag("  $_") for split /\n/, `xd $file`;
+      $tb->diag("  $_") for grep !/^$/, split /\n/, Data::HexDump::HexDump($_[0]);
     }
     else
     {

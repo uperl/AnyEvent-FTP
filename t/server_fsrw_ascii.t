@@ -6,8 +6,6 @@ use Test::More tests => 6;
 use Test::AnyEventFTPServer;
 use File::Temp qw( tempdir );
 
-my $has_xd = eval { require App::xd };
-
 my $tmp      = tempdir( CLEANUP => 1);
 
 note "chdir $tmp";
@@ -56,7 +54,7 @@ subtest 'store native (default)' => sub {
   close $fh;
   is $test1, "one\ntwo\nthree\n", "stored as native";
   
-  note `xd test1.txt` if $has_xd;
+  xd('test1.txt');
 
   $test1 = '';
   is $client->appe('test1.txt', \$payload_crlf)->recv->code, 226, 'appe okay';
@@ -68,7 +66,7 @@ subtest 'store native (default)' => sub {
   close $fh;
   is $test1, "one\ntwo\nthree\none\ntwo\nthree\n", "stored as native (append)";
 
-  note `xd test1.txt` if $has_xd;
+  xd('test1.txt');
   
   my $xfer = $client->stou(undef, \$payload_crlf);
   is $xfer->recv->code, 226, 'stou okay fn = ' . $xfer->remote_name;
@@ -82,8 +80,7 @@ subtest 'store native (default)' => sub {
   close $fh;
   is $test1, "one\ntwo\nthree\n", "stored as native";
   
-  my $fn = $xfer->remote_name;
-  note `xd $fn` if $has_xd;
+  xd($xfer->remote_name);
 };
 
 subtest 'store CRLF' => sub {
@@ -100,3 +97,16 @@ subtest 'store LF' => sub {
 
 note "chdir " . File::Spec->rootdir;
 chdir(File::Spec->rootdir);
+
+sub xd
+{
+  my $fn = shift;
+  if(eval { require Data::HexDump })
+  {
+    open my $fh, '<', $fn;
+    my $data = <$fh>;
+    close $fh;
+    note "hex dump of $fn";
+    note $_ for grep !/^$/, split /\n/, Data::HexDump::HexDump($data);
+  }
+}
