@@ -28,6 +28,8 @@ This class provides a context for L<AnyEvent::FTP::Server> which uses
 memory to provide storage.  Once the server process terminates, all
 data stored is lost.
 
+Note that this implementation is incomplete.
+
 =head1 ROLES
 
 This class consumes these roles:
