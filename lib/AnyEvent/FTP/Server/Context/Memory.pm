@@ -543,8 +543,8 @@ sub cmd_nlst
 
 =cut
 
-# FIXME: cmd_retr
-# FIXME: cmd_list
-# FIXME: cmd_stor
-# FIXME: cmd_appe
-# FIXME: cmd_stou
+# TODO: cmd_retr
+# TODO: cmd_list
+# TODO: cmd_stor
+# TODO: cmd_appe
+# TODO: cmd_stou
