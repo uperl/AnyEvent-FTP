@@ -64,6 +64,9 @@ pod_spelling_system:
     - FSRW
     - vett
     - customizations
+    - Okamoto
+    - Ryo
+    - Shlomi
 
 pod_coverage:
   # format is "Class#method" or "Class", regex allowed
