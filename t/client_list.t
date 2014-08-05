@@ -50,7 +50,7 @@ foreach my $passive (0,1)
     isa_ok $list, 'ARRAY';
     $list //= [];
     # wu-ftpd
-    shift @$list if $list->[0] =~ /^total \d+$/i;
+    shift @$list if $list->[0] =~ / \d+$/i;
     # Net::FTPServer
     shift @$list if $list->[0] =~ /\s\.$/;
     shift @$list if $list->[0] =~ /\s\.\.$/;
@@ -69,7 +69,7 @@ foreach my $passive (0,1)
     isa_ok $list, 'ARRAY';
     $list //= [];
     # wu-ftpd
-    shift @$list if $list->[0] =~ /^total \d+$/i;
+    shift @$list if $list->[0] =~ / \d+$/i;
     # Net::FTPServer
     shift @$list if $list->[0] =~ /\s\.$/;
     shift @$list if $list->[0] =~ /\s\.\.$/;
