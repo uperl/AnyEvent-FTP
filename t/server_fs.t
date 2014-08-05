@@ -4,10 +4,11 @@ use File::Spec;
 use Test::More;
 use Test::AnyEventFTPServer;
 use File::Temp qw( tempdir );
+use Cwd;
 
 foreach my $type (qw( FS FSRW ))
 {
-  my $tmp = tempdir( CLEANUP => 1 );
+  my $tmp = Cwd::abs_path tempdir( CLEANUP => 1 );
   my $tmp_unmodified = $tmp;
 
   if($^O eq 'MSWin32')

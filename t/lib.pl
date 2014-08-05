@@ -9,6 +9,7 @@ use Path::Class qw( dir file );
 use Path::Class ();
 use File::Spec;
 use Test::More;
+use Cwd;
 
 our $config;
 our $detect;
@@ -140,7 +141,7 @@ sub net_pwd
     $pwd =~ s{\\}{/}g;
   }
   
-  $pwd;
+  Cwd::abs_path $pwd;
 }
 
 1;
