@@ -10,7 +10,7 @@ use FindBin ();
 require "$FindBin::Bin/lib.pl";
 
 plan skip_all => 'requires client and server on localhost' if $ENV{AEF_REMOTE};
-plan tests => 22;
+plan tests => 4;
 
 our $config;
 $config->{dir} = tempdir( CLEANUP => 1 );
@@ -44,7 +44,8 @@ foreach my $passive (0,1)
   $client->type('I')->recv;
   $client->cwd($config->{dir})->recv;
 
-  do {
+  subtest 'listing with directory' => sub {
+    plan tests => 6;
     my $list = eval { $client->list->recv };
     diag $@ if $@;
     isa_ok $list, 'ARRAY';
@@ -63,7 +64,8 @@ foreach my $passive (0,1)
   };
 
 
-  do {
+  subtest 'listing in sub directory' => sub {
+    plan tests => 5;
     my $list = eval { $client->list('dir2')->recv };
     diag $@ if $@;
     isa_ok $list, 'ARRAY';
