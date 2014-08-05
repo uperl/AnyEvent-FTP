@@ -55,7 +55,13 @@ server.
 
 # AUTHOR
 
-Graham Ollis <plicease@cpan.org>
+author: Graham Ollis <plicease@cpan.org>
+
+contributors:
+
+Ryo Okamoto
+
+Shlomi Fish
 
 # COPYRIGHT AND LICENSE
 
