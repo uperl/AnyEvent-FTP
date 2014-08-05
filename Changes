@@ -3,6 +3,8 @@ Revision history for {{$dist->name}}
 {{$NEXT}}
 
 0.02      2014-08-05 07:20:55 -0400
+  - fix test failure on non C/English locales (thanks syohex)
+  - fix test on OS X (thanks ryochin)
 
 0.01      2014-08-04 16:49:27 -0400
   - initial version
