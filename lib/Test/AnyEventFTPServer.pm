@@ -537,6 +537,8 @@ sub _display_content
   my $tb = shift;
   state $temp;
   state $counter = 0;
+  my $method = 'diag';
+  $method = 'note' if $tb->todo;
   
   unless(defined $temp)
   {
@@ -548,17 +550,17 @@ sub _display_content
   
   if(-T $file)
   {
-    $tb->diag("  $_") for split /\n/, $_[0];
+    $tb->$method("  $_") for split /\n/, $_[0];
   }
   else
   {
     if(eval { require Data::HexDump })
     {
-      $tb->diag("  $_") for grep !/^$/, split /\n/, Data::HexDump::HexDump($_[0]);
+      $tb->$method("  $_") for grep !/^$/, split /\n/, Data::HexDump::HexDump($_[0]);
     }
     else
     {
-      $tb->diag("  binary content");
+      $tb->$method("  binary content");
     }
   }
   
