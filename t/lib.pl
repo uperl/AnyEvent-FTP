@@ -9,11 +9,13 @@ use Path::Class qw( dir file );
 use Path::Class ();
 use File::Spec;
 use Test::More;
-use Cwd qw( abs_path );
+use Cwd ();
 
 our $config;
 our $detect;
 our $lock;
+
+*my_abs_path = $^O eq 'MSWin32' ? sub ($) { $_[0] } : \&Cwd::abs_path ;
 
 $config->{dir} //= dir( -l file(__FILE__) ? file(readlink file(__FILE__))->parent : $FindBin::Bin )->parent->stringify;
 
@@ -141,7 +143,7 @@ sub net_pwd
     $pwd =~ s{\\}{/}g;
   }
   
-  abs_path($pwd);
+  my_abs_path($pwd);
 }
 
 1;
