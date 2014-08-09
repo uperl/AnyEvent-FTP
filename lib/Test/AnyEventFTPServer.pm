@@ -592,7 +592,7 @@ Set a global timeout on the entire test script.  If the timeout
 is exceeded the test will exit.  Handy if you have test automation
 and your test automation doesn't handle hung tests.
 
-The default timeout is 30 seconds.
+The default timeout is 120 seconds.
 
 =cut
 
@@ -600,7 +600,7 @@ sub global_timeout_ok (;$$)
 {
   my($timeout, $message) = @_;
   
-  $timeout //= 30;
+  $timeout //= 120;
   $message //= "global timeout of $timeout seconds";
   
   my $tb = Test::Builder::Module->builder;

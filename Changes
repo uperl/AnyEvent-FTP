@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - make default for test timeout be 120s
 
 0.03      2014-08-05 08:13:16 -0400
   - fix for test failure on MSWin32
