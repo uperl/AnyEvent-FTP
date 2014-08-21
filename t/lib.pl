@@ -11,6 +11,8 @@ use File::Spec;
 use Test::More;
 use Cwd ();
 
+$ENV{LC_ALL} = 'C';
+
 our $config;
 our $detect;
 our $lock;
