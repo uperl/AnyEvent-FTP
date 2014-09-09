@@ -2,6 +2,9 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.05      2014-09-09 08:49:13 -0400
+  - promote to production
+
 0.04_01   2014-08-21 13:34:15 -0400
   - set LC_ALL=C in tests to avoid possible locale missmatches
 
