@@ -55,9 +55,9 @@ server.
 
 # AUTHOR
 
-author: Graham Ollis <plicease@cpan.org>
+Author: Graham Ollis <plicease@cpan.org>
 
-contributors:
+Contributors:
 
 Ryo Okamoto
 
