@@ -1,18 +1,18 @@
 # AnyEvent::FTP [![Build Status](https://secure.travis-ci.org/plicease/AnyEvent-FTP.png)](http://travis-ci.org/plicease/AnyEvent-FTP)
 
-Simple asynchronous ftp client and server
+Simple asynchronous FTP client and server
 
 # SYNOPSIS
 
-    # for the client
+    # For the client
     use AnyEvent::FTP::Client;
-    
-    # for the server
+
+    # For the server
     use AnyEvent::FTP::Server;
 
 # DESCRIPTION
 
-This distribution provides client and server implementations for 
+This distribution provides client and server implementations for
 File Transfer Protocol (FTP) in an AnyEvent environment.  For the
 specific interfaces, see [AnyEvent::FTP::Client](https://metacpan.org/pod/AnyEvent::FTP::Client) and [AnyEvent::FTP::Server](https://metacpan.org/pod/AnyEvent::FTP::Server)
 for details.
@@ -33,8 +33,8 @@ The client code is also tested less frequently against these FTP servers:
 - NcFTPd
 - Microsoft IIS
 
-It used to also be tested against the VMS ftp server, so it at least one
-point was verified to work with it, but I no longer have access to that
+It used to also be tested against the VMS ftp server, so it was verified to
+work with it, at least at one point. However, I no longer have access to that
 server.
 
 # SEE ALSO
