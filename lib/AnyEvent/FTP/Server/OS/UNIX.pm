@@ -2,7 +2,7 @@ package AnyEvent::FTP::Server::OS::UNIX;
 
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 use Moo;
 use warnings NONFATAL => 'all';
 

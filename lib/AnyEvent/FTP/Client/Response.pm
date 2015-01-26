@@ -2,7 +2,7 @@ package AnyEvent::FTP::Client::Response;
 
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 use base qw( AnyEvent::FTP::Response );
 
 # ABSTRACT: Response class for asynchronous ftp client

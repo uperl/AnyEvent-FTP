@@ -2,7 +2,7 @@ package main;
 
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 use File::HomeDir;
 use FindBin ();
 use Path::Class qw( dir file );

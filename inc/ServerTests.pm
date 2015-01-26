@@ -2,7 +2,7 @@ package inc::ServerTests;
 
 use Moose;
 use namespace::autoclean;
-use v5.10;
+use 5.010;
 use Path::Class qw( file dir );
 use YAML qw( LoadFile DumpFile );
 use File::HomeDir;

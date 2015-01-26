@@ -2,7 +2,7 @@ package AnyEvent::FTP::Server::Role::Type;
 
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 use Moo::Role;
 use warnings NONFATAL => 'all';
 

@@ -2,7 +2,7 @@ package AnyEvent::FTP::Client::Role::RequestBuffer;
 
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 use Moo::Role;
 use warnings NONFATAL => 'all';
 use AnyEvent;

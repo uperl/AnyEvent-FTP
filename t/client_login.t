@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 use Test::More tests => 6;
 BEGIN { eval 'use EV' }
 use AnyEvent::FTP::Client;

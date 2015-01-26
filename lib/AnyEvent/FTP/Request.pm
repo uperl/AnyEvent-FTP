@@ -2,7 +2,7 @@ package AnyEvent::FTP::Request;
 
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 use overload '""' => sub { shift->as_string };
 
 # ABSTRACT: Request class for asynchronous ftp server

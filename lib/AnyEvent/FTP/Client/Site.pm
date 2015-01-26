@@ -2,7 +2,7 @@ package AnyEvent::FTP::Client::Site;
 
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 # ABSTRACT: Dispatcher for site specific ftp commands
 # VERSION

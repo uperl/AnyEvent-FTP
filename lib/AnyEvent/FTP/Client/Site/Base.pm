@@ -2,7 +2,7 @@ package AnyEvent::FTP::Client::Site::Base;
 
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 use Moo;
 use warnings NONFATAL => 'all';
 

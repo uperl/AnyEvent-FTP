@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Moo;
 use warnings NONFATAL => 'all';
-use v5.10;
+use 5.010;
 use AnyEvent;
 use AnyEvent::Socket qw( tcp_server );
 

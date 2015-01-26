@@ -2,7 +2,7 @@ package AnyEvent::FTP;
 
 use strict;
 use warnings;
-use v5.10;
+use 5.010;
 
 # ABSTRACT: Simple asynchronous FTP client and server
 # VERSION
