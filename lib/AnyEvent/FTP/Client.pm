@@ -400,6 +400,16 @@ server.
 
  $client->retr('foo.txt', 'foo.txt');
  
+=item subroutine reference / callback reference
+
+The contents of the file will be passed to the callback as they are received.
+
+ $client->retr('foo.txt', sub {
+     my ($data) = @_;
+     # Do something with $data
+   },
+ );
+
 =back
 
 In order to resume a transfer, you need to include the C<restart> option after the 
