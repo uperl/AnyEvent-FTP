@@ -2,6 +2,10 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.07      2015-01-26 09:43:21 -0500
+  - Grammar and spacing fixes in documentation (GH#22 thanks shlomif)
+  - Improved documentation coverage (GH#22 thanks shlomif)
+
 0.06      2014-10-29 07:55:23 -0400
   - Build.PL now exits instead of dies on wrong Perl version
 
