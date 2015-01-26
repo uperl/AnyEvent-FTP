@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use autodie;
-use v5.10;
+use 5.010;
 use AnyEvent::FTP::Client;
 use URI;
 use URI::file;

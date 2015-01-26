@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use autodie;
-use v5.10;
+use 5.010;
 use File::Spec;
 use File::HomeDir;
 use Path::Class qw( dir );
