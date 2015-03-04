@@ -2,7 +2,6 @@ package AnyEvent::FTP::Client;
 
 use 5.010;
 use Moo;
-use warnings NONFATAL => 'all';
 use AnyEvent;
 use AnyEvent::Socket qw( tcp_connect );
 use AnyEvent::Handle;

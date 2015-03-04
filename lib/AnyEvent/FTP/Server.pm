@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use 5.010;
 use Moo;
-use warnings NONFATAL => 'all';
 use AnyEvent::Handle;
 use AnyEvent::Socket qw( tcp_server );
 use AnyEvent::FTP::Server::Connection;

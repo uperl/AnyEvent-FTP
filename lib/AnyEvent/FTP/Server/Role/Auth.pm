@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use 5.010;
 use Moo::Role;
-use warnings NONFATAL => 'all';
 
 # ABSTRACT: Authentication role for FTP server
 # VERSION

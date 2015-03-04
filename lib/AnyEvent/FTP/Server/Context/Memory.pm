@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use 5.010;
 use Moo;
-use warnings NONFATAL => 'all';
 use Path::Class::File;
 use Path::Class::Dir;
 use List::MoreUtils qw( first_index );

@@ -3,7 +3,6 @@ package AnyEvent::FTP::Client::Transfer::Passive;
 use strict;
 use warnings;
 use Moo;
-use warnings NONFATAL => 'all';
 use 5.010;
 use AnyEvent::Socket qw( tcp_connect );
 

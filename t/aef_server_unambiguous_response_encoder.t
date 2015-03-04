@@ -12,7 +12,6 @@ eval q{
   package Client;
   
   use Moo;
-  use warnings NONFATAL => 'all';
   
   with 'AnyEvent::FTP::Client::Role::ResponseBuffer';
 };

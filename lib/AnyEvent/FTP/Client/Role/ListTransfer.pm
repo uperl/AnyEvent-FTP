@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use 5.010;
 use Moo::Role;
-use warnings NONFATAL => 'all';
 
 # ABSTRACT: Fetch transfer interface for AnyEvent::FTP objects
 # VERSION

@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use 5.010;
 use Moo;
-use warnings NONFATAL => 'all';
 use File::chdir;
 use File::Spec;
 use File::Temp qw( tempfile );

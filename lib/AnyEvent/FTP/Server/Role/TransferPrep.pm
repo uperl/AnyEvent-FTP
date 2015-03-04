@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use 5.010;
 use Moo::Role;
-use warnings NONFATAL => 'all';
 use AnyEvent;
 use AnyEvent::Socket qw( tcp_server tcp_connect );
 use AnyEvent::Handle;

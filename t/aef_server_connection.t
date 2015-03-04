@@ -8,7 +8,6 @@ eval q{
   package Context;
   
   use Moo;
-  use warnings NONFATAL => 'all';
   
   with 'AnyEvent::FTP::Server::Role::Context';
 

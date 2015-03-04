@@ -6,7 +6,6 @@ eval {
   package Foo;
 
   use Moo;
-  use warnings NONFATAL => 'all';
 
   with 'AnyEvent::FTP::Role::Event';
 

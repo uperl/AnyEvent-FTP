@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use 5.010;
 use Moo::Role;
-use warnings NONFATAL => 'all';
 use AnyEvent;
 
 # ABSTRACT: Request buffer role for asynchronous ftp client

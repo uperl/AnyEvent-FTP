@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use 5.010;
 use Moo;
-use warnings NONFATAL => 'all';
 
 # ABSTRACT: base class for AnyEvent::FTP::Client::Site::* classes
 # VERSION

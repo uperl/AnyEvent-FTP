@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use 5.010;
 use Moo;
-use warnings NONFATAL => 'all';
 
 # ABSTRACT: Server response encoder that encodes responses so they cannot be confused
 # VERSION
