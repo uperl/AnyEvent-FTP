@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - AnyEvent::FTP::Server::Context::FSRW no longer attempts to return
+    a directory as a file via RETR
 
 0.08      2015-03-03 23:30:40 -0500
   - Require Moo 2.0, as older versions inadvertently turn on

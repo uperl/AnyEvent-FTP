@@ -80,7 +80,7 @@ sub cmd_retr
     use autodie;
     local $CWD = $self->cwd;
     
-    if(-r $fn)
+    if(-f $fn)
     {
       # TODO: re-write so that this does not blocks
       my $type = $self->type eq 'A' ? 'ASCII' : 'Binary';
@@ -94,7 +94,7 @@ sub cmd_retr
       $self->data->push_shutdown;
       $con->send_response(226 => 'Transfer complete');
     }
-    elsif(-e $fn)
+    elsif(-e $fn && !-d $fn)
     {
       $con->send_response(550 => 'Permission denied');
     }
