@@ -1,4 +1,4 @@
-# AnyEvent::FTP [![Build Status](https://secure.travis-ci.org/plicease/AnyEvent-FTP.png)](http://travis-ci.org/plicease/AnyEvent-FTP)
+# AnyEvent::FTP [![Build Status](https://secure.travis-ci.org/plicease/AnyEvent-FTP.png)](http://travis-ci.org/plicease/AnyEvent-FTP) [![Build status](https://ci.appveyor.com/api/projects/status/xba362o7re2fw037/branch/master?svg=true)](https://ci.appveyor.com/project/plicease/AnyEvent-FTP/branch/master)
 
 Simple asynchronous FTP client and server
 
@@ -55,7 +55,7 @@ server.
 
 # AUTHOR
 
-Author: Graham Ollis <plicease@cpan.org>
+Author: Graham Ollis &lt;plicease@cpan.org>
 
 Contributors:
 
