@@ -55,7 +55,7 @@ server.
 
 # AUTHOR
 
-Author: Graham Ollis &lt;plicease@cpan.org>
+Author: Graham Ollis <plicease@cpan.org>
 
 Contributors:
 

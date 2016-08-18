@@ -4,10 +4,9 @@ install:
   - cpanm -n AnyEvent Moo URI File::HomeDir File::chdir YAML PerlIO::eol
 script: HARNESS_IS_VERBOSE=1 prove -lvr t 
 perl:
+  - "5.24"
   - "5.22"
   - "5.20"
   - "5.18"
   - "5.16"
   - "5.14"
-  - "5.12"
-  - "5.10"
