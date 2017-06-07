@@ -5,6 +5,8 @@ use warnings;
 use 5.010;
 use Moo;
 use File::chdir;
+use File::Share qw( dist_file );
+use File::Which qw( which );
 use File::Temp qw( tempfile );
 
 extends 'AnyEvent::FTP::Server::Context::FS';
@@ -182,12 +184,16 @@ sub cmd_list
 
   eval {
     use autodie;
+
+    my @cmd = shared_cmd('ls', '-l', $dir);
+    my $cmd = join ' ', @cmd;
+
     local $CWD = $self->cwd;
 
     $con->send_response(150 => "Opening ASCII mode data connection for file list");
     my $dh;
     opendir $dh, $dir;
-    $self->data->push_write(join "\015\012", split /\n/, `ls -l $dir`);
+    $self->data->push_write(join "\015\012", split /\n/, `$cmd`);
     closedir $dh;
     $self->data->push_write("\015\012");
     $self->data->push_shutdown;
@@ -372,6 +378,26 @@ sub cmd_stou
     $self->clear_data;
     $self->done;
   };
+}
+
+{
+  my %shared;
+  sub shared_cmd
+  {
+    my ($cmd, @args) = @_;
+
+    unless (defined $shared{$cmd}) {
+      my $which = which $cmd;
+      if ($which) {
+        $shared{$cmd} = $which;
+      }
+      else {
+        $shared{$cmd} = dist_file 'AnyEvent-FTP', 'ppt/' . $cmd . '.pl';
+      }
+    }
+
+    return $shared{$cmd}, @args;
+  }
 }
 
 1;
