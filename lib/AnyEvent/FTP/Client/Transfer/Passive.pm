@@ -14,9 +14,9 @@ extends 'AnyEvent::FTP::Client::Transfer';
 sub BUILD
 {
   my($self) = @_;
-  
+
   my $local = $self->convert_local($self->local);
-  
+
   my $data_connection = sub {
     my $res = shift;
     return if $res->is_preliminary;
@@ -29,7 +29,7 @@ sub BUILD
         {
           return "unable to connect to data port: $!";
         }
-        
+
         $self->xfer($fh,$local);
       };
       return;

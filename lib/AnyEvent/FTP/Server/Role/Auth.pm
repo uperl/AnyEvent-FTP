@@ -13,16 +13,16 @@ use Moo::Role;
 In your context:
 
  package AnyEvent::FTP::Server::Context::MyContext;
- 
+
  use Moo;
  extends 'AnyEvent::FTP::Server::Context';
  with 'AnyEvent::FTP::Server::Role::Auth';
- 
+
  has '+unauthenticated_safe_commands' => (
    default => sub { [ qw( USER PASS HELP QUIT FOO ) ] },
  );
- 
- # this command is deemed safe pre auth by 
+
+ # this command is deemed safe pre auth by
  # unauthenticated_safe_commands
  sub cmd_foo
  {
@@ -30,7 +30,7 @@ In your context:
    $con->send_response(211 => 'Here to stay');
    $self->done;
  }
- 
+
  # this command can pnly be executed after
  # authentication
  sub cmd_bar
@@ -43,20 +43,20 @@ In your context:
 Then when you create your server object:
 
  use AnyEvent:FTP::Server;
- 
+
  my $server = AnyEvent::FTP::Server->new;
  $server->on_connect(sub {
    # $con isa AnyEvent::FTP::Server::Connection
    my $con = shift;
    # $context isa AnyEvent::FTP::Server::Context::MyContext
    my $context = $con->context;
-   
+
    # allow login from user 'user' with password 'secret'
    $context->authenticator(sub {
      my($user, $pass) = @_;
      return $user eq 'user' && $pass eq 'secret';
    });
-   
+
    # make the client wait 5 seconds if they enter a
    # bad username / password
    $context->bad_authentication_delay(5);
@@ -128,7 +128,7 @@ has _safe_commands => (
 has unauthenticated_safe_commands => (
   is      => 'ro',
   lazy    => 1,
-  default => sub { 
+  default => sub {
     [qw( USER PASS HELP QUIT )]
   },
 );
@@ -164,11 +164,11 @@ sub help_user { 'USER <sp> username' }
 sub cmd_user
 {
   my($self, $con, $req) = @_;
-  
+
   my $user = $req->args;
   $user =~ s/^\s+//;
   $user =~ s/\s+$//;
-  
+
   if($user ne '')
   {
     $self->user($user);
@@ -178,7 +178,7 @@ sub cmd_user
   {
     $con->send_response(530 => "USER requires a parameter");
   }
-  
+
   $self->done;
 }
 
@@ -191,17 +191,17 @@ sub help_pass { 'PASS <sp> password' }
 sub cmd_pass
 {
   my($self, $con, $req) = @_;
-  
+
   my $user = $self->user;
   my $pass = $req->args;
-  
+
   unless(defined $user)
   {
     $con->send_response(503 => 'Login with USER first');
     $self->done;
     return;
   }
-  
+
   if($self->authenticator->($user, $pass))
   {
     $con->send_response(230 => "User $user logged in");

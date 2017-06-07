@@ -37,9 +37,9 @@ sub process_request
   my($self, $line) = @_;
 
   my $raw = $line;
-  
+
   $self->emit(request => $raw);
-  
+
   $line =~ s/\015?\012//g;
 
   if($line =~ s/^([A-Z]{1,4})\s?//i)
@@ -50,7 +50,7 @@ sub process_request
   {
     $self->context->invalid_syntax($self, $raw);
   }
-  
+
   $self;
 }
 
@@ -95,4 +95,3 @@ Process a single request. Returns the connection object ($conn).
 Sends the response. Returns the connection object ($conn).
 
 =cut
-

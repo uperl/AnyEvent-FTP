@@ -11,7 +11,7 @@ use Moo::Role;
 sub xfer
 {
   my($self, $fh, $local) = @_;
-  
+
   my $handle = $self->handle($fh);
 
   $handle->on_read(sub {
@@ -35,13 +35,13 @@ sub push_command
   my $cv = $self->{client}->push_command(
     @_,
   );
-  
+
   $cv->cb(sub {
     eval { $cv->recv };
     my $err = $@;
     $self->{cv}->croak($err) if $err;
   });
-  
+
   $self->on_eof(sub {
     $cv->cb(sub {
       my $res = eval { $cv->recv };

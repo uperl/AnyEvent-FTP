@@ -36,10 +36,10 @@ L<AnyEvent::FTP::Response> object, or a code message pair.
 sub encode
 {
   my $self = shift;
-  
+
   my $code;
   my $message;
-  
+
   if(ref $_[0])
   {
     $code = $_[0]->code;
@@ -49,11 +49,11 @@ sub encode
   {
     ($code, $message) = @_;
   }
-  
+
   $message = [ $message ] unless ref($message) eq 'ARRAY';
-  
+
   my $last = pop @$message;
-  
+
   return join "\015\012", (map { "$code-$_" } @$message), "$code $last\015\012";
 }
 

@@ -45,8 +45,8 @@ Execute C<SITE SYMLINK> command.
 =cut
 
 sub utime   { shift->client->push_command([SITE => "UTIME $_[0] $_[1]"]   ) }
-sub mkdir   { shift->client->push_command([SITE => "MKDIR $_[0]"]         ) } 
-sub rmdir   { shift->client->push_command([SITE => "RMDIR $_[0]"]         ) } 
+sub mkdir   { shift->client->push_command([SITE => "MKDIR $_[0]"]         ) }
+sub rmdir   { shift->client->push_command([SITE => "RMDIR $_[0]"]         ) }
 sub symlink { shift->client->push_command([SITE => "SYMLINK $_[0] $_[1]"] ) }
 
 =head2 $client-E<gt>site-E<gt>proftpd-E<gt>ratio

@@ -11,7 +11,7 @@ use Moo::Role;
 =head1 SYNOPSIS
 
  package AnyEvent::FTP::Server::Context::MyContext;
- 
+
  use Moo;
  extends 'AnyEvent::FTP::Server::Context';
  with 'AnyEvent::FTP::Server::Role::Type';
@@ -52,7 +52,7 @@ sub cmd_type
   my $type = uc $req->args;
   $type =~ s/^\s+//;
   $type =~ s/\s+$//;
-  
+
   if($type eq 'A' || $type eq 'I')
   {
     $self->type($type);
@@ -62,7 +62,7 @@ sub cmd_type
   {
     $con->send_response(500 => "Type not understood");
   }
-  
+
   $self->done;
 }
 

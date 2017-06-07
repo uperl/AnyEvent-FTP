@@ -26,20 +26,20 @@ has ascii_layer => (
 sub push_request
 {
   my($self, $con, $req) = @_;
-  
+
   push @{ $self->{request_queue} }, [ $con, $req ];
-  
+
   $self->process_queue if $self->ready;
-  
+
   $self;
 }
 
 sub process_queue
 {
   my($self) = @_;
-  
+
   return $self unless @{ $self->{request_queue} } > 0;
-  
+
   $self->ready(0);
 
   my($con, $req) = @{ shift @{ $self->{request_queue} } };
@@ -52,7 +52,7 @@ sub process_queue
   }
 
   my $method = join '_', 'cmd', $command;
-  
+
   if($self->can($method))
   {
     $self->$method($con, $req);
@@ -61,7 +61,7 @@ sub process_queue
   {
     $self->invalid_command($con, $req);
   }
-  
+
   $self;
 }
 

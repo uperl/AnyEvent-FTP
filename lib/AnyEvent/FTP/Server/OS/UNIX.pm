@@ -11,7 +11,7 @@ use Moo;
 =head1 SYNOPSIS
 
  use AnyEvent::FTP::Server::OS::UNIX;
- 
+
  # interface using user fred
  my $unix = AnyEvent::FTP::Server::OS::UNIX->new('fred');
  $unix->jail;            # chroot
@@ -29,7 +29,7 @@ sub BUILDARGS
   my($class, $query) = @_;
   my($name, $pw, $uid, $gid, $quota, $comment, $gcos, $dir, $shell, $expire) = getpwnam $query;
   die "user not found" unless $name;
-  
+
   return {
     name  => $name,
     uid   => $uid,
@@ -115,10 +115,10 @@ Drop super user privileges
 sub drop_privileges
 {
   my($self) = @_;
-  
+
   $) = join ' ', $self->gid, $self->gid, @{ $self->groups };
   $> = $self->uid;
-  
+
   $( = $self->gid;
   $< = $self->uid;
 

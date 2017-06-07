@@ -16,7 +16,7 @@ extends 'AnyEvent::FTP::Server::Context::FS';
 =head1 SYNOPSIS
 
  use AnyEvent::FTP::Server;
- 
+
  my $server = AnyEvent::FTP::Server->new(
    default_context => 'AnyEvent::FTP::Server::Context::FSRW',
  );
@@ -67,19 +67,19 @@ sub help_retr { 'RETR <sp> pathname' }
 sub cmd_retr
 {
   my($self, $con, $req) = @_;
-  
+
   my $fn = $req->args;
-  
+
   unless(defined $self->data)
   {
     $con->send_response(425 => 'Unable to build data connection');
     return;
   }
-  
+
   eval {
     use autodie;
     local $CWD = $self->cwd;
-    
+
     if(-f $fn)
     {
       # TODO: re-write so that this does not blocks
@@ -124,26 +124,26 @@ sub help_nlst { 'NLST [<sp> (pathname)]' }
 sub cmd_nlst
 {
   my($self, $con, $req) = @_;
-  
+
   my $dir = $req->args || '.';
-  
+
   unless(defined $self->data)
   {
     $con->send_response(425 => 'Unable to build data connection');
     return;
   }
-  
+
   eval {
     use autodie;
     local $CWD = $self->cwd;
-    
+
     $con->send_response(150 => "Opening ASCII mode data connection for file list");
     my $dh;
     opendir $dh, $dir;
-    my @list = 
-      map { $req->args ? join('/', $dir, $_) : $_ } 
-      sort 
-      grep !/^\.\.?$/, 
+    my @list =
+      map { $req->args ? join('/', $dir, $_) : $_ }
+      sort
+      grep !/^\.\.?$/,
       readdir $dh;
     closedir $dh;
     $self->data->push_write(join '', map { $_ . "\015\012" } @list);
@@ -171,20 +171,20 @@ sub help_list { 'LIST [<sp> pathname]' }
 sub cmd_list
 {
   my($self, $con, $req) = @_;
-  
+
   my $dir = $req->args || '.';
   $dir = '.' if $dir eq '-l';
-  
+
   unless(defined $self->data)
   {
     $con->send_response(425 => 'Unable to build data connection');
     return;
   }
-  
+
   eval {
     use autodie;
     local $CWD = $self->cwd;
-    
+
     $con->send_response(150 => "Opening ASCII mode data connection for file list");
     my $dh;
     opendir $dh, $dir;
@@ -217,13 +217,13 @@ sub cmd_stor
   my($self, $con, $req) = @_;
 
   my $fn = $req->args;
-  
+
   unless(defined $self->data)
   {
     $con->send_response(425 => 'Unable to build data connection');
     return;
   }
-  
+
   eval {
     use autodie;
     local $CWD = $self->cwd;
@@ -270,13 +270,13 @@ sub cmd_appe
   my($self, $con, $req) = @_;
 
   my $fn = $req->args;
-  
+
   unless(defined $self->data)
   {
     $con->send_response(425 => 'Unable to build data connection');
     return;
   }
-  
+
   eval {
     use autodie;
     local $CWD = $self->cwd;
@@ -323,13 +323,13 @@ sub cmd_stou
   my($self, $con, $req) = @_;
 
   my $fn = $req->args;
-  
+
   unless(defined $self->data)
   {
     $con->send_response(425 => 'Unable to build data connection');
     return;
   }
-  
+
   eval {
     use autodie;
     local $CWD = $self->cwd;
@@ -380,4 +380,3 @@ sub cmd_stou
 =back
 
 =cut
-

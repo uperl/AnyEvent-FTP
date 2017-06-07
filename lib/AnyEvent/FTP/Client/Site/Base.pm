@@ -17,5 +17,3 @@ sub BUILDARGS
 has client => ( is => 'ro', required => 1 );
 
 1;
-
-

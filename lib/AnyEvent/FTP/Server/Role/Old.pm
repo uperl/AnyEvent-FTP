@@ -13,12 +13,12 @@ use Moo::Role;
 Create a context:
 
  package AnyEvent::FTP::Server::Context::MyContext;
- 
+
  use Moo;
- 
+
  extends 'AnyEvent::FTP::Server::Context';
  with 'AnyEvent::FTP::Server::Role::Old';
- 
+
  1;
 
 Use archaic FTP commands:

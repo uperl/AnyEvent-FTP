@@ -11,11 +11,11 @@ use Moo::Role;
 sub xfer
 {
   my($self, $fh, $local) = @_;
-  
+
   my $handle = $self->handle($fh);
-  
+
   return unless defined $local;
-  
+
   $handle->on_drain(sub {
     my $data = $local->();
     if(defined $data)
@@ -32,10 +32,10 @@ sub xfer
 sub convert_local
 {
   my($self, $local) = @_;
-  
+
   return unless defined $local;
   return $local if ref($local) eq 'CODE';
-  
+
   if(ref($local) eq '')
   {
     open my $fh, '<', $local;

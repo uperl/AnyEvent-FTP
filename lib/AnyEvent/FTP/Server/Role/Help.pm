@@ -55,7 +55,7 @@ sub help_help { 'HELP [<sp> command]' }
 sub cmd_help
 {
   my($self, $con, $req) = @_;
-  
+
   my $topic = $req->args;
   $topic =~ s/^\s+//;
   $topic =~ s/\s+$//;
@@ -67,11 +67,11 @@ sub cmd_help
     unless(defined $cmds{$class})
     {
       no strict 'refs';
-      $cmds{$class} = [ 
+      $cmds{$class} = [
         sort map { s/^cmd_//; uc $_ } grep /^cmd_/, keys %{$class . '::'}
       ];
     }
-  
+
     $con->send_response(214, [
       'The following commands are recognized:',
       join(' ', @{ $cmds{$class} }),
@@ -94,7 +94,7 @@ sub cmd_help
   {
     $con->send_response(502 => 'Unknown command');
   }
-  
+
   $self->done;
 }
 

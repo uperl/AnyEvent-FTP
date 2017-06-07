@@ -45,7 +45,7 @@ sub process_message_line
       );
       delete $self->{response_buffer}->{$_} for qw( code message );
       my $once = delete $self->{response_buffer}->{once};
-      $_->($response) 
+      $_->($response)
         for @{ $self->{response_buffer}->{each} }, @{ $once };
     }
   }

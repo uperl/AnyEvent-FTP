@@ -17,21 +17,21 @@ extends 'AnyEvent::FTP::Client::Site::Base';
  $client->connect('ftp://iisserver')->cb(sub {
    # toggle dir style
    $client->site->microsoft->dirstyle->cb(sub {
-   
+
      $client->list->cb(sub {
        my $list = shift
        # $list is in first style.
-       
+
        $client->site->microsoft->dirstyle->cb(sub {
-       
+
          $client->list->cb(sub {
            my $list = shift;
            # list is in second style.
          });
-       
+
        });
      });
-   
+
    });
  });
 

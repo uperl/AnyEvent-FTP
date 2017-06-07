@@ -11,11 +11,11 @@ use Moo::Role;
 sub xfer
 {
   my($self, $fh, $local) = @_;
-  
+
   my $handle = $self->handle($fh);
 
   return unless defined $local;
-  
+
   $handle->on_read(sub {
     $handle->push_read(sub {
       $local->($_[0]{rbuf});
@@ -27,10 +27,10 @@ sub xfer
 sub convert_local
 {
   my($self, $local) = @_;
-  
+
   return unless defined $local;
   return $local if ref($local) eq 'CODE';
-  
+
   if(ref($local) eq 'SCALAR')
   {
     return sub {
@@ -63,13 +63,13 @@ sub push_command
   my $cv = $self->{client}->push_command(
     @_,
   );
-  
+
   $cv->cb(sub {
     eval { $cv->recv };
     my $err = $@;
     $self->{cv}->croak($err) if $err;
   });
-  
+
   $self->on_eof(sub {
     $cv->cb(sub {
       my $res = eval { $cv->recv };
