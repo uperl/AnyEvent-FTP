@@ -6,6 +6,7 @@ use 5.010;
 use Moo;
 use File::chdir;
 use File::Temp qw( tempfile );
+use Path::Class qw( dir );
 
 extends 'AnyEvent::FTP::Server::Context::FS';
 
@@ -187,7 +188,7 @@ sub cmd_list
     $con->send_response(150 => "Opening ASCII mode data connection for file list");
     my $dh;
     opendir $dh, $dir;
-    $self->data->push_write(join "\015\012", split /\n/, `ls -l $dir`);
+    $self->data->push_write(join "\015\012", dir($dir)->children);
     closedir $dh;
     $self->data->push_write("\015\012");
     $self->data->push_shutdown;
