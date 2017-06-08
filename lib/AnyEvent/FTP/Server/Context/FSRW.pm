@@ -5,7 +5,6 @@ use warnings;
 use 5.010;
 use Moo;
 use File::chdir;
-use File::Spec;
 use File::Temp qw( tempfile );
 
 extends 'AnyEvent::FTP::Server::Context::FS';
