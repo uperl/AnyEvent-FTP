@@ -67,6 +67,14 @@ pod_spelling_system:
     - Okamoto
     - Ryo
     - Shlomi
+    # lol
+    - ACFLRSTWacdfgiklmnopqrstux
+    - dev
+    - Joaquín
+    - José
+    - Leighton
+    - RSacdfiklnrstu
+    
 
 pod_coverage:
   # format is "Class#method" or "Class", regex allowed

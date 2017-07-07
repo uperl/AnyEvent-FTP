@@ -514,7 +514,7 @@ it lists the contents of the current directory.
 Otherwise, B<ls> lists information about the files and
 information about the contents of the directories (but
 see B<-d>).  Furthermore, without any option arguments
-B<ls> justs lists the names of files and directories.
+B<ls> just lists the names of files and directories.
 All files are listed before all directories.
 The default sort order is ascending ASCII on filename.
 
@@ -545,7 +545,7 @@ List all files (normally files starting with '.' are ignored).
 
 =item -c
 
-Sort by decending last modification time of inode.
+Sort by descending last modification time of inode.
 
 =item -d
 
@@ -584,11 +584,11 @@ on non-Unix systems.)
 
 =item -t
 
-Sort by decending last modification time.
+Sort by descending last modification time.
 
 =item -u
 
-Sort by decending last access time.
+Sort by descending last access time.
 
 =back
 
