@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 =begin metadata
 
 Name: ls
