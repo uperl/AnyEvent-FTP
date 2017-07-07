@@ -1,8 +1,8 @@
 language: perl
 sudo: false
 install:
-  - cpanm -n AnyEvent Moo URI File::HomeDir File::chdir YAML PerlIO::eol Path::Class
-script: HARNESS_IS_VERBOSE=1 prove -lvr t 
+  - cpanm -n AnyEvent Moo URI File::HomeDir File::chdir YAML PerlIO::eol Path::Class File::Share
+script: HARNESS_IS_VERBOSE=1 prove -lvr t
 perl:
   - "5.26"
   - "5.24"
