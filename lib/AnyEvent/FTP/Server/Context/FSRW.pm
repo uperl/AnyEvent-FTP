@@ -381,6 +381,7 @@ sub cmd_stou
 }
 
 {
+  state $always_use_bundled_cmd = $ENV{ANYEVENT_FTP_BUNDLED_CMD};
   my %shared;
   sub _shared_cmd
   {
@@ -388,7 +389,7 @@ sub cmd_stou
 
     unless (defined $shared{$cmd}) {
       my $which = which $cmd;
-      if ($which) {
+      if ($which && !$always_use_bundled_cmd) {
         $shared{$cmd} = [ $which ];
       }
       else {
