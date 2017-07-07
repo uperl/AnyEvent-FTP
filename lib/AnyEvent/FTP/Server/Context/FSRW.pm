@@ -185,7 +185,7 @@ sub cmd_list
   eval {
     use autodie;
 
-    my @cmd = shared_cmd('ls', '-l', $dir);
+    my @cmd = _shared_cmd('ls', '-l', $dir);
     my $cmd = join ' ', @cmd;
 
     local $CWD = $self->cwd;
@@ -382,21 +382,25 @@ sub cmd_stou
 
 {
   my %shared;
-  sub shared_cmd
+  sub _shared_cmd
   {
     my ($cmd, @args) = @_;
 
     unless (defined $shared{$cmd}) {
       my $which = which $cmd;
       if ($which) {
-        $shared{$cmd} = $which;
+        $shared{$cmd} = [ $which ];
       }
       else {
-        $shared{$cmd} = dist_file 'AnyEvent-FTP', 'ppt/' . $cmd . '.pl';
+        require AnyEvent::FTP; # dist_file needs this loaded so it can find it in %INC
+        $shared{$cmd} = [
+          $^X,  # use the same Perl
+          dist_file 'AnyEvent-FTP', 'ppt/' . $cmd . '.pl',
+        ];
       }
     }
 
-    return $shared{$cmd}, @args;
+    return @{ $shared{$cmd} }, @args;
   }
 }
 

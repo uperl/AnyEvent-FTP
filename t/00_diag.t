@@ -14,6 +14,8 @@ $modules{$_} = $_ for qw(
   AnyEvent
   EV
   File::HomeDir
+  File::Share
+  File::Which
   File::chdir
   List::MoreUtils
   Module::Build
@@ -23,7 +25,10 @@ $modules{$_} = $_ for qw(
   URI
 );
 
-
+$post_diag = sub {
+  use AnyEvent::FTP::Server::Context::FSRW;
+  diag "ls[] = ", $_ for AnyEvent::FTP::Server::Context::FSRW::_shared_cmd('ls')
+};
 
 my @modules = sort keys %modules;
 
