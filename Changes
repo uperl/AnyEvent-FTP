@@ -4,6 +4,8 @@ Revision history for {{$dist->name}}
   - Remove dependency on File::HomeDir
 
 0.10      2017-07-07 18:13:24 -0400
+  - Bundle ls from Perl Power Tools for platforms that do not
+    have a compliant ls
 
 0.09      2015-08-03 14:38:44 -0400
   - AnyEvent::FTP::Server::Context::FSRW no longer attempts to return
