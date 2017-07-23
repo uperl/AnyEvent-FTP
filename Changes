@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.11      2017-07-22 23:58:59 -0400
   - Remove dependency on File::HomeDir
 
 0.10      2017-07-07 18:13:24 -0400
