@@ -13,7 +13,6 @@ BEGIN { eval q{ use EV; } }
 $modules{$_} = $_ for qw(
   AnyEvent
   EV
-  File::HomeDir
   File::Share
   File::Which
   File::chdir

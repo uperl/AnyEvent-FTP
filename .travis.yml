@@ -3,7 +3,7 @@ language: perl
 sudo: false
 
 install:
-  - cpanm -n AnyEvent Moo URI File::HomeDir File::chdir YAML PerlIO::eol Path::Class File::Share
+  - cpanm -n AnyEvent Moo URI File::chdir YAML PerlIO::eol Path::Class File::Share
 
 script: HARNESS_IS_VERBOSE=1 prove -lvr t
 
