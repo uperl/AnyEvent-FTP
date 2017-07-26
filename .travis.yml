@@ -3,6 +3,7 @@ language: perl
 sudo: false
 
 install:
+  - ./maint/travis-install-file-sharedir-dist
   - cpanm -n AnyEvent Moo URI File::chdir YAML PerlIO::eol Path::Class File::Share
 
 script: HARNESS_IS_VERBOSE=1 prove -lvr t
@@ -15,8 +16,6 @@ perl:
   - "5.18"
   - "5.16"
   - "5.14"
-  - "5.12"
-  - "5.10"
 
 env:
   - ANYEVENT_FTP_BUNDLED_CMD=1

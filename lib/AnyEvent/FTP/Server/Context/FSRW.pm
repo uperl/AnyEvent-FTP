@@ -5,7 +5,7 @@ use warnings;
 use 5.010;
 use Moo;
 use File::chdir;
-use File::Share qw( dist_file );
+use File::ShareDir::Dist qw( dist_share );
 use File::Which qw( which );
 use File::Temp qw( tempfile );
 
@@ -396,7 +396,7 @@ sub cmd_stou
         require AnyEvent::FTP; # dist_file needs this loaded so it can find it in %INC
         $shared{$cmd} = [
           $^X,  # use the same Perl
-          dist_file 'AnyEvent-FTP', 'ppt/' . $cmd . '.pl',
+          File::Spec->catfile((dist_share('AnyEvent-FTP') or die "unable to find share directory") , 'ppt', "$cmd.pl"),
         ];
       }
     }
