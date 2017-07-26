@@ -13,7 +13,7 @@ BEGIN { eval q{ use EV; } }
 $modules{$_} = $_ for qw(
   AnyEvent
   EV
-  File::Share
+  File::ShareDir::Dist
   File::Which
   File::chdir
   Module::Build
