@@ -393,7 +393,6 @@ sub cmd_stou
         $shared{$cmd} = [ $which ];
       }
       else {
-        require AnyEvent::FTP; # dist_file needs this loaded so it can find it in %INC
         $shared{$cmd} = [
           $^X,  # use the same Perl
           File::Spec->catfile((dist_share('AnyEvent-FTP') or die "unable to find share directory") , 'ppt', "$cmd.pl"),

@@ -6,7 +6,7 @@ install:
   - ./maint/travis-install-file-sharedir-dist
   - cpanm -n AnyEvent Moo URI File::chdir YAML PerlIO::eol Path::Class File::Share
 
-script: HARNESS_IS_VERBOSE=1 prove -lvr t
+script: HARNESS_IS_VERBOSE=1 prove -PShareDirDist -lvr t
 
 perl:
   - "5.26"
