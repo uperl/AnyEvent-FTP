@@ -6,7 +6,6 @@ use 5.010;
 use Moo;
 use Path::Class::File;
 use Path::Class::Dir;
-use List::MoreUtils qw( first_index );
 
 extends 'AnyEvent::FTP::Server::Context';
 
@@ -100,6 +99,17 @@ a file in the filesystem.
 
 =cut
 
+sub _first_index (&@)
+{
+  my $f = shift;
+  foreach my $i ( 0 .. $#_ )
+  {
+    local *_ = \$_[$i];
+    return $i if $f->();
+  }
+  return -1;
+}
+
 sub find
 {
   my($self, $path) = @_;
@@ -115,7 +125,7 @@ sub find
 
   while(1)
   {
-    my $i = first_index { $_ eq '..' } @list;
+    my $i = _first_index { $_ eq '..' } @list;
     last if $i == -1;
     if($i > 1)
     {
@@ -185,7 +195,7 @@ sub cmd_cwd
 
   while(1)
   {
-    my $i = first_index { $_ eq '..' } @list;
+    my $i = _first_index { $_ eq '..' } @list;
     last if $i == -1;
     if($i > 1)
     {

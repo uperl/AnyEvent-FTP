@@ -16,7 +16,6 @@ $modules{$_} = $_ for qw(
   File::Share
   File::Which
   File::chdir
-  List::MoreUtils
   Module::Build
   Moo
   Path::Class
