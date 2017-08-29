@@ -50,7 +50,9 @@ __PACKAGE__->define_events(qw( bind connect ));
 
 =head1 ATTRIBUTES
 
-=head2 $server-E<gt>hostname
+=head2 hostname
+
+ my $hostname = $server->hostname;
 
 Readonly, and should be assigned at the constructor. The hostname to listen
 on.
@@ -61,7 +63,9 @@ has hostname => (
   is       => 'ro',
 );
 
-=head2 $server-E<gt>port
+=head2 port
+
+ my $port = $server->port;
 
 The port to listen to. Default is 21 - a different port can be assigned
 at the constructor.
@@ -73,7 +77,9 @@ has port => (
   default => sub { 21 },
 );
 
-=head2 $server-E<gt>default_context
+=head2 default_context
+
+ my $context = $server->default_context;
 
 Readonly: the default context class (can be set as a parameter in the
 constructor).
@@ -85,7 +91,9 @@ has default_context => (
   default => sub { 'AnyEvent::FTP::Server::Context::FSRW' },
 );
 
-=head2 $server-E<gt>welcome
+=head2 welcome
+
+ my($code, $message) = @{ $server->welcome };
 
 The welcome messages as key value pairs. Read only and can be overridden by
 the constructor.
@@ -97,7 +105,10 @@ has welcome => (
   default => sub { [ 220 => "aeftpd $AnyEvent::FTP::Server::VERSION" ] },
 );
 
-=head2 $server-E<gt>bindport([$port])
+=head2 bindport
+
+ my $port = $server->bindport;
+ $server->bindport($port);
 
 Retrieves or sets the TCP port to bind to.
 
@@ -107,7 +118,9 @@ has bindport => (
   is => 'rw',
 );
 
-=head2 my $bool = $server-E<gt>inet
+=head2 inet
+
+ my $bool = $server->inet;
 
 Readonly (assignable via the constructor). If true, then assume a TCP
 connection has been established by inet. The default (false) is to start
@@ -128,7 +141,9 @@ sub BUILD
 
 =head1 METHODS
 
-=head2 $server-E<gt>start()
+=head2 start
+
+ $server->start;
 
 Call this method to start the service.
 

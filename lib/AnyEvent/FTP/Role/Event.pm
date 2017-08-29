@@ -55,7 +55,9 @@ and C<emit> to trigger those callbacks.
 
 =head1 METHODS
 
-=head2 __PACKAGE__-E<gt>define_events( @list_of_event_names )
+=head2 define_events
+
+ __PACKAGE__->define_events( @list_of_event_names );
 
 This is called within the class package to declare the event names for all
 events used by the class.  It creates methods of the form C<on_>I<event_name>
@@ -80,7 +82,9 @@ sub define_events
   }
 }
 
-=head2 $obj-E<gt>emit($event_name, @arguments)
+=head2 emit
+
+ $obj->emit($event_name, @arguments);
 
 This calls the callbacks associated with the given C<$event_name>.
 It will pass to that callback the given C<@arguments>.

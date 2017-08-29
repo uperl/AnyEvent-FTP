@@ -25,7 +25,9 @@ sub new
 
 =head1 ATTRIBUTES
 
-=head2 $client-E<gt>code
+=head2 code
+
+ my $code = $client->code;
 
 Integer code for the message.  These can be categorized thus:
 
@@ -61,7 +63,9 @@ operation.
 
 sub code           { shift->{code}            }
 
-=head2 $res-E<gt>message
+=head2 message
+
+ my $message = $res->message;
 
 The human readable message returned from the server.  This is always a list reference,
 even if the server only returned one line.
@@ -72,7 +76,9 @@ sub message        { shift->{message}         }
 
 =head1 METHODS
 
-=head2 $res-E<gt>is_success
+=head2 is_success
+
+ my $bool = $res->is_success;
 
 True if the response does not represent an error condition (codes C<1xx>, C<2xx> or C<3xx>).
 
@@ -80,7 +86,9 @@ True if the response does not represent an error condition (codes C<1xx>, C<2xx>
 
 sub is_success     { shift->{code} !~ /^[45]/ }
 
-=head2 $res-E<gt>is_preliminary
+=head2 is_preliminary
+
+ my $bool = $res->is_preliminary;
 
 True if the response is a preliminary positive reply (code C<1xx>).
 
@@ -88,7 +96,10 @@ True if the response is a preliminary positive reply (code C<1xx>).
 
 sub is_preliminary { shift->{code} =~ /^1/    }
 
-=head2 $res-E<gt>as_string
+=head2 as_string
+
+ my $str = $res->as_string;
+ my $str = "$res";
 
 Returns a string representation of the response.  This may not be exactly what was
 returned by the server, but will include the code and at least part of the message in

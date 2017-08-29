@@ -19,12 +19,12 @@ L<AnyEvent::FTP::Response>
 
 =head1 METHODS
 
-=head2 $res-E<gt>get_address_and_port
+=head2 get_address_and_port
+
+ my($ip, $port) = $res->get_address_and_port
 
 This method is used to parse the response to the C<PASV> command to extract the IP address
-and port number.  It returns these as a list:
-
- my($ip, $port) = $res->get_address_and_port;
+and port number.
 
 =cut
 
@@ -34,12 +34,12 @@ sub get_address_and_port
   return;
 }
 
-=head2 $res-E<gt>get_dir
+=head2 get_dir
+
+ my $dir = $res->get_dir
 
 This method is used to extract the path from  a response to the C<PWD> command.
-It returns the path as a simple string:
-
- my $dir = $res->get_dir;
+It returns the path as a simple string.
 
 =cut
 
@@ -54,7 +54,9 @@ sub get_dir
   return;
 }
 
-=head2 $res-E<gt>get_file
+=head2 get_file
+
+ my $filename = $res->get_file;
 
 Returns the filename from a response to the C<STOU> command.
 

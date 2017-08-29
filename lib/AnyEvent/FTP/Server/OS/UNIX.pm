@@ -93,7 +93,9 @@ has groups => (
 
 =head1 METHODS
 
-=head2 $unix-E<gt>jail
+=head2 jail
+
+ $unix->jail;
 
 C<chroot> to the users' home directory.  Requires root and the chroot function.
 
@@ -106,7 +108,9 @@ sub jail
   return $self;
 }
 
-=head2 $unix-E<gt>drop_privileges
+=head2 drop_privileges
+
+ $unix->drop_privileges;
 
 Drop super user privileges
 

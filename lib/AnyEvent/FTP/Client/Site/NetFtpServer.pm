@@ -29,7 +29,9 @@ This class provides the C<SITE> specific commands for L<Net::FTPServer>.
 
 =head1 METHODS
 
-=head2 $client-E<gt>site-E<gt>net_ftp_server-E<gt>version
+=head2 version
+
+ $client->site->net_ftp_server->version
 
 Get the L<Net::FTPServer> version.
 

@@ -41,7 +41,9 @@ This class provides Microsoft's IIS SITE commands.
 
 =head1 METHODS
 
-=head2 $client-E<gt>site-E<gt>microsoft-E<gt>dirstyle
+=head2 dirstyle
+
+ $client->site->microsoft->dirstyle
 
 Toggle between directory listing output styles.
 

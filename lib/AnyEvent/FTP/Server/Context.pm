@@ -101,39 +101,58 @@ sub done
 
 =head1 METHODS
 
-=head2 $ctx-E<gt>cmd_quit($con, $req)
+=head2 cmd_quit
+
+ $ctx->cmd_quit($con, $req);
 
 Sends a quit command through $con ($req is unused.). Returns the $ctx object.
 
-=head2 $ctx-E<gt>done()
+=head2 done
+
+ $ctx->done;
 
 B<TODO>: document. Returns the $ctx object.
 
-=head2 my $quit_str = $ctx-E<gt>help_quit()
+=head2 help_quit
+
+ my $quit_str = $ctx->help_quit;
 
 Returns the string "QUIT".
 
-=head2 $ctx-E<gt>invalid_command($con, $req)
+=head2 invalid_command
+
+ $ctx->invalid_command($con, $req);
 
 Sends an invalid command due to the request $req through $con.
 
-=head2 $ctx-E<gt>invalid_syntax($con, $raw)
+=head2 invalid_syntax
+
+ $ctx->invalid_syntax($con, $raw);
 
 Sends a command not understood response through $con.
 
-=head2 $ctx-E<gt>process_queue()
+=head2 process_queue
+
+ $ctx->process_queue;
 
 Processes the request queue.
 
-=head2 $ctx-E<gt>push_request($con, $req)
+=head2 push_request
+
+ $ctx->push_request($con, $req);
 
 Pushes the request to the queue.
 
-=head2 my $bool = $ctx-E<gt>ready([$new_ready])
+=head2 ready
+
+ my $bool = $ctx->ready;
+ $ctx->ready($bool)
 
 Gets or sets the "is ready" status, which is a boolean.
 
-=head2 $ctx-E<gt>ascii_layer
+=head2 ascii_layer
+
+ $ctx->ascii_layer;
 
 The L<PerlIO> layer to apply for writing (C<STOR>, C<STOU>, C<APPE>) and
 reading (C<RETR>) when operating under ASCII file transfer mode.  By

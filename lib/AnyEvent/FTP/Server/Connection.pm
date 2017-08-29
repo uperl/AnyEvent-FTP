@@ -72,25 +72,36 @@ sub close
 
 =head1 METHODS
 
-=head2 $conn-E<gt>close()
+=head2 close
+
+ $conn->close;
 
 Emits a close signal.
 
-=head2 my $context_obj = $conn-E<gt>context()
+=head2 context
+
+ my $context_obj = $conn->context;
 
 Required to be specified by the constructor and readonly - this is the
 context object.
 
-=head2 my $ip = $conn-E<gt>ip();
+=head2 ip
+
+ my $ip = $conn->ip;
 
 Required to be specified by the constructor and readonly - this is the
 IP address.
 
-=head2 $conn-E<gt>process_request($line)
+=head2 process_request
+
+ $conn->process_request($line);
 
 Process a single request. Returns the connection object ($conn).
 
-=head2 $conn-E<gt>send_response([ $res | $code, $message ])
+=head2 send_response
+
+ $conn->send_response($res)
+ $conn->send_response($code, $message)
 
 Sends the response. Returns the connection object ($conn).
 

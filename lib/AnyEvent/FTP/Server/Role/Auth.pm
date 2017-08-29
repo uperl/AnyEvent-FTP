@@ -135,7 +135,9 @@ has unauthenticated_safe_commands => (
 
 =head1 METHODS
 
-=head2 $context-E<gt>auth_command_check_hook
+=head2 auth_command_check_hook
+
+ $context->auth_command_check_hook($connection, $command);
 
 This hook checks that any commands executed by the client before
 authentication are in the C<authenticated_safe_commands> list.

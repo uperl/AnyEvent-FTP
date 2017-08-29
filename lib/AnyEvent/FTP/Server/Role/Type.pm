@@ -22,7 +22,11 @@ This role provides an interface for the FTP C<TYPE> command.
 
 =head1 ATTRIBUTES
 
-=head2 $context-E<gt>type
+=head2 type
+
+ my $type = $context->type;
+ $context->type('A');
+ $context->type('I');
 
 The current transfer type 'A' for ASCII and I for binary.
 

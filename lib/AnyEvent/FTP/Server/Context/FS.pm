@@ -58,7 +58,9 @@ with 'AnyEvent::FTP::Server::Role::Type';
 
 =head1 ATTRIBUTES
 
-=head2 $context-E<gt>cwd
+=head2 cwd
+
+ my $dir = $context->cwd;
 
 The current working directory as a string.
 
@@ -71,7 +73,9 @@ sub cwd
   $self->{cwd} //= '/';
 }
 
-=head2 $context-E<gt>rename_from
+=head2 rename_from
+
+ my $filename = $context-E<gt>rename_from;
 
 The filename specified by the last FTP C<RNFR> command.
 

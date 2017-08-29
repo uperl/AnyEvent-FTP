@@ -22,7 +22,9 @@ sub new
 
 =head1 ATTRIBUTES
 
-=head2 $req-E<gt>command
+=head2 command
+
+ my $command = $req->command;
 
 The command, usually something like C<USER>, C<PASS>, C<HELP>, etc.
 
@@ -30,7 +32,9 @@ The command, usually something like C<USER>, C<PASS>, C<HELP>, etc.
 
 sub command { shift->{command} }
 
-=head2 $res-E<gt>args
+=head2 args
+
+ my $args = $res->args;
 
 The arguments passed in with the command
 
@@ -38,7 +42,9 @@ The arguments passed in with the command
 
 sub args    { shift->{args}    }
 
-=head2 $res-E<gt>raw
+=head2 raw
+
+ my $raw = $res->raw;
 
 The raw, unparsed request.
 
@@ -48,7 +54,10 @@ sub raw     { shift->{raw}     }
 
 =head1 METHODS
 
-=head2 $res-E<gt>as_string
+=head2 as_string
+
+ my $str = $res->as_string
+ my $str = "$res";
 
 Returns a string representation of the request.  This may not be exactly the same as
 what was actually sent to the server (see C<raw> attribute for that).  You can also

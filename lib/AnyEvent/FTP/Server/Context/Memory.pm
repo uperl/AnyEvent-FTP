@@ -158,7 +158,9 @@ sub find
   { return }
 }
 
-=head2 $context-E<gt>rename_from
+=head2 rename_from
+
+ my $filename = $context->rename_from;
 
 The filename specified by the last FTP C<RNFR> command.
 

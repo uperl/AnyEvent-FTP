@@ -26,7 +26,10 @@ with 'AnyEvent::FTP::Server::Role::ResponseEncoder';
 
 =head1 METHODS
 
-=head2 $encoder-E<gt>encode( [ $res | $code, $message ] )
+=head2 encode
+
+ my $str = $encoder->encode( $res );
+ my $str = $encoder->encode( $code, $message );
 
 Returns the encoded message.  You can pass in either a
 L<AnyEvent::FTP::Response> object, or a code message pair.
