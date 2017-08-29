@@ -1,7 +1,5 @@
-use strict;
-use warnings;
+use Test2::V0 -no_srand => 1;
 use autodie;
-use Test::More tests => 41;
 use Test::AnyEventFTPServer;
 use AnyEvent::FTP::Server::Context::Memory;
 
@@ -65,9 +63,11 @@ $t->command_ok(RNFR => "dir/foo.txt")
   ->code_is(350)
   ->message_is('File or directory exists, ready for destination name');
 
-TODO: { local $TODO = "shouldn't be able to rename to root";
+todo "shouldn't be able to rename to root" => sub {
 
 $t->command_ok(RNTO => "/")
   ->code_is(550);
 
-}
+};
+
+done_testing;

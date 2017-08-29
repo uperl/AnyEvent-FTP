@@ -1,7 +1,5 @@
-use strict;
-use warnings;
+use Test2::V0 -no_srand => 1;
 use autodie;
-use Test::More tests => 19;
 use Test::AnyEventFTPServer;
 use AnyEvent::FTP::Server::Context::Memory;
 
@@ -34,3 +32,5 @@ $t->command_ok(STAT => "..")
 $t->command_ok(STAT => ".././/bogus.txt")
   ->code_is(450)
   ->message_is('No such file or directory');
+
+done_testing;

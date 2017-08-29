@@ -1,7 +1,5 @@
-use strict;
-use warnings;
+use Test2::V0 -no_srand => 1;
 use autodie;
-use Test::More tests => 10;
 use Test::AnyEventFTPServer;
 use AnyEvent::FTP::Server::Context::Memory;
 
@@ -23,3 +21,5 @@ $t->command_ok(SIZE => "/top/bogus.txt")
 $t->command_ok(SIZE => "/top/dir")
   ->code_is(550)
   ->message_is("/top/dir: not a regular file");
+
+done_testing;

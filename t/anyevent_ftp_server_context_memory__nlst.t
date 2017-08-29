@@ -1,7 +1,5 @@
-use strict;
-use warnings;
+use Test2::V0 -no_srand => 1;
 use autodie;
-use Test::More tests => 11;
 use Test::AnyEventFTPServer;
 use AnyEvent::FTP::Server::Context::Memory;
 
@@ -27,9 +25,11 @@ $t->nlst_ok('/stuff')
 $t->nlst_ok('/stuff/bar.txt')
   ->content_is("/stuff/bar.txt\n");
 
-TODO: { local $TODO = 'wildcards';
+todo 'wildcards' => sub {
 
 $t->nlst_ok('/stuff/*')
   ->content_is("/stuff/bar.txt\n/stuff/baz.txt\n/stuff/foo\n");
 
 };
+
+done_testing;

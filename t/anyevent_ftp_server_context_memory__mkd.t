@@ -1,7 +1,5 @@
-use strict;
-use warnings;
+use Test2::V0 -no_srand => 1;
 use autodie;
-use Test::More tests => 14;
 use Test::AnyEventFTPServer;
 use AnyEvent::FTP::Server::Context::Memory;
 
@@ -26,9 +24,11 @@ $t->command_ok(MKD => '../.././foo')
 $t->command_ok(MKD => '/')
   ->code_is(550);
 
-TODO: { local $TODO = "shouldn't be able to MKD on root";
+todo "shouldn't be able to MKD on root" => sub {
 
 $t->command_ok(MKD => '../../')
   ->code_is(550);
 
-}
+};
+
+done_testing;

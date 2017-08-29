@@ -23,7 +23,6 @@ $modules{$_} = $_ for qw(
   PerlIO::eol
   Test2::API
   Test2::V0
-  Test::More
   URI
 );
 

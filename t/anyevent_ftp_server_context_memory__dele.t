@@ -1,7 +1,5 @@
-use strict;
-use warnings;
+use Test2::V0 -no_srand => 1;
 use autodie;
-use Test::More tests => 10;
 use Test::AnyEventFTPServer;
 use AnyEvent::FTP::Server::Context::Memory;
 
@@ -23,9 +21,11 @@ $t->command_ok(DELE => '/')
 $t->command_ok(DELE => 'bar')
   ->code_is(550);
 
-TODO: { local $TODO = "shouldn't be able to do a DELE on a directory";
+todo "shouldn't be able to do a DELE on a directory" => sub {
 
 $t->command_ok(DELE => 'foo')
   ->code_is(550);
 
-}
+};
+
+done_testing;

@@ -1,7 +1,5 @@
-use strict;
-use warnings;
+use Test2::V0 -no_srand => 1;
 use autodie;
-use Test::More tests => 20;
 use Test::AnyEventFTPServer;
 use AnyEvent::FTP::Server::Context::Memory;
 
@@ -47,3 +45,5 @@ $t->command_ok(CWD => "./../../../../../top/./foo/.//./bar/./stuff")
   ->code_is(250);
 
 is $context->cwd, "/top/foo/bar/stuff", "cwd = /top/foo/bar/stuff";
+
+done_testing;
