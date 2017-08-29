@@ -16,7 +16,7 @@ extends 'AnyEvent::FTP::Server';
 
 =head1 SYNOPSIS
 
- use Test::More test => 3;
+ use Test2:V0;
  use Test::AnyEventFTPServer;
  
  # exit this script after 30s to avoid hung test
@@ -39,6 +39,8 @@ extends 'AnyEvent::FTP::Server';
  
  # check to make sure that all FTP commands have help
  $test_server->help_coverage_ok;
+ 
+ done_testing;
 
 =head1 DESCRIPTION
 
