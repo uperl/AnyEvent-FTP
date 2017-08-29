@@ -1,9 +1,8 @@
 use 5.010;
+use lib 't/lib';
 use Test2::V0 -no_srand => 1;
-BEGIN { eval 'use EV' }
+use Test2::Tools::ClientTests;
 use AnyEvent::FTP::Client;
-use FindBin ();
-require "$FindBin::Bin/lib.pl";
 
 plan skip_all => 'requires client and server on localhost' if $ENV{AEF_REMOTE};
 plan tests => 8;

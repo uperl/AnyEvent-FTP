@@ -1,6 +1,7 @@
-package main;
+package Test2::Tools::ClientTests;
 
-use Test2::V0 -no_srand => 1;
+use strict;
+use warnings;
 use 5.010;
 use FindBin ();
 use Path::Class qw( dir file );
@@ -8,6 +9,10 @@ use Path::Class ();
 use File::Spec;
 use File::Glob qw( bsd_glob );
 use Cwd ();
+use Test2::API qw( context );
+use base qw( Exporter );
+
+our @EXPORT = qw( $config $detect prep_client translate_dir net_pwd );
 
 $ENV{LC_ALL} = 'C';
 
@@ -60,12 +65,13 @@ else
   $config->{host} = 'localhost';
   $config->{user} = join '', map { chr(ord('a') + int rand(26)) } (1..10);
   $config->{pass} = join '', map { chr(ord('a') + int rand(26)) } (1..10);
-  note "using fake credentials ", join ':', $config->{user}, $config->{pass};
+  my $ctx = context ();
+  $ctx->note("using fake credentials ", join ':', $config->{user}, $config->{pass});
   
   $server->on_bind(sub {
     my $port = shift;
     $config->{port} = $port;
-    note "binding aeftpd localhost:$port";
+    $ctx->note("binding aeftpd localhost:$port");
   });
   
   $server->on_connect(sub {
@@ -80,13 +86,17 @@ else
   $server->start;
   
   $detect->{ae} = 1;
+  
+  $ctx->release;
 }
 
-our $anyevent_test_timeout = AnyEvent->timer( after => ($detect->{ae} ? 5 : 15), cb => sub { diag "TIMEOUT: giving up"; exit } );
+our $anyevent_test_timeout = AnyEvent->timer( after => ($detect->{ae} ? 5 : 15), cb => sub { my $ctx = context (); $ctx->diag("TIMEOUT: giving up"); $ctx->release; exit } );
 
 sub prep_client
 {
   my($client) = @_;
+
+  my $ctx = context();
 
   if($ENV{AEF_DEBUG})
   {
@@ -94,14 +104,16 @@ sub prep_client
       my($cmd, $arguments) = @_;
       $arguments //= '';
       $arguments = 'XXXX' if $cmd eq 'PASS';
-      note "CLIENT: $cmd $arguments";
+      $ctx->note("CLIENT: $cmd $arguments");
     });
 
     $client->on_each_response(sub {
       my $res = shift;
-      note sprintf "SERVER: [ %d ] %s\n", $res->code, $_ for @{ $res->message };
+      $ctx->note(sprintf "SERVER: [ %d ] %s\n", $res->code, $_) for @{ $res->message };
     });
   }
+  
+  $ctx->release;
 
   $client->on_greeting(sub {
     my $res = shift;
@@ -145,5 +157,7 @@ sub net_pwd
   
   my_abs_path($pwd);
 }
+
+eval { use EV };
 
 1;

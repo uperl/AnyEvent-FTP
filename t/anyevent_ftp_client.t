@@ -1,9 +1,9 @@
 use 5.010;
+use lib 't/lib';
 use Test2::V0 -no_srand => 1;
-BEGIN { eval 'use EV' }
+use Test2::Tools::ClientTests;
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
-require './t/lib.pl';
 
 subtest 'syst' => sub {
   my $client = eval { AnyEvent::FTP::Client->new };
