@@ -1,6 +1,4 @@
-use strict;
-use warnings;
-use Test::More tests => 20;
+use Test2::V0 -no_srand => 1;
 
 eval {
   package Foo;
@@ -66,3 +64,5 @@ is $arg2, 2, 'arg2 = 2';
 $obj->emit('bar', 3, 4);
 is $arg1, 3, 'arg1 = 3';
 is $arg2, 4, 'arg2 = 4';
+
+done_testing;

@@ -1,8 +1,7 @@
-use strict;
-use warnings;
+use Test2::V0 -no_srand => 1;
+use AnyEvent::FTP::Server::Context::FSRW;
 use autodie;
 use File::Spec;
-use Test::More tests => 6;
 use Test::AnyEventFTPServer;
 use File::Temp qw( tempdir );
 
@@ -97,6 +96,8 @@ subtest 'store LF' => sub {
 
 note "chdir " . File::Spec->rootdir;
 chdir(File::Spec->rootdir);
+
+done_testing;
 
 sub xd
 {

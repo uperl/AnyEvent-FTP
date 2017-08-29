@@ -1,6 +1,4 @@
-use strict;
-use warnings;
-use Test::More tests => 14;
+use Test2::V0 -no_srand => 1;
 
 eval {
   package Client;
@@ -64,3 +62,5 @@ is $count1, 3, 'total = 3';
 is $count2, 1, 'single = 1';
 is $count3, 1, 'single = 1';
 is $count4, 1, 'single = 1';
+
+done_testing;

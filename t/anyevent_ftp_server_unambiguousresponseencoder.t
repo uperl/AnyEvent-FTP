@@ -1,6 +1,4 @@
-use strict;
-use warnings;
-use Test::More tests => 20;
+use Test2::V0 -no_srand => 1;
 use AnyEvent::FTP::Server::UnambiguousResponseEncoder;
 use AnyEvent::FTP::Client::Role::ResponseBuffer;
 use AnyEvent::FTP::Response;
@@ -98,3 +96,4 @@ do {
   $client->process_message_line($_) for split /\015\012/, $raw;
 };
 
+done_testing;

@@ -1,7 +1,8 @@
+use Test2::V0 -no_srand => 1;
+use AnyEvent::FTP::Server::Role::TransferPrep;
 use strict;
 use warnings;
 use Test::AnyEventFTPServer;
-use Test::More;
 
 global_timeout_ok(30);
 

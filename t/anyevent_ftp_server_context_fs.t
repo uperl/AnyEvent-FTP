@@ -1,7 +1,6 @@
-use strict;
-use warnings;
+use Test2::V0 -no_srand => 1;
+use AnyEvent::FTP::Server::Context::FS;
 use File::Spec;
-use Test::More;
 use Test::AnyEventFTPServer;
 use File::Temp qw( tempdir );
 use Cwd ();

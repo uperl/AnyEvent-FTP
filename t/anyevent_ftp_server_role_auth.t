@@ -1,8 +1,7 @@
-use strict;
-use warnings;
+use Test2::V0 -no_srand => 1;
+use AnyEvent::FTP::Server::Role::Auth;
 use 5.010;
 use Test::AnyEventFTPServer;
-use Test::More;
 
 eval {
   package 

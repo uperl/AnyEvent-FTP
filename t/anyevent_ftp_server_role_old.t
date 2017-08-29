@@ -1,6 +1,4 @@
-use strict;
-use warnings;
-use Test::More tests => 14;
+use Test2::V0 -no_srand => 1;
 use Test::AnyEventFTPServer;
 
 global_timeout_ok;
@@ -18,3 +16,5 @@ foreach my $type (qw( FSRW Memory ))
 }
 
 pass 'good';
+
+done_testing;

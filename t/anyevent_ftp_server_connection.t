@@ -1,7 +1,5 @@
-use strict;
-use warnings;
 use 5.010;
-use Test::More tests => 17;
+use Test2::V0 -no_srand => 1;
 use AnyEvent::FTP::Server::Connection;
 
 eval q{
@@ -61,3 +59,5 @@ $cx->{cb} = sub {
 
 isa_ok eval { $con->process_request("pWd\015\012") }, 'AnyEvent::FTP::Server::Connection';
 diag $@ if $@;
+
+done_testing;
