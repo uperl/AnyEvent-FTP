@@ -1,7 +1,5 @@
-use strict;
-use warnings;
 use 5.010;
-use Test::More;
+use Test2::V0 -no_srand => 1;
 BEGIN { eval 'use EV' }
 use AnyEvent::FTP::Client;
 use FindBin ();
@@ -47,3 +45,4 @@ do {
 
 $client->quit->recv;
 
+done_testing;

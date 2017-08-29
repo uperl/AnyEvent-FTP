@@ -1,13 +1,11 @@
 package main;
 
-use strict;
-use warnings;
+use Test2::V0 -no_srand => 1;
 use 5.010;
 use FindBin ();
 use Path::Class qw( dir file );
 use Path::Class ();
 use File::Spec;
-use Test::More;
 use File::Glob qw( bsd_glob );
 use Cwd ();
 
@@ -19,10 +17,10 @@ our $lock;
 
 *my_abs_path = $^O eq 'MSWin32' ? sub ($) { $_[0] } : \&Cwd::abs_path ;
 
-$config->{dir} //= dir( -l file(__FILE__) ? file(readlink file(__FILE__))->parent : $FindBin::Bin )->parent->stringify;
+$config->{dir} //= dir( -l file(__FILE__)->absolute ? file(readlink file(__FILE__))->absolute->parent : $FindBin::Bin )->parent->stringify;
 
 do {
-  my $file = file( __FILE__ )->parent->file("config.yml")->stringify;
+  my $file = file( __FILE__ )->absolute->parent->file("config.yml")->stringify;
   $ENV{AEF_CONFIG} = $file if -r $file;
 };
 
