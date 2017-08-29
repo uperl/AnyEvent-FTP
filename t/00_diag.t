@@ -13,10 +13,11 @@ BEGIN { eval q{ use EV; } }
 $modules{$_} = $_ for qw(
   AnyEvent
   EV
+  ExtUtils::MakeMaker
   File::ShareDir::Dist
+  File::ShareDir::Install
   File::Which
   File::chdir
-  Module::Build
   Moo
   Path::Class
   PerlIO::eol
