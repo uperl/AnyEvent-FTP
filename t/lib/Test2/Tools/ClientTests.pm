@@ -65,13 +65,18 @@ else
   $config->{host} = 'localhost';
   $config->{user} = join '', map { chr(ord('a') + int rand(26)) } (1..10);
   $config->{pass} = join '', map { chr(ord('a') + int rand(26)) } (1..10);
-  my $ctx = context ();
-  $ctx->note("using fake credentials ", join ':', $config->{user}, $config->{pass});
+  {
+    my $ctx = context();
+    $ctx->note("using fake credentials ", join ':', $config->{user}, $config->{pass});  
+    $ctx->release;
+  }
   
   $server->on_bind(sub {
     my $port = shift;
     $config->{port} = $port;
+    my $ctx = context();
     $ctx->note("binding aeftpd localhost:$port");
+    $ctx->release;
   });
   
   $server->on_connect(sub {
@@ -86,17 +91,13 @@ else
   $server->start;
   
   $detect->{ae} = 1;
-  
-  $ctx->release;
 }
 
-our $anyevent_test_timeout = AnyEvent->timer( after => ($detect->{ae} ? 5 : 15), cb => sub { my $ctx = context (); $ctx->diag("TIMEOUT: giving up"); $ctx->release; exit } );
+our $anyevent_test_timeout = AnyEvent->timer( after => ($detect->{ae} ? 5 : 15), cb => sub { my $ctx = context(); $ctx->bail("TIMEOUT: giving up"); $ctx->release; } );
 
 sub prep_client
 {
   my($client) = @_;
-
-  my $ctx = context();
 
   if($ENV{AEF_DEBUG})
   {
@@ -104,16 +105,19 @@ sub prep_client
       my($cmd, $arguments) = @_;
       $arguments //= '';
       $arguments = 'XXXX' if $cmd eq 'PASS';
+      my $ctx = context();
       $ctx->note("CLIENT: $cmd $arguments");
+      $ctx->release;
     });
 
     $client->on_each_response(sub {
       my $res = shift;
+      my $ctx = context();
       $ctx->note(sprintf "SERVER: [ %d ] %s\n", $res->code, $_) for @{ $res->message };
+      $ctx->release;
     });
   }
   
-  $ctx->release;
 
   $client->on_greeting(sub {
     my $res = shift;

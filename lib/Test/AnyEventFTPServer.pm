@@ -157,6 +157,8 @@ sub create_ftpserver_ok (;$$)
 {
   my($context, $message) = @_;
   
+  my $ctx = context();
+
   my $uri = URI->new("ftp://127.0.0.1");
   
   $context //= 'Memory';
@@ -179,7 +181,6 @@ sub create_ftpserver_ok (;$$)
     
     if($ENV{AEF_DEBUG})
     {
-      my $ctx = context();
       $server->on_connect(sub {
         my $con = shift;
         $ctx->note("CONNECT");
@@ -198,7 +199,6 @@ sub create_ftpserver_ok (;$$)
           $ctx->note("DISCONNECT");
         });
       });
-      $ctx->release;
     }
     
     $server->on_connect(sub {
@@ -223,7 +223,6 @@ sub create_ftpserver_ok (;$$)
   
   $message //= "created FTP ($name) server at $uri";
 
-  my $ctx = context();
   $ctx->ok($error eq '', $message);
   $ctx->diag($error) if $error;
   $ctx->release;
