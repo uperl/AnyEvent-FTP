@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Fix to timeout in now longer running client test
 
 0.15      2017-08-29 18:39:58 -0400
   - Migrate to EUMM

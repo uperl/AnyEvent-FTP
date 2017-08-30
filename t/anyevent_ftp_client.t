@@ -6,6 +6,8 @@ use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
 
 subtest 'syst' => sub {
+  reset_timeout;
+
   my $client = eval { AnyEvent::FTP::Client->new };
   diag $@ if $@;
   isa_ok $client, 'AnyEvent::FTP::Client';
@@ -24,10 +26,12 @@ subtest 'syst' => sub {
   diag $@ if $@;
   
   $client->quit->recv;
+
   
 };
 
 subtest 'retr' => sub {
+  reset_timeout;
   skip_all 'requires client and server on localhost' if $ENV{AEF_REMOTE};
   
   our $config;
@@ -126,6 +130,7 @@ subtest 'retr' => sub {
 };
 
 subtest 'help' => sub {
+  reset_timeout;
   my $client = AnyEvent::FTP::Client->new;
   
   prep_client( $client );
@@ -172,6 +177,7 @@ subtest 'help' => sub {
 };
 
 subtest 'type' => sub {
+  reset_timeout;
   my $client = eval { AnyEvent::FTP::Client->new };
   diag $@ if $@;
   isa_ok $client, 'AnyEvent::FTP::Client';
@@ -212,6 +218,7 @@ subtest 'type' => sub {
 };
 
 subtest 'allo' => sub {
+  reset_timeout;
   my $client = AnyEvent::FTP::Client->new;
   
   prep_client( $client );
@@ -246,6 +253,7 @@ subtest 'allo' => sub {
 };
 
 subtest 'mkd' => sub {
+  reset_timeout;
   skip_all 'requires client and server on localhost' if $ENV{AEF_REMOTE};
   
   our $config;
@@ -277,6 +285,7 @@ subtest 'mkd' => sub {
 };
 
 subtest 'nlst' => sub {
+  reset_timeout;
   skip_all 'requires client and server on localhost' if $ENV{AEF_REMOTE};
   
   our $config;
@@ -337,6 +346,7 @@ subtest 'nlst' => sub {
 };
 
 subtest '00' => sub {
+  reset_timeout;
   my $client = eval { AnyEvent::FTP::Client->new };
   diag $@ if $@;
   isa_ok $client, 'AnyEvent::FTP::Client';
@@ -357,6 +367,7 @@ subtest '00' => sub {
 };
 
 subtest 'dele' => sub {
+  reset_timeout;
   skip_all 'requires client and server on localhost' if $ENV{AEF_REMOTE};
   
   our $config;
@@ -400,6 +411,7 @@ subtest 'dele' => sub {
 };
 
 subtest 'site_proftpd' => sub {
+  reset_timeout;
   skip_all 'requires client and server on localhost' if $ENV{AEF_REMOTE};
   
   our $config;
@@ -463,6 +475,7 @@ subtest 'site_proftpd' => sub {
 };
 
 subtest 'remote' => sub {
+  reset_timeout;
   local $ENV{AEF_REMOTE} //= tempdir( CLEANUP => 1 );
   
   our $config;
@@ -566,6 +579,7 @@ subtest 'remote' => sub {
 };
 
 subtest 'rmd' => sub {
+  reset_timeout;
   skip_all 'requires client and server on localhost' if $ENV{AEF_REMOTE};
   
   our $config;
@@ -594,6 +608,7 @@ subtest 'rmd' => sub {
 };
 
 subtest 'stou' => sub {
+  reset_timeout;
   skip_all 'requires client and server on localhost' if $ENV{AEF_REMOTE};
   
   our $config;
@@ -661,6 +676,7 @@ subtest 'stou' => sub {
 };
 
 subtest 'stat' => sub {
+  reset_timeout;
   my $client = AnyEvent::FTP::Client->new;
   
   prep_client( $client );
@@ -709,6 +725,7 @@ subtest 'stat' => sub {
 };
 
 subtest 'rename' => sub {
+  reset_timeout;
   skip_all 'requires client and server on localhost' if $ENV{AEF_REMOTE};
   
   our $config;
@@ -763,6 +780,7 @@ subtest 'rename' => sub {
 };
 
 subtest 'list' => sub {
+  reset_timeout;
   skip_all 'requires client and server on localhost' if $ENV{AEF_REMOTE};
   
   our $config;
@@ -838,6 +856,7 @@ subtest 'list' => sub {
 };
 
 subtest 'stor' => sub {
+  reset_timeout;
   skip_all 'requires client and server on localhost' if $ENV{AEF_REMOTE};
   
   our $config;
@@ -1003,6 +1022,7 @@ subtest 'stor' => sub {
 };
 
 subtest 'login' => sub {
+  reset_timeout;
   my $client = eval { AnyEvent::FTP::Client->new };
   diag $@ if $@;
   isa_ok $client, 'AnyEvent::FTP::Client';
@@ -1033,6 +1053,7 @@ subtest 'login' => sub {
 };
 
 subtest 'uri' => sub {
+  reset_timeout;
   skip_all 'requires client and server on localhost' if $ENV{AEF_REMOTE};
   skip_all 'requires URI' unless eval q{ require URI };
   
@@ -1106,6 +1127,7 @@ subtest 'uri' => sub {
 };
 
 subtest 'rest' => sub {
+  reset_timeout;
   skip_all 'requires client and server on localhost' if $ENV{AEF_REMOTE};
   
   our $config;
@@ -1147,6 +1169,7 @@ subtest 'rest' => sub {
 };
 
 subtest 'connect' => sub {
+  reset_timeout;
   my $done = AnyEvent->condvar;
   
   my $client = eval { AnyEvent::FTP::Client->new };
@@ -1216,6 +1239,7 @@ subtest 'connect' => sub {
 };
 
 subtest 'appe_2' => sub {
+  reset_timeout;
   skip_all 'requires client and server on localhost' if $ENV{AEF_REMOTE};
   
   our $config;
@@ -1293,6 +1317,7 @@ subtest 'appe_2' => sub {
 };
 
 subtest 'noop' => sub {
+  reset_timeout;
   my $client = eval { AnyEvent::FTP::Client->new };
   diag $@ if $@;
   isa_ok $client, 'AnyEvent::FTP::Client';
@@ -1314,6 +1339,7 @@ subtest 'noop' => sub {
 };
 
 subtest 'appe' => sub {
+  reset_timeout;
   skip_all 'requires client and server on localhost' if $ENV{AEF_REMOTE};
   
   our $config;

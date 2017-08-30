@@ -12,7 +12,7 @@ use Cwd ();
 use Test2::API qw( context );
 use base qw( Exporter );
 
-our @EXPORT = qw( $config $detect prep_client translate_dir net_pwd );
+our @EXPORT = qw( $config $detect prep_client translate_dir net_pwd reset_timeout );
 
 $ENV{LC_ALL} = 'C';
 
@@ -93,7 +93,18 @@ else
   $detect->{ae} = 1;
 }
 
-our $anyevent_test_timeout = AnyEvent->timer( after => ($detect->{ae} ? 5 : 15), cb => sub { my $ctx = context(); $ctx->bail("TIMEOUT: giving up"); $ctx->release; } );
+our $anyevent_test_timeout;
+
+sub reset_timeout {
+  $anyevent_test_timeout = AnyEvent->timer(
+    after => ($detect->{ae} ? 5 : 15),
+    cb => sub {
+      my $ctx = context();
+      $ctx->bail("TIMEOUT: giving up");
+      $ctx->release;
+    }
+  );
+}
 
 sub prep_client
 {
