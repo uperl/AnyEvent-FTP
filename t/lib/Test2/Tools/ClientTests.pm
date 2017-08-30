@@ -158,6 +158,6 @@ sub net_pwd
   my_abs_path($pwd);
 }
 
-eval { use EV };
+eval { require EV; EV->import; };
 
 1;
