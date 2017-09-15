@@ -8,6 +8,7 @@ use File::chdir;
 use File::ShareDir::Dist qw( dist_share );
 use File::Which qw( which );
 use File::Temp qw( tempfile );
+use Capture::Tiny qw( capture );
 
 extends 'AnyEvent::FTP::Server::Context::FS';
 
@@ -186,14 +187,14 @@ sub cmd_list
     use autodie;
 
     my @cmd = _shared_cmd('ls', '-l', $dir);
-    my $cmd = join ' ', @cmd;
 
     local $CWD = $self->cwd;
 
     $con->send_response(150 => "Opening ASCII mode data connection for file list");
     my $dh;
     opendir $dh, $dir;
-    $self->data->push_write(join "\015\012", split /\n/, `$cmd`);
+    
+    $self->data->push_write(join "\015\012", split /\n/, scalar capture { system @cmd });
     closedir $dh;
     $self->data->push_write("\015\012");
     $self->data->push_shutdown;
