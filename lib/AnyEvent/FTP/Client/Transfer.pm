@@ -16,14 +16,14 @@ use Carp qw( confess );
  use AnyEvent::FTP::Client;
  my $client = AnyEvent::FTP::Client;
  $client->connect('ftp://ftp.cpan.org')->cb(sub {
-
+ 
    # $upload_transfer and $download_transfer are instances of
    # AnyEvent::FTP::Client::Transfer
    my $upload_transfer = $client->stor('remote_filename.txt', 'content');
-
+ 
    my $buffer;
    my $download_transfer = $client->retr('remote_filename.txt', \$buffer);
-
+ 
  });
 
 =head1 DESCRIPTION

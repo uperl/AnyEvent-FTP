@@ -11,7 +11,7 @@ use Moo::Role;
 =head1 SYNOPSIS
 
  package AnyEvent::FTP::Server::Context::MyContext;
-
+ 
  use Moo;
  extends 'AnyEvent::FTP::Server::Context';
  with 'AnyEvent::FTP::Server::Role::Type';

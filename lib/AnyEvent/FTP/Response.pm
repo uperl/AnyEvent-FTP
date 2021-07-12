@@ -5,7 +5,8 @@ use warnings;
 use 5.010;
 use overload
   '""' => sub { shift->as_string },
-  fallback => 1;
+  fallback => 1,
+  bool => sub { 1 }, fallback => 1;
 
 # ABSTRACT: Response class for asynchronous ftp client
 # VERSION

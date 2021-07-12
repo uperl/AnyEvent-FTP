@@ -18,7 +18,7 @@ extends 'AnyEvent::FTP::Server::Context::FS';
 =head1 SYNOPSIS
 
  use AnyEvent::FTP::Server;
-
+ 
  my $server = AnyEvent::FTP::Server->new(
    default_context => 'AnyEvent::FTP::Server::Context::FSRW',
  );
@@ -193,7 +193,7 @@ sub cmd_list
     $con->send_response(150 => "Opening ASCII mode data connection for file list");
     my $dh;
     opendir $dh, $dir;
-    
+
     $self->data->push_write(join "\015\012", split /\n/, scalar capture { system @cmd });
     closedir $dh;
     $self->data->push_write("\015\012");
