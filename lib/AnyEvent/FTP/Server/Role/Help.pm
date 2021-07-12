@@ -68,7 +68,7 @@ sub cmd_help
     {
       no strict 'refs';
       $cmds{$class} = [
-        sort map { s/^cmd_//; uc $_ } grep /^cmd_/, keys %{$class . '::'}
+        sort map { my $x = $_; $x =~ s/^cmd_//; uc $x } grep /^cmd_/, keys %{$class . '::'}
       ];
     }
 

@@ -15,7 +15,7 @@ extends 'AnyEvent::FTP::Server::Context';
 =head1 SYNOPSIS
 
  use AnyEvent::FTP::Server;
-
+ 
  my $server = AnyEvent::FTP::Server->new(
    default_context => 'AnyEvent::FTP::Server::Context::Memory',
  );

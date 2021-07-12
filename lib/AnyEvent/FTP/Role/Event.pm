@@ -11,15 +11,15 @@ use Moo::Role;
 =head1 SYNOPSIS
 
  package AnyEvent::FTP::Foo;
-
+ 
  use Moo;
  with 'AnyEvent::FTP::Role::Event';
  __PACKAGE__->define_events(qw( error good ));
-
+ 
  sub some_method
  {
    my($self) = @_;
-
+ 
    if($self->other_method)
    {
      $self->emit(good => 'paylod message');
@@ -33,7 +33,7 @@ use Moo::Role;
 later on somewhere else
 
  use AnyEvent::FTP::Foo;
-
+ 
  my $foo = AnyEvent::FTP::Foo->new;
  $foo->on_good(sub {
    my($message) = @_;
@@ -43,7 +43,7 @@ later on somewhere else
    my($message) = @_;
    print "failed: $message";
  });
-
+ 
  $foo->some_method
 
 =head1 DESCRIPTION

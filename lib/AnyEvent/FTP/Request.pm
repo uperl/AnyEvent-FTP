@@ -3,7 +3,7 @@ package AnyEvent::FTP::Request;
 use strict;
 use warnings;
 use 5.010;
-use overload '""' => sub { shift->as_string };
+use overload '""' => sub { shift->as_string }, bool => sub { 1 }, fallback => 1;
 
 # ABSTRACT: Request class for asynchronous ftp server
 # VERSION

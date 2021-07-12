@@ -11,7 +11,7 @@ use Moo;
 =head1 SYNOPSIS
 
  use AnyEvent::FTP::Server::OS::UNIX;
-
+ 
  # interface using user fred
  my $unix = AnyEvent::FTP::Server::OS::UNIX->new('fred');
  $unix->jail;            # chroot

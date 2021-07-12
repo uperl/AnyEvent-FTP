@@ -14,7 +14,7 @@ use AnyEvent::Handle;
 =head1 SYNOPSIS
 
  package AnyEvent::FTP::Server::Context::MyContext;
-
+ 
  use Moo;
  extends 'AnyEvent::FTP::Server::Context';
  with 'AnyEvent::FTP::Server::Role::TransferPrep';
