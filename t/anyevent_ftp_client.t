@@ -4,6 +4,7 @@ use Test2::V0 -no_srand => 1;
 use Test2::Tools::ClientTests;
 use AnyEvent::FTP::Client;
 use File::Temp qw( tempdir );
+use File::chdir;
 
 subtest 'syst' => sub {
   reset_timeout;
@@ -1064,6 +1065,8 @@ subtest 'uri' => sub {
   our $config;
   our $detect;
 
+  local $config->{dir} = $CWD;
+
   prep_client( $client );
 
   my $uri = URI->new('ftp:');
@@ -1082,18 +1085,28 @@ subtest 'uri' => sub {
   });
   isa_ok $uri, 'URI';
 
-  do {
+  subtest 'test with real URI object' => sub {
     my $res = eval { $client->connect($uri)->recv };
-    diag $@ if $@;
+    is $@, '';
+    if($@ ne '')
+    {
+      eval { $client->quit->recv };
+      return;
+    }
     isa_ok $res, 'AnyEvent::FTP::Response';
     is $res->code, 250, 'code = 250';
     is $client->pwd->recv, net_pwd($config->{dir}), "dir = " . net_pwd($config->{dir});
     $client->quit->recv;
   };
 
-  do {
+  subtest 'test with string URI' => sub {
     my $res = eval { $client->connect($uri->as_string)->recv };
-    diag $@ if $@;
+    is $@, '';
+    if($@ ne '')
+    {
+      eval { $client->quit->recv };
+      return;
+    }
     isa_ok $res, 'AnyEvent::FTP::Response';
     is $res->code, 250, 'code = 250';
     is $client->pwd->recv, net_pwd($config->{dir}), "dir = " . net_pwd($config->{dir});
