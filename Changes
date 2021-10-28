@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Fix test that could fail on some platforms because
+    regexp wasn't correctly escaped (gh#30)
 
 0.17      2021-07-12 08:43:17 -0600
   - Fix bug related to space being in %PATH% on Windows
