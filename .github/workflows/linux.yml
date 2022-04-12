@@ -46,8 +46,8 @@ jobs:
             bundled_cmd: 0
           - tag: "5.12"
             bundled_cmd: 0
-#          - tag: "5.10"
-#            bundled_cmd: 0
+          - tag: "5.10"
+            bundled_cmd: 0
 
     env:
       CIP_TAG: ${{ matrix.cip.tag }}

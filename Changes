@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Fix prereq on autodie (gh#33)
 
 0.18      2021-10-28 09:18:40 -0600
   - Fix test that could fail on some platforms because
