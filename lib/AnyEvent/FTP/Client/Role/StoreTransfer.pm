@@ -25,6 +25,7 @@ sub xfer
     else
     {
       $handle->push_shutdown;
+      $handle->destroy;
     }
   });
 }
