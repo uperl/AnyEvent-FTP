@@ -1,2 +1,4 @@
 /AnyEvent-FTP-*
 /.build
+*.old
+*.orig

@@ -1,4 +1,4 @@
-# AnyEvent::FTP ![static](https://github.com/uperl/AnyEvent-FTP/workflows/static/badge.svg) ![linux](https://github.com/uperl/AnyEvent-FTP/workflows/linux/badge.svg) ![macos](https://github.com/uperl/AnyEvent-FTP/workflows/macos/badge.svg) ![windows](https://github.com/uperl/AnyEvent-FTP/workflows/windows/badge.svg) ![cygwin](https://github.com/uperl/AnyEvent-FTP/workflows/cygwin/badge.svg) ![msys2-mingw](https://github.com/uperl/AnyEvent-FTP/workflows/msys2-mingw/badge.svg)
+# AnyEvent::FTP ![static](https://github.com/uperl/AnyEvent-FTP/workflows/static/badge.svg) ![linux](https://github.com/uperl/AnyEvent-FTP/workflows/linux/badge.svg) ![macos](https://github.com/uperl/AnyEvent-FTP/workflows/macos/badge.svg) ![windows](https://github.com/uperl/AnyEvent-FTP/workflows/windows/badge.svg) ![msys2-mingw](https://github.com/uperl/AnyEvent-FTP/workflows/msys2-mingw/badge.svg)
 
 Simple asynchronous FTP client and server
 
@@ -84,7 +84,7 @@ José Joaquín Atria
 
 # COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2017-2021 by Graham Ollis.
+This software is copyright (c) 2017-2024 by Graham Ollis.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
