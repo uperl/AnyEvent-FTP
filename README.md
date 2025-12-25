@@ -1,4 +1,4 @@
-# AnyEvent::FTP ![static](https://github.com/uperl/AnyEvent-FTP/workflows/static/badge.svg) ![linux](https://github.com/uperl/AnyEvent-FTP/workflows/linux/badge.svg) ![macos](https://github.com/uperl/AnyEvent-FTP/workflows/macos/badge.svg) ![windows](https://github.com/uperl/AnyEvent-FTP/workflows/windows/badge.svg) ![cygwin](https://github.com/uperl/AnyEvent-FTP/workflows/cygwin/badge.svg) ![msys2-mingw](https://github.com/uperl/AnyEvent-FTP/workflows/msys2-mingw/badge.svg)
+# AnyEvent::FTP ![static](https://github.com/uperl/AnyEvent-FTP/workflows/static/badge.svg) ![linux](https://github.com/uperl/AnyEvent-FTP/workflows/linux/badge.svg) ![macos](https://github.com/uperl/AnyEvent-FTP/workflows/macos/badge.svg) ![windows](https://github.com/uperl/AnyEvent-FTP/workflows/windows/badge.svg) ![cygwin](https://github.com/uperl/AnyEvent-FTP/workflows/cygwin/badge.svg)
 
 Simple asynchronous FTP client and server
 
