@@ -17,11 +17,12 @@ jobs:
       fail-fast: false
       matrix:
         cip:
-          - tag: static
-          - tag: "5.37"
+          - tag: "5.41"
             bundled_cmd: 0
-          - tag: "5.36"
+          - tag: "5.40"
             bundled_cmd: 1
+          - tag: "5.38"
+            bundled_cmd: 0
           - tag: "5.36"
             bundled_cmd: 0
           - tag: "5.34"
